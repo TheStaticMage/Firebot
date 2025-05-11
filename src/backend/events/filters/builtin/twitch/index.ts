@@ -10,6 +10,7 @@ import isAnonymous from "./is-anonymous";
 import message from "./message";
 import raidViewerCount from "./raid-viewer-count";
 import rewardName from "./reward-name";
+import rewardType from "./reward-type";
 import reward from "./reward";
 import sharedChat from "./shared-chat";
 import streamCategory from "./stream-category";
@@ -30,6 +31,7 @@ export default [
     message,
     raidViewerCount,
     rewardName,
+    rewardType,
     reward,
     sharedChat,
     streamCategory,

@@ -4,27 +4,25 @@ import { OutputDataType, VariableCategory } from "../../../../../shared/variable
 
 const triggers = {};
 triggers[EffectTrigger.EVENT] = [
-    "twitch:channel-reward-redemption",
-    "twitch:channel-reward-redemption-fulfilled",
-    "twitch:channel-reward-redemption-canceled",
     "twitch:channel-automatic-reward-redemption"
 ];
-triggers[EffectTrigger.CHANNEL_REWARD] = true;
-triggers[EffectTrigger.PRESET_LIST] = true;
+triggers[EffectTrigger.CHANNEL_AUTOMATIC_REWARD] = true;
 triggers[EffectTrigger.MANUAL] = true;
 
 const model : ReplaceVariable = {
     definition: {
-        handle: "rewardMessage",
-        description: "The reward message text",
+        handle: "rewardType",
+        description: "The type of the automatic channel reward",
         triggers: triggers,
         categories: [VariableCategory.COMMON, VariableCategory.TRIGGER],
         possibleDataOutput: [OutputDataType.TEXT]
     },
     evaluator: (trigger) => {
-        return (trigger.metadata.eventData ?
-            trigger.metadata.eventData.messageText :
-            trigger.metadata.messageText) || "";
+        const rewardType = trigger.metadata?.eventData?.rewardType;
+        if (!rewardType) {
+            return "";
+        }
+        return rewardType;
     }
 };
 

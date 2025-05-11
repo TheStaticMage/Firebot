@@ -125,7 +125,8 @@ export const FirebotSettingsDefaults: FirebotSettingsTypes = {
         'extralife:donation',
         "tipeeestream:donation",
         "streamelements:donation",
-        "twitch:channel-reward-redemption"
+        "twitch:channel-reward-redemption",
+        "twitch:channel-automatic-reward-redemption"
     ],
     AudioOutputDevice: { label: "System Default", deviceId: "default" },
     AutoFlagBots: true,

@@ -1,6 +1,45 @@
 import eventManager from "../EventManager";
 import frontendCommunicator from "../../common/frontend-communicator";
 import rewardManager from "../../channel-rewards/channel-reward-manager";
+import { EventSubAutomaticRewardType } from "@twurple/eventsub-base";
+import { getAutomaticRewardTypes } from "../../../shared/event-constants";
+
+export function handleAutomaticRewardRedemption(
+    redemptionId: string,
+    messageText: string,
+    userId: string,
+    username: string,
+    userDisplayName: string,
+    rewardType: EventSubAutomaticRewardType,
+    rewardCost: number,
+): void {
+    frontendCommunicator.send("twitch:chat:automaticrewardredemption", {
+        id: redemptionId,
+    });
+
+    let rewardTypeDisplay = "unknown";
+    if (rewardType) {
+        const rewardTypes = getAutomaticRewardTypes();
+        const rewardTypeObj = rewardTypes.find((reward) => reward.value === rewardType);
+        if (rewardTypeObj) {
+            rewardTypeDisplay = rewardTypeObj.display;
+        }
+    }
+
+    const redemptionMeta = {
+        username,
+        userId,
+        userDisplayName,
+        messageText,
+        args: (messageText ?? "").split(" "),
+        redemptionId,
+        rewardType,
+        rewardTypeDisplay,
+        rewardCost
+    };
+
+    eventManager.triggerEvent("twitch", "channel-automatic-reward-redemption", redemptionMeta);
+}
 
 export function handleRewardRedemption(
     redemptionId: string,

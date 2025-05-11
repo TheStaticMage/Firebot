@@ -106,6 +106,20 @@ class TwitchEventSubClient {
         );
         this._subscriptions.push(autoModMessageUpdateSub);
 
+        // Channel automatic reward
+        const automaticRewardRedemptionSubscription = this._eventSubListener.onChannelAutomaticRewardRedemptionAdd(streamer.userId, async (event) => {
+            twitchEventsHandler.rewardRedemption.handleAutomaticRewardRedemption(
+                event.id,
+                event.input,
+                event.userId,
+                event.userName,
+                event.userDisplayName,
+                event.rewardType,
+                event.rewardCost
+            )
+        });
+        this._subscriptions.push(automaticRewardRedemptionSubscription);
+
         // Channel custom reward
         const customRewardRedemptionSubscription = this._eventSubListener.onChannelRedemptionAdd(streamer.userId, async (event) => {
             const reward = await twitchApi.channelRewards.getCustomChannelReward(event.rewardId);

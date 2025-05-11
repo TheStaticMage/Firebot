@@ -8,6 +8,9 @@ import {
     HelixCustomRewardRedemption,
     HelixCustomRewardRedemptionFilter
 } from "@twurple/api";
+import {
+    EventSubAutomaticRewardType
+} from "@twurple/eventsub-base";
 import { chunkArray } from "../../utils/chunkArray";
 
 export interface ImageSet {
@@ -46,6 +49,18 @@ export interface CustomReward {
     shouldRedemptionsSkipRequestQueue: boolean;
     redemptionsRedeemedCurrentStream?: number;
     cooldownExpiresAt?: Date;
+}
+
+export interface AutomaticRewardRedemption {
+    id: string;
+    rewardMessage?: string;
+    redemptionDate: Date;
+    rewardCost: number;
+    rewardType: EventSubAutomaticRewardType;
+    rewardTypeDisplay: string;
+    userDisplayName: string;
+    userId: string;
+    userName : string;
 }
 
 export interface RewardRedemption {

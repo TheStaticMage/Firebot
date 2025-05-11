@@ -498,6 +498,35 @@ module.exports = {
             }
         },
         {
+            id: "channel-automatic-reward-redemption",
+            name: "Channel Automatic Reward Redemption",
+            description: "When someone redeems an AUTOMATIC channel reward",
+            cached: true,
+            cacheMetaKey: "username",
+            cacheTtlInSecs: 1,
+            queued: false,
+            manualMetadata: {
+                username: "firebot",
+                userDisplayName: "Firebot",
+                userId: "",
+                rewardType: "send_highlighted_message",
+                rewardTypeDisplay: "Send Highlighted Message",
+                rewardCost: 100,
+                messageText: "Test message"
+            },
+            activityFeed: {
+                icon: "fad fa-circle",
+                getMessage: (eventData) => {
+                    const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
+                    return `**${eventData.userDisplayName}${
+                        showUserIdName ? ` (${eventData.username})` : ""
+                    }** redeemed an automatic reward: *${eventData.rewardTypeDisplay}*${
+                        eventData.messageText && !!eventData.messageText.length ? `: *${eventData.messageText}*` : ""
+                    }`;
+                }
+            },
+        },
+        {
             id: "channel-reward-redemption",
             name: "Channel Reward Redemption",
             description: "When someone redeems a CUSTOM channel reward",
