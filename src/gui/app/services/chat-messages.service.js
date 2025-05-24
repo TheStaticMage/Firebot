@@ -147,6 +147,20 @@
                 service.chatAlertMessage(message);
             });
 
+            // Hide/show chat messages in the chat feed.
+            service.setChatFeedMessageHidden = function(messageId, isHidden) {
+                const messageItem = service.chatQueue.find(i => i.type === "message" && i.data.id === messageId);
+                if (messageItem == null) {
+                    return;
+                }
+
+                messageItem.data.isHiddenFromChatFeed = isHidden ?? false;
+            };
+
+            backendCommunicator.on("chat-feed-message-hidden", (data) => {
+                service.setChatFeedMessageHidden(data.messageId, data.isHidden);
+            });
+
             // Chat Update Handler
             // This handles all of the chat stuff that isn't a message.
             // This will only work when chat feed is turned on in the settings area.
@@ -399,6 +413,13 @@
                             chatMessage.autoModStatus = "expired";
                         }
                     }, 5 * 60 * 1000);
+                }
+                if (settingsService.getSetting("ChatFeedDelayMessages") === true) {
+                    setTimeout(() => {
+                        chatMessage.isDelayed = false;
+                        service.pruneChatQueue();
+                    }, 250);
+                    chatMessage.isDelayed = true;
                 }
 
                 pronounsService.getUserPronoun(chatMessage.username);

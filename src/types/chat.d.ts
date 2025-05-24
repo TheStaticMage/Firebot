@@ -58,6 +58,8 @@ export type FirebotChatMessage = {
     threadParentMessageSenderDisplayName?: string;
     isSharedChatMessage: boolean;
     sharedChatRoomId?: string;
+    isHiddenFromChatFeed?: boolean;
+    isDelayed?: boolean;
 };
 
 export type FirebotEmote = {
