@@ -62,6 +62,7 @@ export type FirebotChatMessage = {
     customHighlightColor?: string;
     customBannerIcon?: string;
     customBannerText?: string;
+    isDelayed?: boolean;
 };
 
 export type FirebotEmote = {
