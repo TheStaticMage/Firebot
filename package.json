@@ -4,7 +4,7 @@
     "description": "Powerful all-in-one bot for Twitch streamers.",
     "main": "build/main.js",
     "scripts": {
-        "start": "grunt prep && electron . --dev",
+        "start": "grunt prep && electron . --dev --fbuser-data-directory=/home/paulisse/.config/Firebot-development",
         "setup": "npm ci && npm rebuild",
         "build": "grunt build",
         "lint": "grunt lint"
