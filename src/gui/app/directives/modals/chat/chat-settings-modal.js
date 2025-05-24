@@ -202,6 +202,17 @@
                         ></chat-settings-toggle>
                     </div>
 
+                    <!-- Other Settings -->
+                    <div class="chat-settings-header">Advanced Settings</div>
+                    <div class="mt-4 mb-8 px-8">
+                        <chat-settings-toggle
+                            setting="settings.getSetting('ChatFeedDelayMessages')"
+                            title="Delay Messages by 250ms in Chat Feed"
+                            tooltip="This is useful if you are using the 'Chat Feed Message Hidden' effect to avoid briefly seeing messages that are immediately hidden."
+                            input-id="delayMessagesInChat"
+                            on-update="settings.saveSetting('ChatFeedDelayMessages', setting)"
+                        ></chat-settings-toggle>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" ng-click="$ctrl.dismiss()">Close</button>

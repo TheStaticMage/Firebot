@@ -414,6 +414,13 @@
                         }
                     }, 5 * 60 * 1000);
                 }
+                if (settingsService.getSetting("ChatFeedDelayMessages") === true) {
+                    setTimeout(() => {
+                        chatMessage.isDelayed = false;
+                        service.pruneChatQueue();
+                    }, 250);
+                    chatMessage.isDelayed = true;
+                }
 
                 pronounsService.getUserPronoun(chatMessage.username);
 
