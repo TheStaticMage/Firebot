@@ -1,4 +1,5 @@
 import bitsBadgeTier from "./bits-badge-tier";
+import bitsUse from "./bits-use";
 import chatModeDuration from "./chat-mode-duration";
 import chatModeSetting from "./chat-mode-setting";
 import chatMode from "./chat-mode";
@@ -20,6 +21,7 @@ import username from "./username";
 
 export default [
     bitsBadgeTier,
+    ...bitsUse,
     chatModeDuration,
     chatModeSetting,
     chatMode,

@@ -11,6 +11,7 @@ import rewardManager from "../../channel-rewards/channel-reward-manager";
 import chatRolesManager from "../../roles/chat-roles-manager";
 import { EventSubAutoModMessageHoldV2Subscription } from "./custom-subscriptions/automod-v2/automod-message-hold-v2-subscription";
 import { EventSubAutoModMessageUpdateV2Subscription } from "./custom-subscriptions/automod-v2/automod-message-update-v2-subscription";
+import { EventSubChannelBitsUseSubscription } from "./custom-subscriptions/channel-bits-use/EventSubChannelBitsUseSubscription";
 
 class TwitchEventSubClient {
     private _eventSubListener: EventSubWsListener;
@@ -66,6 +67,35 @@ class TwitchEventSubClient {
             );
         });
         this._subscriptions.push(bitsSubscription);
+
+        // channel.bits.use - Generic subscription for bits use events
+        // @ts-ignore
+        const channelBitsUseSubscription = this._eventSubListener._genericSubscribe(
+            EventSubChannelBitsUseSubscription,
+            (event) => {
+                // Temporary to capture the data structure
+                const eventData = {
+                    powerUp: event.powerUp,
+                    bits: event.bits,
+                    type: event.type,
+                    messageText: event.messageText,
+                };
+                logger.debug("Bits use event data: ", JSON.stringify(eventData, null, 2));
+
+                twitchEventsHandler.bits.triggerBitsUse(
+                    event.userName,
+                    event.userId,
+                    event.userDisplayName,
+                    event.bits,
+                    event.type,
+                    event.messageText,
+                    event.powerUp,
+                );
+            },
+            this._eventSubListener,
+            streamer.userId
+        );
+        this._subscriptions.push(channelBitsUseSubscription);
 
         // AutoMod message hold v2
         // @ts-ignore
