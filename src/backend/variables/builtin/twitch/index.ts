@@ -1,4 +1,5 @@
 import adVariables from './ads';
+import bitsVariables from './bits';
 import chatVariables from './chat';
 import channelGoalVariables from './channel-goal';
 import charityVariables from './charity';
@@ -21,6 +22,7 @@ import vip from './vip';
 
 export default [
     ...adVariables,
+    ...bitsVariables,
     ...chatVariables,
     ...channelGoalVariables,
     ...charityVariables,

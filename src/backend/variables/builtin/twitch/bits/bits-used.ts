@@ -4,22 +4,20 @@ import { OutputDataType, VariableCategory } from "../../../../../shared/variable
 const { EffectTrigger } = require("../../../../../shared/effect-constants");
 
 const triggers = {};
-triggers[EffectTrigger.EVENT] = ["twitch:cheer", "twitch:bits-use"];
+triggers[EffectTrigger.EVENT] = ["twitch:bits-use"];
 triggers[EffectTrigger.MANUAL] = true;
 
 const model : ReplaceVariable = {
     definition: {
-        handle: "cheerMessage",
-        description: "The message included with the cheer",
+        handle: "usedBitsAmount",
+        description: "The amount of bits used in the event.",
         triggers: triggers,
         categories: [VariableCategory.COMMON, VariableCategory.TRIGGER],
-        possibleDataOutput: [OutputDataType.TEXT]
+        possibleDataOutput: [OutputDataType.NUMBER]
     },
     evaluator: (trigger: Trigger) => {
-        const cheerMessage = <string>(trigger.metadata.eventData.cheerMessage || "");
-        return cheerMessage
-            .replace(/( |\b)[a-zA-Z]+\d+( |\b)/g, "")
-            .trim();
+        const bits = trigger.metadata.eventData.bits || 0;
+        return bits;
     }
 };
 
