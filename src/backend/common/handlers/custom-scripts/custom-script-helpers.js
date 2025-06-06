@@ -123,7 +123,11 @@ function buildModules(scriptManifest) {
                     .forEach(n => notificationManager.deleteNotification(n.id));
             }
         },
-        uiExtensionManager: require("../../../ui-extensions/ui-extension-manager")
+        uiExtensionManager: require("../../../ui-extensions/ui-extension-manager"),
+
+        profileManager: {
+            getPathInProfile: profileManager.getPathInProfile,
+        },
     };
 }
 
