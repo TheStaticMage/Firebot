@@ -11,22 +11,22 @@ export type EventSubChannelBitsUseMessagePart =
 
 /** @private */
 export interface EventSubChannelBitsUseMessageData {
-	text: string;
-	fragments: EventSubChannelBitsUseMessagePart[];
+    text: string;
+    fragments: EventSubChannelBitsUseMessagePart[];
 }
 
 /** @private */
 export interface EventSubChannelBitsUseEventData {
-	user_id: string;
-	user_login: string;
-	user_name: string;
-	broadcaster_user_id: string;
-	broadcaster_user_login: string;
-	broadcaster_user_name: string;
-	bits: number;
-	type: EventSubChannelBitsUseType;
-	power_up: EventSubChannelBitsUsePowerUpData | null;
-	message: EventSubChannelBitsUseMessageData | null;
+    user_id: string;
+    user_login: string;
+    user_name: string;
+    broadcaster_user_id: string;
+    broadcaster_user_login: string;
+    broadcaster_user_name: string;
+    bits: number;
+    type: EventSubChannelBitsUseType;
+    power_up: EventSubChannelBitsUsePowerUpData | null;
+    message: EventSubChannelBitsUseMessageData | null;
     powerUpType?: EventSubChannelBitsUsePowerUpType | null; // Sent by manual trigger
 }
 
@@ -37,15 +37,15 @@ export type EventSubChannelBitsUsePowerUpType = 'message_effect' | 'celebration'
 
 /** @private */
 export interface EventSubChannelBitsUsePowerUpEmoteData {
-	id: string;
-	name: string;
+    id: string;
+    name: string;
 }
 
 /** @private */
 export interface EventSubChannelBitsUsePowerUpData {
-	type: EventSubChannelBitsUsePowerUpType;
-	emote: EventSubChannelBitsUsePowerUpEmoteData | null;
-	message_effect_id: string | null;
+    type: EventSubChannelBitsUsePowerUpType;
+    emote: EventSubChannelBitsUsePowerUpEmoteData | null;
+    message_effect_id: string | null;
 }
 
 export interface EventSubChatMessageTextPart {

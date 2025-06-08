@@ -7,7 +7,9 @@ export function triggerBitsUse(
     bits: number,
     type: 'cheer' | 'power_up' | 'combo',
     messageText: string,
-    powerUp: { type: 'message_effect' | 'celebration' | 'gigantify_an_emote', emote?: { id: string, name: string }, message_effect_id?: string | null } | null,
+    powerUpType: 'message_effect' | 'celebration' | 'gigantify_an_emote' | null,
+    powerUpEmote: { id: string, name: string } | null,
+    powerUpMessageEffectId: string | null
 ): void {
     // Trigger the generic "bits used" event. This will trigger for all types of
     // bits usage in the channel.
@@ -18,7 +20,9 @@ export function triggerBitsUse(
         bits,
         type,
         messageText,
-        powerUp,
+        powerUpType,
+        powerUpEmote,
+        powerUpMessageEffectId
     });
 
     // If we want to trigger specific events for different types of bits usage,
