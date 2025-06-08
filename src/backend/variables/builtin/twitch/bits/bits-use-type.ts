@@ -9,8 +9,8 @@ triggers[EffectTrigger.MANUAL] = true;
 
 const model1 : ReplaceVariable = {
     definition: {
-        handle: "bitsUseTypeRaw",
-        description: "The type of bits usage (raw: cheer, power_up, combo).",
+        handle: "bitsUseTypeId",
+        description: "The type of bits usage (ID: cheer, power_up, combo).",
         triggers: triggers,
         categories: [VariableCategory.COMMON, VariableCategory.TRIGGER],
         possibleDataOutput: [OutputDataType.TEXT]
@@ -23,7 +23,7 @@ const model1 : ReplaceVariable = {
 const model2 : ReplaceVariable = {
     definition: {
         handle: "bitsUseType",
-        description: "The type of bits usage.",
+        description: "The type of bits usage (human friendly name).",
         triggers: triggers,
         categories: [VariableCategory.COMMON, VariableCategory.TRIGGER],
         possibleDataOutput: [OutputDataType.TEXT]

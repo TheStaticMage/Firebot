@@ -73,15 +73,6 @@ class TwitchEventSubClient {
         const channelBitsUseSubscription = this._eventSubListener._genericSubscribe(
             EventSubChannelBitsUseSubscription,
             (event) => {
-                // Temporary to capture the data structure
-                const eventData = {
-                    powerUp: event.powerUp,
-                    bits: event.bits,
-                    type: event.type,
-                    messageText: event.messageText,
-                };
-                logger.debug("Bits use event data: ", JSON.stringify(eventData, null, 2));
-
                 twitchEventsHandler.bits.triggerBitsUse(
                     event.userName,
                     event.userId,
@@ -89,7 +80,9 @@ class TwitchEventSubClient {
                     event.bits,
                     event.type,
                     event.messageText,
-                    event.powerUp,
+                    event.powerUp?.type,
+                    event.powerUp?.emote,
+                    event.powerUp?.message_effect_id
                 );
             },
             this._eventSubListener,

@@ -7,7 +7,17 @@ const triggers = {};
 triggers[EffectTrigger.EVENT] = ["twitch:bits-use"];
 triggers[EffectTrigger.MANUAL] = true;
 
-type powerUpData = { type: 'message_effect' | 'celebration' | 'gigantify_an_emote', emote?: { id: string, name: string }, message_effect_id?: string | null; } | null;
+type powerUpRawData = {
+    type: 'message_effect' | 'celebration' | 'gigantify_an_emote',
+    emote?: { id: string, name: string },
+    message_effect_id?: string | null;
+} | null;
+
+type powerUpData = {
+    type: 'message_effect' | 'celebration' | 'gigantify_an_emote',
+    emote?: { id: string, name: string },
+    messageEffectId?: string | null;
+} | null;
 
 const model1 : ReplaceVariable = {
     definition: {
@@ -56,20 +66,25 @@ const model2 : ReplaceVariable = {
 
 function getPowerUpFromEventData(eventData: any): powerUpData {
     if (eventData && eventData.power_up) {
-        return eventData.power_up as powerUpData;
+        const pu = eventData.power_up as powerUpRawData;
+        return {
+            type: pu.type,
+            emote: pu.emote ? { id: pu.emote.id, name: pu.emote.name } : undefined,
+            messageEffectId: pu.message_effect_id || null
+        };
     } else if (eventData && eventData.type === "power_up" && typeof eventData.powerUpType === "string") {
         // Manual triggers send the power-up type as a string so we will
         // simulate additional power-up data based on the type.
         if (eventData.powerUpType === "message_effect") {
-            return { type: eventData.powerUpType, message_effect_id: 'test_message_effect_id' };
+            return { type: eventData.powerUpType, emote: null, messageEffectId: 'test_message_effect_id' };
         }
 
         if (eventData.powerUpType === "celebration") {
-            return { type: eventData.powerUpType };
+            return { type: eventData.powerUpType, emote: { id: 'thesta174Mittens', name: 'Mittens' }, messageEffectId: null };
         }
 
         if (eventData.powerUpType === "gigantify_an_emote") {
-            return { type: eventData.powerUpType, emote: { id: 'thesta174Mittens', name: 'Mittens' } };
+            return { type: eventData.powerUpType, emote: { id: 'thesta174Mittens', name: 'Mittens' }, messageEffectId: null };
         }
     }
     return null;

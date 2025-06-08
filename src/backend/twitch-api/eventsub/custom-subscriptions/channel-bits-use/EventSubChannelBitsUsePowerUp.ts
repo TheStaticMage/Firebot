@@ -2,7 +2,7 @@ import { DataObject, rawDataSymbol, rtfm } from '@twurple/common';
 import type {
     EventSubChannelBitsUsePowerUpData,
     EventSubChannelBitsUsePowerUpType,
-    EventSubChannelBitsUsePowerUpEmoteData,
+    EventSubChannelBitsUsePowerUpEmoteData
 } from './EventSubChannelBitsUsePowerUp.external';
 
 /**
@@ -10,24 +10,24 @@ import type {
  */
 @rtfm('eventsub-base', 'EventSubChannelBitsUsePowerUp')
 export class EventSubChannelBitsUsePowerUp extends DataObject<EventSubChannelBitsUsePowerUpData> {
-	/**
+    /**
 	 * The type of the Power-up.
 	 */
-	get type(): EventSubChannelBitsUsePowerUpType {
-		return this[rawDataSymbol].type;
-	}
+    get type(): EventSubChannelBitsUsePowerUpType {
+        return this[rawDataSymbol].type;
+    }
 
-	/**
+    /**
 	 * Emote associated with the reward.
 	 */
-	get emote(): EventSubChannelBitsUsePowerUpEmoteData | null {
-		return this[rawDataSymbol].emote;
-	}
+    get emote(): EventSubChannelBitsUsePowerUpEmoteData | null {
+        return this[rawDataSymbol].emote;
+    }
 
-	/**
+    /**
 	 * The ID of the message effect.
 	 */
-	get messageEffectId(): string | null {
-		return this[rawDataSymbol].message_effect_id;
-	}
+    get message_effect_id(): string | null {
+        return this[rawDataSymbol].message_effect_id;
+    }
 }

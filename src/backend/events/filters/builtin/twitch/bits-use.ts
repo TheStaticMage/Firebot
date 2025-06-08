@@ -2,7 +2,11 @@ import { createNumberFilter, createPresetFilter } from "../../filter-factory";
 import { EventFilter } from "../../../../../types/events";
 import { ComparisonType } from "../../../../../shared/filter-constants";
 
-type powerUpData = { type: 'message_effect' | 'celebration' | 'gigantify_an_emote', emote?: { id: string, name: string }, message_effect_id?: string | null } | null;
+type powerUpData = {
+    type: 'message_effect' | 'celebration' | 'gigantify_an_emote',
+    emote?: { id: string, name: string },
+    messageEffectId?: string | null;
+} | null;
 
 const filter1 = createPresetFilter({
     id: "firebot:bits-use-type",
@@ -72,11 +76,19 @@ const filter2: EventFilter = {
             return true;
         }
 
-        var powerUp = eventMeta.power_up as powerUpData | null;
+        let powerUp = eventMeta.power_up as powerUpData | null;
         if (!powerUp) {
             // Manual metadata
-            if (eventMeta.type === "power_up" && (eventMeta.powerUpType === "message_effect" || eventMeta.powerUpType === "celebration" || eventMeta.powerUpType === "gigantify_an_emote")) {
-                powerUp = { type: eventMeta.powerUpType, emote: null, message_effect_id: null };
+            if (eventMeta.type === "power_up") {
+                if (eventMeta.powerUpType === "message_effect") {
+                    powerUp = { type: eventMeta.powerUpType, emote: null, messageEffectId: 'test_message_effect_id' };
+                } else if (eventMeta.powerUpType === "celebration") {
+                    powerUp = { type: eventMeta.powerUpType, emote: { id: 'test_emote_id', name: 'test_emote_name' }, messageEffectId: null };
+                } else if (eventMeta.powerUpType === "gigantify_an_emote") {
+                    powerUp = { type: eventMeta.powerUpType, emote: { id: 'test_emote_id', name: 'test_emote_name' }, messageEffectId: null };
+                } else {
+                    return false; // Unknown power-up type
+                }
             } else {
                 return false; // No power-up data available
             }
