@@ -147,20 +147,6 @@
                 service.chatAlertMessage(message, icon);
             });
 
-            // Hide/show chat messages in the chat feed.
-            service.setChatFeedMessageHidden = function(messageId, isHidden) {
-                const messageItem = service.chatQueue.find(i => i.type === "message" && i.data.id === messageId);
-                if (messageItem == null) {
-                    return;
-                }
-
-                messageItem.data.isHiddenFromChatFeed = isHidden ?? false;
-            };
-
-            backendCommunicator.on("chat-feed-message-hidden", (data) => {
-                service.setChatFeedMessageHidden(data.messageId, data.isHidden);
-            });
-
             // Chat Update Handler
             // This handles all of the chat stuff that isn't a message.
             // This will only work when chat feed is turned on in the settings area.
