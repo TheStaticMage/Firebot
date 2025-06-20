@@ -59,6 +59,9 @@ export type FirebotChatMessage = {
     isSharedChatMessage: boolean;
     sharedChatRoomId?: string;
     isHiddenFromChatFeed?: boolean;
+    customHighlightColor?: string;
+    customBannerIcon?: string;
+    customBannerText?: string;
 };
 
 export type FirebotEmote = {
