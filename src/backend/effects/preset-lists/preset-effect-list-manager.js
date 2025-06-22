@@ -1,7 +1,10 @@
 "use strict";
 
+const logger = require("../../logwrapper");
 const frontendCommunicator = require("../../common/frontend-communicator");
 const JsonDbManager = require("../../database/json-db-manager");
+const { EffectTrigger } = require("../../../shared/effect-constants");
+const effectRunner = require("../../common/effect-runner");
 
 /**
  * @typedef PresetEffectList
@@ -45,5 +48,29 @@ frontendCommunicator.onAsync("saveAllPresetEffectLists",
 
 frontendCommunicator.on("deletePresetEffectList",
     (/** @type {string} */ presetEffectListId) => presetEffectListManager.deleteItem(presetEffectListId));
+
+frontendCommunicator.on("run-preset-effect-list",
+    async (params) => {
+        const presetList = presetEffectListManager.getItem(params.presetEffectListId);
+        if (!presetList) {
+            logger.warn(`Attempted to run preset effect list with id ${params.presetEffectListId} but it does not exist.`);
+            return;
+        }
+
+        const effects = presetList?.effects;
+        const request = {
+            trigger: {
+                type: EffectTrigger.QUICK_ACTION,
+                metadata: {
+                    presetListArgs: params.args || {}
+                }
+            },
+            effects: effects
+        };
+
+        effectRunner.processEffects(request);
+        return;
+    }
+);
 
 module.exports = presetEffectListManager;
