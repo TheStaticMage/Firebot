@@ -30,6 +30,7 @@ class QuickActionManager extends JsonDbManager {
         [
             "give-currency",
             "raid",
+            "raid-category",
             "stream-info",
             "stream-preview",
             "open-reward-request-queue"
