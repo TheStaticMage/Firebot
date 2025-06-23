@@ -19,7 +19,7 @@
                         </button>
 
                         <button
-                            ng-if="action.type === 'custom'"
+                            ng-if="action.type === 'custom' || action.type === 'system-editable'"
                             class="quick-action-btn p-0"
                             ng-click="$ctrl.triggerQuickAction(action.id)"
                             uib-tooltip="{{action.name}}"
@@ -115,8 +115,10 @@
                             click: () => {
                                 quickActionsService.showAddOrEditCustomQuickActionModal(customQuickAction);
                             }
-                        },
-                        {
+                        }
+                    ];
+                    if (customQuickAction.type === "custom") {
+                        options.push({
                             html: `<a href style="color: #fb7373;"><i class="far fa-trash-alt" style="margin-right: 10px;"></i> Delete</a>`,
                             click: () => {
                                 utilityService
@@ -134,8 +136,8 @@
 
                             },
                             compile: true
-                        }
-                    ];
+                        });
+                    }
 
                     return options;
                 };

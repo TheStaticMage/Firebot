@@ -12,7 +12,10 @@ class SystemQuickAction {
             id: definition.id,
             name: definition.name,
             type: definition.type,
-            icon: definition.icon
+            icon: definition.icon,
+            defaultEvent: definition.defaultEvent || "",
+            defaultEventData: definition.defaultEventData || {},
+            helpText: definition.helpText || ""
         };
     }
 

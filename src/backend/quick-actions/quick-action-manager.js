@@ -29,6 +29,7 @@ class QuickActionManager extends JsonDbManager {
 
         [
             "give-currency",
+            "raid",
             "raid-category",
             "stream-info",
             "stream-preview",
@@ -45,9 +46,10 @@ class QuickActionManager extends JsonDbManager {
      * @returns {QuickActionDefinition[]}
      */
     getAllItems() {
+        const customQuickActions = Object.values(this.items).filter(qa => qa.type === 'custom');
         return [
             ...this.getSystemQuickActionDefinitions(),
-            ...Object.values(this.items)
+            ...customQuickActions
         ];
     }
 

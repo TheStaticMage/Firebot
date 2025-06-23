@@ -6,15 +6,16 @@
             template: `
                 <div class="modal-header" style="text-align: center">
                     <button type="button" class="close" ng-click="$ctrl.dismiss()"><span>&times;</span></button>
-                    <h4 class="modal-title">Edit Quick Action</h4>
+                    <h4 class="modal-title" ng-if="$ctrl.quickAction.type === 'custom'">Edit Quick Action</h4>
+                    <h4 class="modal-title" ng-if="$ctrl.quickAction.type === 'system-editable'">Edit Quick Action: {{ $ctrl.quickAction.name }}</h4>
                 </div>
                 <div class="modal-body py-8 px-14">
-                    <div class="mb-6">
+                    <div class="mb-6" ng-if="$ctrl.quickAction.type === 'custom'">
                         <h3>Name</h3>
                         <p class="muted">The name will also be the tooltip when you hover the Quick Action.</p>
                         <input type="text" class="form-control" placeholder="Enter name" ng-model="$ctrl.quickAction.name" required>
                     </div>
-                    <div class="mb-6">
+                    <div class="mb-6" ng-if="$ctrl.quickAction.type === 'custom'">
                         <h3>Icon</h3>
                         <p class="muted">A custom icon which allows you to identify your Quick Action.</p>
                         <input maxlength="2" type="text" class="form-control" ng-model="$ctrl.quickAction.icon" icon-picker required>
@@ -22,8 +23,9 @@
                     <div>
                         <h3>Effect list</h3>
                         <p class="muted">The effect list that will be run when the Quick Action is triggered.</p>
-                        <dropdown-select options="{ custom: 'Custom', preset: 'Preset'}" selected="$ctrl.listType"></dropdown-select>
+                        <dropdown-select options="$ctrl.dropdownOptions" selected="$ctrl.listType"></dropdown-select>
                         <div ng-if="$ctrl.listType === 'preset'" class="mt-8">
+                            <p class="muted" ng-if="$ctrl.quickAction.helpText">{{ $ctrl.quickAction.helpText }}</p>
                             <firebot-searchable-select
                                 ng-model="$ctrl.quickAction.presetListId"
                                 items="$ctrl.presetEffectLists"
@@ -32,12 +34,16 @@
                             />
                         </div>
                         <div ng-if="$ctrl.listType === 'custom'" class="mt-8">
+                            <p class="muted" ng-if="$ctrl.quickAction.helpText">{{ $ctrl.quickAction.helpText }}</p>
                             <effect-list effects="$ctrl.quickAction.effectList"
                                 trigger="quick_action"
                                 trigger-meta="$ctrl.triggerMeta"
                                 update="$ctrl.effectListUpdated(effects)"
                                 modalId="{{modalId}}"
                             ></effect-list>
+                        </div>
+                        <div ng-if="$ctrl.listType === 'default'" class="mt-8">
+                            <p class="muted">This Quick Action will use default effects.</p>
                         </div>
                     </div>
                     <div ng-if="$ctrl.listType === 'preset' && $ctrl.currentPresetArgs.length > 0">
@@ -86,6 +92,18 @@
                 $ctrl.presetEffectLists = presetEffectListsService.getPresetEffectLists();
                 $ctrl.listType = "custom";
 
+                $ctrl.getDropdownOptions = function() {
+                    const options = {};
+                    if ($ctrl.quickAction && $ctrl.quickAction.type === 'system-editable') {
+                        options.default = 'Default';
+                    }
+                    options.custom = 'Custom';
+                    options.preset = 'Preset';
+                    return options;
+                };
+
+                $ctrl.dropdownOptions = $ctrl.getDropdownOptions();
+
                 $ctrl.effectListUpdated = (effects) => {
                     $ctrl.quickAction.effectList = effects;
                 };
@@ -95,10 +113,12 @@
                     name: "",
                     type: "custom",
                     icon: "far fa-magic",
+                    helpText: "",
                     presetListId: null,
                     presetArgValues: {},
                     promptForArgs: false,
-                    effectList: null
+                    effectList: null,
+                    overrideDefault: false
                 };
 
                 $ctrl.currentPresetArgs = [];
@@ -121,11 +141,16 @@
                     };
 
                     $ctrl.listType = $ctrl.quickAction.presetListId != null ? "preset" : "custom";
+                    if ($ctrl.quickAction.type === 'system-editable' && !$ctrl.quickAction.overrideDefault) {
+                        $ctrl.listType = "default";
+                    }
 
                     if ($ctrl.listType === "preset") {
                         const list = $ctrl.presetEffectLists.find(l => l.id === $ctrl.quickAction.presetListId);
                         $ctrl.currentPresetArgs = list?.args || [];
                     }
+
+                    $ctrl.dropdownOptions = $ctrl.getDropdownOptions();
                 };
 
                 $ctrl.save = function() {
@@ -134,20 +159,38 @@
                         return;
                     }
 
-                    if (
-                        ($ctrl.quickAction.presetListId == null || $ctrl.quickAction.presetListId === "") &&
-                        ($ctrl.quickAction.effectList == null || !$ctrl.quickAction.effectList.list.length)
-                    ) {
-                        ngToast.create("Please select a Custom or Preset Effect List for this Quick Action");
+                    if ($ctrl.listType === 'default' && $ctrl.quickAction.type !== 'system-editable') {
+                        ngToast.create("You cannot set a Default Effect List for a Custom Quick Action");
                         return;
                     }
 
-                    if ($ctrl.quickAction.presetListId != null && $ctrl.listType === 'preset') {
-                        $ctrl.quickAction.effectList = null;
+                    if ($ctrl.listType === 'preset' && ($ctrl.quickAction.presetListId == null || $ctrl.quickAction.presetListId === "")) {
+                        ngToast.create("Please select a Preset Effect List for this Quick Action");
+                        return;
                     }
 
-                    if ($ctrl.quickAction.effectList != null && $ctrl.listType === 'custom') {
-                        $ctrl.quickAction.presetListId = null;
+                    if ($ctrl.listType === 'custom' && ($ctrl.quickAction.effectList == null || !$ctrl.quickAction.effectList.list.length)) {
+                        ngToast.create("Please define at least one Effect in the Custom Effect List for this Quick Action");
+                        return;
+                    }
+
+                    switch ($ctrl.listType) {
+                        case 'default':
+                            $ctrl.quickAction.presetListId = null;
+                            $ctrl.quickAction.effectList = null;
+                            $ctrl.quickAction.overrideDefault = false;
+                            break;
+                        case 'preset':
+                            $ctrl.quickAction.effectList = null;
+                            $ctrl.quickAction.overrideDefault = true;
+                            break;
+                        case 'custom':
+                            $ctrl.quickAction.presetListId = null;
+                            $ctrl.quickAction.overrideDefault = true;
+                            break;
+                        default:
+                            ngToast.create("Invalid Quick Action type selected. Please try again.");
+                            return;
                     }
 
                     if ($ctrl.quickAction.icon == null || $ctrl.quickAction.icon === "") {
