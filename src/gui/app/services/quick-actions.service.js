@@ -75,13 +75,6 @@
                         size: "md"
                     });
                 });
-
-                backendCommunicator.on("trigger-quickaction:raid-category", () => {
-                    utilityService.showModal({
-                        component: "raidCategoryModal",
-                        size: "md"
-                    });
-                });
             };
 
             /**
@@ -137,16 +130,6 @@
                     size: "md",
                     resolveObj: {
                         quickAction: () => customQuickAction
-                    }
-                });
-            };
-
-            service.showEditSystemQuickActionModal = (systemQuickAction) => {
-                utilityService.showModal({
-                    component: "addOrEditCustomQuickActionModal",
-                    size: "md",
-                    resolveObj: {
-                        quickAction: () => systemQuickAction
                     }
                 });
             };

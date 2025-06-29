@@ -13,9 +13,7 @@ class SystemQuickAction {
             name: definition.name,
             type: definition.type,
             icon: definition.icon,
-            defaultEvent: definition.defaultEvent || "",
-            defaultEventData: definition.defaultEventData || {},
-            helpText: definition.helpText || ""
+            modalData: definition.modalData || {},
         };
     }
 
@@ -27,12 +25,22 @@ class SystemQuickAction {
     }
 
     /**
+     * @abstract
+     * @param {import("../../shared/effect-runner").EffectRunner} effectRunner
+     * @param {Object} args
+     */
+    onDefaultTriggerEvent(effectRunner, args) {
+        throw new Error("Please implement this method");
+    }
+
+    /**
      * @protected
      */
     toJson() {
         return {
             definition: this.definition,
-            onTriggerEvent: this.onTriggerEvent
+            onTriggerEvent: this.onTriggerEvent,
+            onDefaultTriggerEvent: this.onDefaultTriggerEvent
         };
     }
 }

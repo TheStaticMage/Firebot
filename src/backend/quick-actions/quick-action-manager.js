@@ -10,6 +10,8 @@ const { SettingsManager } = require("../common/settings-manager");
 
 /** @typedef {import("../../shared/types").QuickActionDefinition} QuickActionDefinition */
 
+/** @typedef {import("../../shared/types").QuickActionTrigger} QuickActionTrigger */
+
 /**
  * @extends {JsonDbManager<QuickActionDefinition>}
  */
@@ -30,7 +32,6 @@ class QuickActionManager extends JsonDbManager {
         [
             "give-currency",
             "raid",
-            "raid-category",
             "stream-info",
             "stream-preview",
             "open-reward-request-queue"
@@ -54,6 +55,10 @@ class QuickActionManager extends JsonDbManager {
     }
 
     saveQuickAction(quickAction, notify = true) {
+        if (quickAction.type === 'system-editable') {
+            delete quickAction.modalData;
+        }
+
         const savedQuickAction = super.saveItem(quickAction);
         if (!savedQuickAction) {
             return;
@@ -81,48 +86,76 @@ class QuickActionManager extends JsonDbManager {
      * @returns {QuickActionDefinition[]}
      */
     getSystemQuickActionDefinitions() {
-        return this.systemQuickActions.map(sqa => sqa.definition);
+        // System editable quick actions have their configuration saved along with the custom
+        // quick actions but are defined along with the system quick actions.
+        const systemEditableQuickActions = Object.values(this.items).filter(qa => qa.type === 'system-editable');
+        const systemQuickActions = this.systemQuickActions
+            .map(sqa => sqa.definition)
+            .map(sqa => {
+                const editableQuickAction = systemEditableQuickActions.find(qa => qa.id === sqa.id);
+                if (editableQuickAction) {
+                    sqa.overrideDefault = editableQuickAction.overrideDefault;
+                    sqa.presetListId = editableQuickAction.presetListId;
+                    sqa.presetArgValues = editableQuickAction.presetArgValues;
+                    sqa.promptForArgs = editableQuickAction.promptForArgs;
+                    sqa.effectList = editableQuickAction.effectList;
+                }
+                return sqa;
+            });
+
+        return systemQuickActions;
     }
 
-    triggerQuickAction(quickActionId) {
-        const triggeredQuickAction = [
-            ...this.getSystemQuickActionDefinitions(),
-            ...Object.values(this.items)
-        ].find(qa => qa.id === quickActionId);
-
-        if (triggeredQuickAction.type === 'custom') {
-            let effects = [];
-            let presetArgValues = undefined;
-
-            if (triggeredQuickAction.presetListId != null) {
-                const presetList = presetEffectListManager.getItem(triggeredQuickAction.presetListId);
-                if (triggeredQuickAction.promptForArgs && presetList?.args?.length > 0) {
-                    frontendCommunicator.send("show-run-preset-list-modal", triggeredQuickAction.presetListId);
-                    return;
-                }
-                effects = presetList?.effects;
-                presetArgValues = triggeredQuickAction.presetArgValues;
-            } else if (triggeredQuickAction.effectList != null) {
-                effects = triggeredQuickAction.effectList;
-            }
-
-            const request = {
-                trigger: {
-                    type: EffectTrigger.QUICK_ACTION,
-                    metadata: {
-                        username: accountAccess.getAccounts().streamer.username,
-                        presetListArgs: presetArgValues
-                    }
-                },
-                effects: effects
-            };
-
-            effectRunner.processEffects(request);
-            return;
-        }
+    triggerQuickAction(trigger) {
+        const { quickActionId, isInitialClick = true, args = {} } = trigger;
+        const triggeredQuickAction = this.getAllItems().find(qa => qa.id === quickActionId);
 
         const systemQuickAction = this.systemQuickActions.find(sqa => sqa.definition.id === quickActionId);
-        systemQuickAction.onTriggerEvent();
+        if (systemQuickAction) {
+            if (systemQuickAction.definition?.type !== 'system-editable' || isInitialClick) {
+                systemQuickAction.onTriggerEvent();
+                return;
+            }
+
+            // If there is no customization to the editable system quick action, or the default
+            // behavior has not been overridden, execute the default effects.
+            if (!triggeredQuickAction || !triggeredQuickAction.overrideDefault) {
+                systemQuickAction.onDefaultTriggerEvent(effectRunner, args);
+                return;
+            }
+        }
+
+        let effects = [];
+        let presetArgValues = undefined;
+        
+        if (triggeredQuickAction.presetListId != null) {
+            const presetList = presetEffectListManager.getItem(triggeredQuickAction.presetListId);
+            if (triggeredQuickAction.promptForArgs && presetList?.args?.length > 0) {
+                frontendCommunicator.send("show-run-preset-list-modal", triggeredQuickAction.presetListId);
+                return;
+            }
+            effects = presetList?.effects;
+            presetArgValues = triggeredQuickAction.presetArgValues;
+        } else if (triggeredQuickAction.effectList != null) {
+            effects = triggeredQuickAction.effectList;
+        }
+
+        const request = {
+            trigger: {
+                type: EffectTrigger.QUICK_ACTION,
+                metadata: {
+                    username: accountAccess.getAccounts().streamer.username,
+                    presetListArgs: presetArgValues,
+                    quickAction: {
+                        id: quickActionId,
+                        args: args,
+                    }
+                }
+            },
+            effects: effects
+        };
+
+        effectRunner.processEffects(request);
     }
 
     /**
@@ -147,8 +180,7 @@ frontendCommunicator.onAsync("saveAllCustomQuickActions",
 frontendCommunicator.on("deleteCustomQuickAction",
     (/** @type {string} */ customQuickActionId) => quickActionManager.deleteQuickAction(customQuickActionId));
 
-frontendCommunicator.on("triggerQuickAction", (quickActionId) => {
-    quickActionManager.triggerQuickAction(quickActionId);
-});
+frontendCommunicator.on("triggerQuickAction",
+    (/** @type {QuickActionTrigger} */ trigger) => quickActionManager.triggerQuickAction(trigger));
 
 module.exports = quickActionManager;

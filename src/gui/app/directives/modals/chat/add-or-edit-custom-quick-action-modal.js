@@ -25,7 +25,6 @@
                         <p class="muted">The effect list that will be run when the Quick Action is triggered.</p>
                         <dropdown-select options="$ctrl.dropdownOptions" selected="$ctrl.listType"></dropdown-select>
                         <div ng-if="$ctrl.listType === 'preset'" class="mt-8">
-                            <p class="muted" ng-if="$ctrl.quickAction.helpText">{{ $ctrl.quickAction.helpText }}</p>
                             <firebot-searchable-select
                                 ng-model="$ctrl.quickAction.presetListId"
                                 items="$ctrl.presetEffectLists"
@@ -34,7 +33,7 @@
                             />
                         </div>
                         <div ng-if="$ctrl.listType === 'custom'" class="mt-8">
-                            <p class="muted" ng-if="$ctrl.quickAction.helpText">{{ $ctrl.quickAction.helpText }}</p>
+                            <p class="muted" ng-if="$ctrl.helpText">{{ $ctrl.helpText }}</p>
                             <effect-list effects="$ctrl.quickAction.effectList"
                                 trigger="quick_action"
                                 trigger-meta="$ctrl.triggerMeta"
@@ -93,27 +92,34 @@
                 $ctrl.listType = "custom";
 
                 $ctrl.getDropdownOptions = function() {
+                    // System editable quick actions can have a default or custom effect list.
+                    // (It's possible to add a preset effect list to the custom list, and get
+                    // full use of variable resolution.) Custom quick actions can have a custom
+                    // effect list or a preset effect list without variables.
                     const options = {};
                     if ($ctrl.quickAction && $ctrl.quickAction.type === 'system-editable') {
                         options.default = 'Default';
                     }
                     options.custom = 'Custom';
-                    options.preset = 'Preset';
+                    if (!$ctrl.quickAction || $ctrl.quickAction.type !== 'system-editable') {
+                        options.preset = 'Preset';
+                    }
                     return options;
                 };
 
-                $ctrl.dropdownOptions = $ctrl.getDropdownOptions();
+                $ctrl.dropdownOptions = {};
 
                 $ctrl.effectListUpdated = (effects) => {
                     $ctrl.quickAction.effectList = effects;
                 };
+
+                $ctrl.helpText = "";
 
                 $ctrl.quickAction = {
                     id: null,
                     name: "",
                     type: "custom",
                     icon: "far fa-magic",
-                    helpText: "",
                     presetListId: null,
                     presetArgValues: {},
                     promptForArgs: false,
@@ -137,12 +143,19 @@
                     }
 
                     $ctrl.triggerMeta = {
+                        triggerId: $ctrl.quickAction.id || "",
                         rootEffects: $ctrl.quickAction.effectList
                     };
 
                     $ctrl.listType = $ctrl.quickAction.presetListId != null ? "preset" : "custom";
-                    if ($ctrl.quickAction.type === 'system-editable' && !$ctrl.quickAction.overrideDefault) {
-                        $ctrl.listType = "default";
+                    if ($ctrl.quickAction.type === 'system-editable') {
+                        if (!$ctrl.quickAction.overrideDefault) {
+                            $ctrl.listType = "default";
+                        }
+
+                        if ($ctrl.quickAction.modalData != null) {
+                            $ctrl.helpText = $ctrl.quickAction.modalData.helpText || "";
+                        }
                     }
 
                     if ($ctrl.listType === "preset") {
@@ -160,7 +173,12 @@
                     }
 
                     if ($ctrl.listType === 'default' && $ctrl.quickAction.type !== 'system-editable') {
-                        ngToast.create("You cannot set a Default Effect List for a Custom Quick Action");
+                        ngToast.create("You cannot set a Default Effect List for this type of Quick Action");
+                        return;
+                    }
+
+                    if ($ctrl.listType === 'preset' && $ctrl.quickAction.type === 'system-editable') {
+                        ngToast.create("You cannot set a Preset Effect List for this type of Quick Action (you can use a 'Run Effect List' effect in the custom effect list to achieve the same outcome)");
                         return;
                     }
 

@@ -71,7 +71,7 @@
                 });
 
                 $ctrl.triggerQuickAction = (quickActionId) => {
-                    backendCommunicator.fireEvent("triggerQuickAction", quickActionId);
+                    backendCommunicator.fireEvent("triggerQuickAction", { quickActionId: quickActionId });
                 };
 
                 $ctrl.$onInit = async () => {

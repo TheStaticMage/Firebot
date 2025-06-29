@@ -40,34 +40,63 @@ class TwitchApi {
                 id: c.id,
                 username: c.name,
                 displayName: c.displayName,
-                avatarUrl: c.thumbnailUrl
+                avatarUrl: c.thumbnailUrl,
+                isLive: c.isLive
             }));
         });
 
-        frontendCommunicator.onAsync("search-twitch-channels-in-same-category", async (categoryId: number, includeStreamer = false) => {
-            logger.debug(`search-twitch-channels-in-same-category received, categoryId = ${categoryId}, includeStreamer = ${includeStreamer}`);
-            const paginatedRequest = this.streamerClient.streams.getStreamsPaginated({ game: categoryId.toString() });
+        frontendCommunicator.onAsync("get-streams", async (filter: Object, includeStreamer = false, limit: number = 50) => {
+            logger.debug(`get-streams received, filter = ${JSON.stringify(filter)}, includeStreamer = ${includeStreamer}, limit = ${limit}`);
+            const paginatedRequest = this.streamerClient.streams.getStreamsPaginated(filter);
             const results = [];
             const accountAccess = require("../common/account-access");
             const streamerChannelId = accountAccess.getAccounts().streamer.channelId;
             for await (const stream of paginatedRequest) {
                 if (!includeStreamer && stream.userId === streamerChannelId) {
-                    continue; // Skip the streamer's own channel if not included
+                    continue;
                 }
                 results.push({
                     id: stream.userId,
                     username: stream.userName,
                     displayName: stream.userDisplayName,
-                    avatarUrl: stream.thumbnailUrl,
                     isMature: stream.isMature,
                     viewers: stream.viewers,
-                    uptime: Math.floor((Date.now() - stream.startDate.getTime()) / 1000)
+                    uptime: Math.floor((Date.now() - stream.startDate.getTime()) / 1000),
+                    gameName: stream.gameName,
+                    language: stream.language,
+                    isLive: true
                 });
-                if (results.length >= 50) {
-                    break; // Limit to 50 results for sanity
+                if (results.length >= limit) {
+                    break;
                 }
             }
-            logger.debug(`search-twitch-channels-in-same-category: returning ${results.length} results`);
+            logger.debug(`get-streams: returning ${results.length} results`);
+            return results;
+        });
+
+        frontendCommunicator.onAsync("get-followed-streams", async (limit: number = 50) => {
+            logger.debug(`get-followed-streams received, limit = ${limit}`);
+            const accountAccess = require("../common/account-access");
+            const streamerChannelId = accountAccess.getAccounts().streamer.channelId;
+            const paginatedRequest = this.streamerClient.streams.getFollowedStreamsPaginated(streamerChannelId);
+            const results = [];
+            for await (const stream of paginatedRequest) {
+                results.push({
+                    id: stream.userId,
+                    username: stream.userName,
+                    displayName: stream.userDisplayName,
+                    isMature: stream.isMature,
+                    viewers: stream.viewers,
+                    uptime: Math.floor((Date.now() - stream.startDate.getTime()) / 1000),
+                    gameName: stream.gameName,
+                    language: stream.language,
+                    isLive: true
+                });
+                if (results.length >= limit) {
+                    break;
+                }
+            }
+            logger.debug(`get-followed-streams: returning ${results.length} results`);
             return results;
         });
 
