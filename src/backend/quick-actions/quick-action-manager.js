@@ -55,9 +55,7 @@ class QuickActionManager extends JsonDbManager {
     }
 
     saveQuickAction(quickAction, notify = true) {
-        if (quickAction.type === 'system-editable') {
-            delete quickAction.modalData;
-        }
+        delete quickAction.modalData;
 
         const savedQuickAction = super.saveItem(quickAction);
         if (!savedQuickAction) {
@@ -86,19 +84,17 @@ class QuickActionManager extends JsonDbManager {
      * @returns {QuickActionDefinition[]}
      */
     getSystemQuickActionDefinitions() {
-        // System editable quick actions have their configuration saved along with the custom
-        // quick actions but are defined along with the system quick actions.
-        const systemEditableQuickActions = Object.values(this.items).filter(qa => qa.type === 'system-editable');
+        const customizableActions = Object.values(this.items).filter(qa => qa.type === 'system' && qa.customizable);
         const systemQuickActions = this.systemQuickActions
             .map(sqa => sqa.definition)
             .map(sqa => {
-                const editableQuickAction = systemEditableQuickActions.find(qa => qa.id === sqa.id);
-                if (editableQuickAction) {
-                    sqa.overrideDefault = editableQuickAction.overrideDefault;
-                    sqa.presetListId = editableQuickAction.presetListId;
-                    sqa.presetArgValues = editableQuickAction.presetArgValues;
-                    sqa.promptForArgs = editableQuickAction.promptForArgs;
-                    sqa.effectList = editableQuickAction.effectList;
+                const customizableQuickAction = customizableActions.find(qa => qa.id === sqa.id);
+                if (customizableQuickAction) {
+                    sqa.overrideDefault = customizableQuickAction.overrideDefault;
+                    sqa.presetListId = null;
+                    sqa.presetArgValues = null;
+                    sqa.promptForArgs = null;
+                    sqa.effectList = customizableQuickAction.effectList;
                 }
                 return sqa;
             });
@@ -108,19 +104,24 @@ class QuickActionManager extends JsonDbManager {
 
     triggerQuickAction(trigger) {
         const { quickActionId, isInitialClick = true, args = {} } = trigger;
+
         const triggeredQuickAction = this.getAllItems().find(qa => qa.id === quickActionId);
+        if (!triggeredQuickAction) {
+            return;
+        }
 
         const systemQuickAction = this.systemQuickActions.find(sqa => sqa.definition.id === quickActionId);
         if (systemQuickAction) {
-            if (systemQuickAction.definition?.type !== 'system-editable' || isInitialClick) {
+            if (!systemQuickAction.definition.customizable || isInitialClick) {
                 systemQuickAction.onTriggerEvent();
                 return;
             }
 
-            // If there is no customization to the editable system quick action, or the default
-            // behavior has not been overridden, execute the default effects.
-            if (!triggeredQuickAction || !triggeredQuickAction.overrideDefault) {
-                systemQuickAction.onDefaultTriggerEvent(effectRunner, args);
+            if (!triggeredQuickAction.overrideDefault) {
+                const request = systemQuickAction.getDefaultRequest(args);
+                if (request) {
+                    effectRunner.processEffects(request);
+                }
                 return;
             }
         }

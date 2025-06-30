@@ -13,6 +13,7 @@ class SystemQuickAction {
             name: definition.name,
             type: definition.type,
             icon: definition.icon,
+            customizable: definition.customizable || false,
             modalData: definition.modalData || {},
         };
     }
@@ -26,10 +27,10 @@ class SystemQuickAction {
 
     /**
      * @abstract
-     * @param {import("../../shared/effect-runner").EffectRunner} effectRunner
      * @param {Object} args
+     * @returns {Object} The default request object
      */
-    onDefaultTriggerEvent(effectRunner, args) {
+    getDefaultRequest(args) {
         throw new Error("Please implement this method");
     }
 
@@ -40,7 +41,7 @@ class SystemQuickAction {
         return {
             definition: this.definition,
             onTriggerEvent: this.onTriggerEvent,
-            onDefaultTriggerEvent: this.onDefaultTriggerEvent
+            getDefaultRequest: this.getDefaultRequest
         };
     }
 }

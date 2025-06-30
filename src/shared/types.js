@@ -4,9 +4,10 @@
  * @typedef QuickActionDefinition
  * @prop {string} id
  * @prop {string} name
- * @prop {"system" | "system-editable" | "custom"} type
+ * @prop {"system" | "custom"} type
  * @prop {string} icon
  * @prop {string} [presetListId]
+ * @prop {boolean} [customizable]
  */
 
 /**
