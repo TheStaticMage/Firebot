@@ -2,6 +2,7 @@
 
 const SystemQuickAction = require("../quick-action");
 const accountAccess = require("../../common/account-access");
+const connectionManager = require("../../common/connection-manager");
 const frontendCommunicator = require("../../common/frontend-communicator");
 const { EffectTrigger } = require("../../../shared/effect-constants");
 const { v4: uuid } = require("uuid");
@@ -25,42 +26,45 @@ class RaidQuickAction extends SystemQuickAction {
     }
 
     getDefaultRequest(args) {
-        const effects = [
-            {
-                id: uuid(),
-                type: "firebot:raid",
-                action: "Raid Channel",
-                username: args.username || ""
+        return new Promise((resolve, reject) => {
+            if (!args || !args.username) {
+                reject(new Error("Raid Quick Action requires a username argument"));
             }
-        ];
 
-        // Uncomment for testing
-        effects[0] = {
-            id: uuid(),
-            type: "firebot:chat-feed-alert",
-            action: "Chat Feed Alert",
-            message: `[Testing] Raid Quick Action would have triggered a raid to ${args.username || "unknown user"}.`,
-        };
+            if (!connectionManager.streamerIsOnline()) {
+                reject(new Error(`You cannot trigger a raid while offline (selected raid target: ${args.username})`));
+            }
 
-        const request = {
-            trigger: {
-                type: EffectTrigger.QUICK_ACTION,
-                metadata: {
-                    username: accountAccess.getAccounts().streamer.username,
-                    quickAction: {
-                        id: "firebot:raid",
-                        action: "Raid Channel",
-                        username: args.username,
-                        userDisplayName: args.userDisplayName || args.username || ""
-                    }
+            const effects = [
+                {
+                    id: uuid(),
+                    type: "firebot:raid",
+                    action: "Raid Channel",
+                    username: args.username
                 }
-            },
-            effects: {
-                list: effects
-            },
-        };
+            ];
 
-        return request;
+            const streamer = accountAccess.getAccounts().streamer;
+            const request = {
+                trigger: {
+                    type: EffectTrigger.QUICK_ACTION,
+                    metadata: {
+                        username: streamer.username,
+                        quickAction: {
+                            id: "firebot:raid",
+                            action: "Raid Channel",
+                            username: args.username,
+                            userDisplayName: args.userDisplayName || args.username
+                        }
+                    }
+                },
+                effects: {
+                    list: effects
+                },
+            };
+
+            resolve(request);
+        });
     }
 }
 

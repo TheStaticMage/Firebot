@@ -28,10 +28,10 @@ class SystemQuickAction {
     /**
      * @abstract
      * @param {Object} args
-     * @returns {Object} The default request object
+     * @returns {Promise<Object>}
      */
     getDefaultRequest(args) {
-        throw new Error("Please implement this method");
+        return Promise.reject(new Error("Please implement this method"));
     }
 
     /**

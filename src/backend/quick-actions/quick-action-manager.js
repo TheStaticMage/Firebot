@@ -118,10 +118,13 @@ class QuickActionManager extends JsonDbManager {
             }
 
             if (!triggeredQuickAction.overrideDefault) {
-                const request = systemQuickAction.getDefaultRequest(args);
-                if (request) {
-                    effectRunner.processEffects(request);
+                const requestPromise = systemQuickAction.getDefaultRequest(args);
+                if (!(requestPromise instanceof Promise)) {
+                    throw new Error("getDefaultRequest must return a Promise");
                 }
+                requestPromise.then(request => effectRunner.processEffects(request)).catch(error => {
+                    frontendCommunicator.send("error", `Error processing quick action for ${quickActionId}: ${error.message}`);
+                });
                 return;
             }
         }
