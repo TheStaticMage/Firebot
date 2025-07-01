@@ -67,10 +67,19 @@
                             </ui-select-choices>
                         </ui-select>
                     </div>
+                    <div class="form-group" style="width: 100%; margin-top: 15px; display: block;" ng-if="!$ctrl.streamerIsOnline">
+                        <div>
+                            <label class="control-label" style="margin:0;">Confirm Offline Raid</label>
+                            <p class="help-block">It appears that you are not streaming right now. Confirm that you want to initiate a raid anyway.</p>
+                        </div>
+                        <div>
+                            <toggle-button toggle-model="$ctrl.confirmOfflineRaid" auto-update-value="true" font-size="32"></toggle-button>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer" style="display: flex; justify-content: flex-end;">
                     <button type="button" class="btn btn-default" ng-click="$ctrl.dismiss()">Cancel</button>
-                    <button type="button" class="btn btn-primary" ng-click="$ctrl.initiate()" ng-disabled="!$ctrl.isActionEnabled">Initiate Raid</button>
+                    <button type="button" class="btn btn-primary" ng-click="$ctrl.initiate()" ng-disabled="!$ctrl.isActionEnabled || (!$ctrl.streamerIsOnline && !$ctrl.confirmOfflineRaid)">Initiate Raid</button>
                 </div>
             `,
             bindings: {
@@ -87,10 +96,12 @@
                 $ctrl.currentCategoryId = -1;
                 $ctrl.currentCategoryUrl = "";
                 $ctrl.channels = [];
+                $ctrl.confirmOfflineRaid = false;
                 $ctrl.hasValidationError = false;
                 $ctrl.validationText = "";
                 $ctrl.isActionEnabled = false;
                 $ctrl.selectTargetType = "category";
+                $ctrl.streamerIsOnline = false;
                 $ctrl.targetTypeOptions = { category: 'Same Category', followed: 'Followed Channels', username: 'Username' };
 
                 $ctrl.viewerSelected = function () {
@@ -233,16 +244,15 @@
                 };
 
                 $ctrl.$onInit = function () {
-                    if ($ctrl.resolve.model) {
-                        $ctrl.model = $ctrl.resolve.model;
+                    if ($ctrl.resolve) {
+                        $ctrl.streamerIsOnline = $ctrl.resolve.streamerIsOnline || false;
                     }
-
-                    // Prefetch the category and game information
+                    
                     backendCommunicator.fireEventAsync("get-channel-info")
                         .then((channelInfo) => {
                             if (channelInfo && channelInfo.gameId) {
                                 $ctrl.currentCategoryId = channelInfo.gameId;
-                                $ctrl.onTargetTypeChange(); // To load by category
+                                $ctrl.onTargetTypeChange();
 
                                 backendCommunicator.fireEventAsync("get-twitch-game", $ctrl.currentCategoryId)
                                     .then((gameInfo) => {

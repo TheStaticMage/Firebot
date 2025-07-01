@@ -74,10 +74,11 @@
                     });
                 });
 
-                backendCommunicator.on("trigger-quickaction:raid", () => {
+                backendCommunicator.on("trigger-quickaction:raid", (resolveObj) => {
                     utilityService.showModal({
                         component: "raidModal",
-                        size: "md"
+                        size: "md",
+                        resolveObj: resolveObj
                     });
                 });
             };

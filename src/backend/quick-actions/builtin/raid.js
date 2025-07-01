@@ -28,7 +28,10 @@ class RaidQuickAction extends SystemQuickAction {
 
     onTriggerEvent(/** @type {QuickActionTriggerEvent} */ event = {}) {
         if (!event.params || Object.keys(event.params).length === 0) {
-            frontendCommunicator.send("trigger-quickaction:raid");
+            const resolveObj = {
+                streamerIsOnline: connectionManager.streamerIsOnline(),
+            };
+            frontendCommunicator.send("trigger-quickaction:raid", resolveObj);
             return;
         }
 
@@ -39,12 +42,6 @@ class RaidQuickAction extends SystemQuickAction {
         const effects = [];
 
         if (!event.config || !event.config.overrideDefault) {
-            if (!connectionManager.streamerIsOnline()) {
-                const message = `You cannot trigger a raid while you are offline (selected raid target: ${event.params.username})`;
-                frontendCommunicator.send("error", message);
-                return;
-            }
-
             effects.push({
                 id: uuid(),
                 type: "firebot:raid",
