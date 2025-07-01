@@ -68,13 +68,6 @@
                         size: "lg"
                     });
                 });
-
-                backendCommunicator.on("trigger-quickaction:raid-category", () => {
-                    utilityService.showModal({
-                        component: "raidCategoryModal",
-                        size: "md"
-                    });
-                });
             };
 
             /**

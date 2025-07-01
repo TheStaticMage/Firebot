@@ -44,33 +44,6 @@ class TwitchApi {
             }));
         });
 
-        frontendCommunicator.onAsync("search-twitch-channels-in-same-category", async (categoryId: number, includeStreamer = false) => {
-            logger.debug(`search-twitch-channels-in-same-category received, categoryId = ${categoryId}, includeStreamer = ${includeStreamer}`);
-            const paginatedRequest = this.streamerClient.streams.getStreamsPaginated({ game: categoryId.toString() });
-            const results = [];
-            const accountAccess = require("../common/account-access");
-            const streamerChannelId = accountAccess.getAccounts().streamer.channelId;
-            for await (const stream of paginatedRequest) {
-                if (!includeStreamer && stream.userId === streamerChannelId) {
-                    continue; // Skip the streamer's own channel if not included
-                }
-                results.push({
-                    id: stream.userId,
-                    username: stream.userName,
-                    displayName: stream.userDisplayName,
-                    avatarUrl: stream.thumbnailUrl,
-                    isMature: stream.isMature,
-                    viewers: stream.viewers,
-                    uptime: Math.floor((Date.now() - stream.startDate.getTime()) / 1000)
-                });
-                if (results.length >= 50) {
-                    break; // Limit to 50 results for sanity
-                }
-            }
-            logger.debug(`search-twitch-channels-in-same-category: returning ${results.length} results`);
-            return results;
-        });
-
         frontendCommunicator.onAsync("process-automod-message", async ({ messageId, allow }: { messageId: string, allow: boolean }) => {
             const accountAccess = require("../common/account-access");
             const streamerChannelId = accountAccess.getAccounts().streamer.channelId;
