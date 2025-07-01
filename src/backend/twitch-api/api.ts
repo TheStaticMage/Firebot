@@ -70,12 +70,10 @@ class TwitchApi {
                     break;
                 }
             }
-            logger.debug(`get-streams: returning ${results.length} results`);
             return results;
         });
 
         frontendCommunicator.onAsync("get-followed-streams", async (limit: number = 50) => {
-            logger.debug(`get-followed-streams received, limit = ${limit}`);
             const accountAccess = require("../common/account-access");
             const streamerChannelId = accountAccess.getAccounts().streamer.channelId;
             const paginatedRequest = this.streamerClient.streams.getFollowedStreamsPaginated(streamerChannelId);
@@ -96,7 +94,6 @@ class TwitchApi {
                     break;
                 }
             }
-            logger.debug(`get-followed-streams: returning ${results.length} results`);
             return results;
         });
 
