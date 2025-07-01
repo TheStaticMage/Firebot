@@ -18,7 +18,7 @@ const model : ReplaceVariable = {
     },
     evaluator: (trigger: Trigger) => {
         const quickActionData = trigger.metadata.quickAction;
-        const args = quickActionData?.args as { userDisplayName?: string } | undefined;
+        const args = quickActionData as { userDisplayName?: string } | undefined;
         return args?.userDisplayName || "";
     }
 };

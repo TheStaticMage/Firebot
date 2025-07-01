@@ -6,32 +6,23 @@ class SystemQuickAction {
     /**
      * @param {QuickActionDefinition} definition
      */
-    constructor (definition) {
+    constructor (definition, properties = {}) {
         /** @type {QuickActionDefinition} */
         this.definition = {
             id: definition.id,
             name: definition.name,
             type: definition.type,
-            icon: definition.icon,
-            customizable: definition.customizable || false,
-            modalData: definition.modalData || {},
+            icon: definition.icon
         };
+        this.properties = properties;
     }
 
     /**
      * @abstract
+     * @param {Object} [args]
      */
-    onTriggerEvent() {
+    onTriggerEvent(args = {}) {
         throw new Error("Please implement this method");
-    }
-
-    /**
-     * @abstract
-     * @param {Object} args
-     * @returns {Promise<Object>}
-     */
-    getDefaultRequest(args) {
-        return Promise.reject(new Error("Please implement this method"));
     }
 
     /**
@@ -40,8 +31,8 @@ class SystemQuickAction {
     toJson() {
         return {
             definition: this.definition,
-            onTriggerEvent: this.onTriggerEvent,
-            getDefaultRequest: this.getDefaultRequest
+            properties: this.properties,
+            onTriggerEvent: this.onTriggerEvent
         };
     }
 }

@@ -2,6 +2,7 @@
 
 (function() {
     /** @typedef {import("../../../shared/types").QuickActionDefinition} QuickAction */
+    /** @typedef {import("../../../shared/types").QuickActionProperties} QuickActionProperties */
 
     angular
         .module("firebotApp")
@@ -10,6 +11,9 @@
 
             /** @type {QuickAction[]} */
             service.quickActions = [];
+
+            /** @type {Record<string, QuickActionProperties>} */
+            service.quickActionProperties = {};
 
             /**
              * @memberof quickActionService
@@ -29,10 +33,11 @@
              * @returns {Promise.<void>}
              */
             service.loadQuickActions = async () => {
-                const quickActions = await backendCommunicator.fireEventAsync("getQuickActions");
+                const response = await backendCommunicator.fireEventAsync("getQuickActions");
 
-                if (quickActions) {
-                    service.quickActions = quickActions;
+                if (response) {
+                    service.quickActions = response.definitions || [];
+                    service.quickActionProperties = response.properties || {};
                 }
 
                 service.setupListeners();
@@ -125,11 +130,16 @@
              * @returns {void}
              */
             service.showAddOrEditCustomQuickActionModal = (customQuickAction) => {
+                const quickAction = {
+                    definition: customQuickAction,
+                    properties: service.quickActionProperties[customQuickAction.id] || {}
+                };
+
                 utilityService.showModal({
                     component: "addOrEditCustomQuickActionModal",
                     size: "md",
                     resolveObj: {
-                        quickAction: () => customQuickAction
+                        quickAction: () => quickAction
                     }
                 });
             };

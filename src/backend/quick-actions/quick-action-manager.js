@@ -49,7 +49,10 @@ class QuickActionManager extends JsonDbManager {
     getAllItems() {
         const customQuickActions = Object.values(this.items).filter(qa => qa.type === 'custom');
         return [
-            ...this.getSystemQuickActionDefinitions(),
+            ...this.getSystemQuickActionDefinitions().map(sqa => {
+                const customization = Object.values(this.items).find(qa => qa.id === sqa.id);
+                return customization || sqa;
+            }),
             ...customQuickActions
         ];
     }
@@ -81,52 +84,35 @@ class QuickActionManager extends JsonDbManager {
     }
 
     /**
+     * @returns {SystemQuickAction[]}
+     */
+    getSystemQuickActions() {
+        return this.systemQuickActions;
+    }
+
+    /**
      * @returns {QuickActionDefinition[]}
      */
     getSystemQuickActionDefinitions() {
-        const customizableActions = Object.values(this.items).filter(qa => qa.type === 'system' && qa.customizable);
-        const systemQuickActions = this.systemQuickActions
-            .map(sqa => sqa.definition)
-            .map(sqa => {
-                const customizableQuickAction = customizableActions.find(qa => qa.id === sqa.id);
-                if (customizableQuickAction) {
-                    sqa.overrideDefault = customizableQuickAction.overrideDefault;
-                    sqa.presetListId = null;
-                    sqa.presetArgValues = null;
-                    sqa.promptForArgs = null;
-                    sqa.effectList = customizableQuickAction.effectList;
-                }
-                return sqa;
-            });
-
-        return systemQuickActions;
+        return this.systemQuickActions.map(sqa => sqa.definition);
     }
 
-    triggerQuickAction(trigger) {
-        const { quickActionId, isInitialClick = true, args = {} } = trigger;
-
-        const triggeredQuickAction = this.getAllItems().find(qa => qa.id === quickActionId);
-        if (!triggeredQuickAction) {
-            return;
-        }
-
+    triggerQuickAction(quickActionId, args = {}) {
         const systemQuickAction = this.systemQuickActions.find(sqa => sqa.definition.id === quickActionId);
         if (systemQuickAction) {
-            if (!systemQuickAction.definition.customizable || isInitialClick) {
+            if (!systemQuickAction.properties?.customizable) {
                 systemQuickAction.onTriggerEvent();
                 return;
             }
 
-            if (!triggeredQuickAction.overrideDefault) {
-                const requestPromise = systemQuickAction.getDefaultRequest(args);
-                if (!(requestPromise instanceof Promise)) {
-                    throw new Error("getDefaultRequest must return a Promise");
-                }
-                requestPromise.then(request => effectRunner.processEffects(request)).catch(error => {
-                    frontendCommunicator.send("error", `Error processing quick action for ${quickActionId}: ${error.message}`);
-                });
-                return;
-            }
+            const customizedAction = Object.values(this.items).find(qa => qa.id === quickActionId);
+            systemQuickAction.onTriggerEvent({config: customizedAction, params: args});
+            return;
+        }
+
+        const triggeredQuickAction = this.getAllItems().find(qa => qa.id === quickActionId);
+        if (!triggeredQuickAction) {
+            return;
         }
 
         let effects = [];
@@ -173,7 +159,15 @@ class QuickActionManager extends JsonDbManager {
 const quickActionManager = new QuickActionManager();
 
 frontendCommunicator.onAsync("getQuickActions",
-    async () => quickActionManager.getAllItems());
+    async () => {
+        return {
+            definitions: quickActionManager.getAllItems(),
+            properties: quickActionManager.getSystemQuickActions().reduce((acc, sqa) => {
+                acc[sqa.definition.id] = sqa.properties || {};
+                return acc;
+            }, {})
+        };
+    });
 
 frontendCommunicator.onAsync("saveCustomQuickAction",
     async (/** @type {QuickActionDefinition} */ customQuickAction) => await quickActionManager.saveQuickAction(customQuickAction));
@@ -185,6 +179,6 @@ frontendCommunicator.on("deleteCustomQuickAction",
     (/** @type {string} */ customQuickActionId) => quickActionManager.deleteQuickAction(customQuickActionId));
 
 frontendCommunicator.on("triggerQuickAction",
-    (/** @type {QuickActionTrigger} */ trigger) => quickActionManager.triggerQuickAction(trigger));
+    (/** @type {QuickActionTrigger} */ trigger) => quickActionManager.triggerQuickAction(trigger.quickActionId, trigger.params));
 
 module.exports = quickActionManager;

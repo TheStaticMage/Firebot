@@ -281,8 +281,7 @@
 
                     backendCommunicator.fireEventAsync("triggerQuickAction", {
                         quickActionId: "firebot:raid",
-                        isInitialClick: false,
-                        args: { username: channel.username, userDisplayName: channel.displayName }
+                        params: { username: channel.username, userDisplayName: channel.displayName }
                     })
                         .then(() => {
                             ngToast.create({

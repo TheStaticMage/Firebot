@@ -7,14 +7,19 @@
  * @prop {"system" | "custom"} type
  * @prop {string} icon
  * @prop {string} [presetListId]
+ */
+
+/**
+ * @typedef QuickActionProperties
  * @prop {boolean} [customizable]
+ * @prop {boolean} [hasDefaultAction]
+ * @prop {string} [modalHelpText]
  */
 
 /**
  * @typedef QuickActionTrigger
  * @prop {string} quickActionId
- * @prop {boolean} [isInitialClick]
- * @prop {Object} [args]
+ * @prop {Object} [params]
  */
 
 /**

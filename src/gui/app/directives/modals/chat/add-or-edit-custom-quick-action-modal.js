@@ -7,7 +7,7 @@
                 <div class="modal-header" style="text-align: center">
                     <button type="button" class="close" ng-click="$ctrl.dismiss()"><span>&times;</span></button>
                     <h4 class="modal-title" ng-if="$ctrl.quickAction.type === 'custom'">Edit Quick Action</h4>
-                    <h4 class="modal-title" ng-if="$ctrl.quickAction.type === 'system' && $ctrl.quickAction.customizable">Edit Quick Action: {{ $ctrl.quickAction.name }}</h4>
+                    <h4 class="modal-title" ng-if="$ctrl.quickAction.type === 'system' && $ctrl.quickActionProperties.customizable">Edit Quick Action: {{ $ctrl.quickAction.name }}</h4>
                 </div>
                 <div class="modal-body py-8 px-14">
                     <div class="mb-6" ng-if="$ctrl.quickAction.type === 'custom'">
@@ -92,16 +92,12 @@
                 $ctrl.listType = "custom";
 
                 $ctrl.getDropdownOptions = function() {
-                    // System editable quick actions can have a default or custom effect list.
-                    // (It's possible to add a preset effect list to the custom list, and get
-                    // full use of variable resolution.) Custom quick actions can have a custom
-                    // effect list or a preset effect list without variables.
                     const options = {};
-                    if ($ctrl.quickAction && $ctrl.quickAction.type === 'system' && $ctrl.quickAction.customizable) {
+                    if ($ctrl.quickActionProperties && $ctrl.quickActionProperties.hasDefaultAction) {
                         options.default = 'Default';
                     }
                     options.custom = 'Custom';
-                    if (!$ctrl.quickAction || $ctrl.quickAction.type !== 'system' || !$ctrl.quickAction.customizable) {
+                    if (!$ctrl.quickAction || $ctrl.quickAction.type === 'custom') {
                         options.preset = 'Preset';
                     }
                     return options;
@@ -127,6 +123,8 @@
                     overrideDefault: false
                 };
 
+                $ctrl.quickActionProperties = {};
+
                 $ctrl.currentPresetArgs = [];
 
                 $ctrl.presetListSelected = (presetList) => {
@@ -137,7 +135,8 @@
 
                 $ctrl.$onInit = () => {
                     if ($ctrl.resolve.quickAction != null) {
-                        $ctrl.quickAction = JSON.parse(angular.toJson($ctrl.resolve.quickAction));
+                        $ctrl.quickAction = JSON.parse(angular.toJson($ctrl.resolve.quickAction.definition));
+                        $ctrl.quickActionProperties = JSON.parse(angular.toJson($ctrl.resolve.quickAction.properties));
                     } else {
                         $ctrl.isNewQuickAction = true;
                     }
@@ -148,14 +147,12 @@
                     };
 
                     $ctrl.listType = $ctrl.quickAction.presetListId != null ? "preset" : "custom";
-                    if ($ctrl.quickAction.type === 'system' && $ctrl.quickAction.customizable) {
+                    if ($ctrl.quickActionProperties.customizable) {
                         if (!$ctrl.quickAction.overrideDefault) {
                             $ctrl.listType = "default";
                         }
 
-                        if ($ctrl.quickAction.modalData != null) {
-                            $ctrl.helpText = $ctrl.quickAction.modalData.helpText || "";
-                        }
+                        $ctrl.helpText = $ctrl.quickActionProperties.modalHelpText || "";
                     }
 
                     if ($ctrl.listType === "preset") {
@@ -172,12 +169,12 @@
                         return;
                     }
 
-                    if ($ctrl.listType === 'default' && ($ctrl.quickAction.type !== 'system' || !$ctrl.quickAction.customizable)) {
+                    if ($ctrl.listType === 'default' && ($ctrl.quickAction.type !== 'system' || !$ctrl.quickActionProperties.customizable)) {
                         ngToast.create("You cannot set a Default Effect List for this type of Quick Action");
                         return;
                     }
 
-                    if ($ctrl.listType === 'preset' && $ctrl.quickAction.type === 'system' && $ctrl.quickAction.customizable) {
+                    if ($ctrl.listType === 'preset' && $ctrl.quickAction.type === 'system' && $ctrl.quickActionProperties.customizable) {
                         ngToast.create("You cannot set a Preset Effect List for this type of Quick Action (you can use a 'Run Effect List' effect in the custom effect list to achieve the same outcome)");
                         return;
                     }
