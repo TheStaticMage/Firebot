@@ -1,10 +1,7 @@
 "use strict";
 
-const logger = require("../../logwrapper");
 const frontendCommunicator = require("../../common/frontend-communicator");
 const JsonDbManager = require("../../database/json-db-manager");
-const { EffectTrigger } = require("../../../shared/effect-constants");
-const effectRunner = require("../../common/effect-runner");
 
 /**
  * @typedef PresetEffectList
