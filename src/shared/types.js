@@ -23,6 +23,12 @@
  */
 
 /**
+ * @typedef QuickActionTriggerEvent
+ * @prop {object} config
+ * @prop {Object} params
+ */
+
+/**
  * @typedef FontAwesomeIcon
  * @prop {string} name
  * @prop {string} className

@@ -9,8 +9,9 @@ const accountAccess = require("../common/account-access");
 const { SettingsManager } = require("../common/settings-manager");
 
 /** @typedef {import("../../shared/types").QuickActionDefinition} QuickActionDefinition */
-
+/** @typedef {import("../../shared/types").QuickActionProperties} QuickActionProperties */
 /** @typedef {import("../../shared/types").QuickActionTrigger} QuickActionTrigger */
+/** @typedef {import("../../shared/types").QuickActionTriggerEvent} QuickActionTriggerEvent */
 
 /**
  * @extends {JsonDbManager<QuickActionDefinition>}
@@ -82,10 +83,13 @@ class QuickActionManager extends JsonDbManager {
     }
 
     /**
-     * @returns {SystemQuickAction[]}
+     * @returns {Record<string, QuickActionProperties>}
      */
-    getSystemQuickActions() {
-        return this.systemQuickActions;
+    getSystemQuickActionProperties() {
+        return this.systemQuickActions.reduce((acc, sqa) => {
+            acc[sqa.definition.id] = sqa.properties || {};
+            return acc;
+        }, {});
     }
 
     /**
@@ -95,55 +99,58 @@ class QuickActionManager extends JsonDbManager {
         return this.systemQuickActions.map(sqa => sqa.definition);
     }
 
-    triggerQuickAction(quickActionId, args = {}) {
-        const systemQuickAction = this.systemQuickActions.find(sqa => sqa.definition.id === quickActionId);
+    triggerQuickAction(/** @type{QuickActionTrigger} */ trigger) {
+        const triggeredQuickAction = this.getAllItems().find(qa => qa.id === trigger.quickActionId);
+        if (triggeredQuickAction.type === 'custom') {
+            let effects = [];
+            let presetArgValues = undefined;
+
+            if (triggeredQuickAction.presetListId != null) {
+                const presetList = presetEffectListManager.getItem(triggeredQuickAction.presetListId);
+                if (triggeredQuickAction.promptForArgs && presetList?.args?.length > 0) {
+                    frontendCommunicator.send("show-run-preset-list-modal", triggeredQuickAction.presetListId);
+                    return;
+                }
+                effects = presetList?.effects;
+                presetArgValues = triggeredQuickAction.presetArgValues;
+            } else if (triggeredQuickAction.effectList != null) {
+                effects = triggeredQuickAction.effectList;
+            }
+
+            const request = {
+                trigger: {
+                    type: EffectTrigger.QUICK_ACTION,
+                    metadata: {
+                        username: accountAccess.getAccounts().streamer.username,
+                        presetListArgs: presetArgValues
+                    }
+                },
+                effects: effects
+            };
+
+            effectRunner.processEffects(request);
+            return;
+        }
+
+        const systemQuickAction = this.systemQuickActions.find(sqa => sqa.definition.id === trigger.quickActionId);
         if (systemQuickAction) {
             if (!systemQuickAction.properties?.customizable) {
                 systemQuickAction.onTriggerEvent();
                 return;
             }
 
-            const customizedAction = Object.values(this.items).find(qa => qa.id === quickActionId);
-            systemQuickAction.onTriggerEvent({config: customizedAction, params: args});
+            const customizedAction = Object.values(this.items).find(qa => qa.id === trigger.quickActionId);
+            /** @type {QuickActionTriggerEvent} */
+            const triggerEvent = {
+                config: customizedAction || {},
+                params: trigger.params || {}
+            };
+            systemQuickAction.onTriggerEvent(triggerEvent);
             return;
         }
 
-        const triggeredQuickAction = this.getAllItems().find(qa => qa.id === quickActionId);
-        if (!triggeredQuickAction) {
-            return;
-        }
-
-        let effects = [];
-        let presetArgValues = undefined;
-        
-        if (triggeredQuickAction.presetListId != null) {
-            const presetList = presetEffectListManager.getItem(triggeredQuickAction.presetListId);
-            if (triggeredQuickAction.promptForArgs && presetList?.args?.length > 0) {
-                frontendCommunicator.send("show-run-preset-list-modal", triggeredQuickAction.presetListId);
-                return;
-            }
-            effects = presetList?.effects;
-            presetArgValues = triggeredQuickAction.presetArgValues;
-        } else if (triggeredQuickAction.effectList != null) {
-            effects = triggeredQuickAction.effectList;
-        }
-
-        const request = {
-            trigger: {
-                type: EffectTrigger.QUICK_ACTION,
-                metadata: {
-                    username: accountAccess.getAccounts().streamer.username,
-                    presetListArgs: presetArgValues,
-                    quickAction: {
-                        id: quickActionId,
-                        args: args,
-                    }
-                }
-            },
-            effects: effects
-        };
-
-        effectRunner.processEffects(request);
+        // Should never get here, but throw an error just in case
+        throw new Error(`Quick action with ID ${trigger.quickActionId} not found.`);
     }
 
     /**
@@ -160,10 +167,7 @@ frontendCommunicator.onAsync("getQuickActions",
     async () => {
         return {
             definitions: quickActionManager.getAllItems(),
-            properties: quickActionManager.getSystemQuickActions().reduce((acc, sqa) => {
-                acc[sqa.definition.id] = sqa.properties || {};
-                return acc;
-            }, {})
+            properties: quickActionManager.getSystemQuickActionProperties()
         };
     });
 
@@ -177,6 +181,6 @@ frontendCommunicator.on("deleteCustomQuickAction",
     (/** @type {string} */ customQuickActionId) => quickActionManager.deleteQuickAction(customQuickActionId));
 
 frontendCommunicator.on("triggerQuickAction",
-    (/** @type {QuickActionTrigger} */ trigger) => quickActionManager.triggerQuickAction(trigger.quickActionId, trigger.params));
+    (/** @type {QuickActionTrigger} */ trigger) => quickActionManager.triggerQuickAction(trigger));
 
 module.exports = quickActionManager;

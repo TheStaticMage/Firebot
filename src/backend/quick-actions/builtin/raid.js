@@ -1,5 +1,7 @@
 "use strict";
 
+/** @typedef {import("../../shared/types").QuickActionTriggerEvent} QuickActionTriggerEvent */
+
 const SystemQuickAction = require("../quick-action");
 const accountAccess = require("../../common/account-access");
 const connectionManager = require("../../common/connection-manager");
@@ -24,21 +26,21 @@ class RaidQuickAction extends SystemQuickAction {
         super(definition, properties);
     }
 
-    onTriggerEvent(args = {}) {
-        if (!args.params || Object.keys(args.params).length === 0) {
+    onTriggerEvent(/** @type {QuickActionTriggerEvent} */ event = {}) {
+        if (!event.params || Object.keys(event.params).length === 0) {
             frontendCommunicator.send("trigger-quickaction:raid");
             return;
         }
 
-        if (!args.params.username || args.params.username.trim() === "") {
+        if (!event.params.username || event.params.username.trim() === "") {
             throw new Error("The raid quick action requires a username parameter");
         }
 
         const effects = [];
 
-        if (!args.config || !args.config.overrideDefault) {
+        if (!event.config || !event.config.overrideDefault) {
             if (!connectionManager.streamerIsOnline()) {
-                const message = `You cannot trigger a raid while you are offline (selected raid target: ${args.params.username})`;
+                const message = `You cannot trigger a raid while you are offline (selected raid target: ${event.params.username})`;
                 frontendCommunicator.send("error", message);
                 return;
             }
@@ -47,12 +49,12 @@ class RaidQuickAction extends SystemQuickAction {
                 id: uuid(),
                 type: "firebot:raid",
                 action: "Raid Channel",
-                username: args.params.username
+                username: event.params.username
             });
         }
 
-        if (args.config && args.config.effectList && Array.isArray(args.config.effectList.list)) {
-            effects.push(...args.config.effectList.list);
+        if (event.config && event.config.effectList && Array.isArray(event.config.effectList.list)) {
+            effects.push(...event.config.effectList.list);
         }
 
         if (effects.length === 0) {
@@ -69,8 +71,8 @@ class RaidQuickAction extends SystemQuickAction {
                     quickAction: {
                         id: "firebot:raid",
                         action: "Raid Channel",
-                        username: args.params.username,
-                        userDisplayName: args.params.userDisplayName || args.params.username
+                        username: event.params.username,
+                        userDisplayName: event.params.userDisplayName || event.params.username
                     }
                 }
             },

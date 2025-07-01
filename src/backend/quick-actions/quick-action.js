@@ -1,6 +1,7 @@
 "use strict";
 
 /** @typedef {import("../../shared/types").QuickActionDefinition} QuickActionDefinition */
+/** @typedef {import("../../shared/types").QuickActionTriggerEvent} QuickActionTriggerEvent */
 
 class SystemQuickAction {
     /**
@@ -19,9 +20,9 @@ class SystemQuickAction {
 
     /**
      * @abstract
-     * @param {Object} [args]
+     * @param {QuickActionTriggerEvent} [event]
      */
-    onTriggerEvent(args = {}) {
+    onTriggerEvent(event = undefined) {
         throw new Error("Please implement this method");
     }
 
