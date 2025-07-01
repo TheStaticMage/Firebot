@@ -58,8 +58,6 @@ class QuickActionManager extends JsonDbManager {
     }
 
     saveQuickAction(quickAction, notify = true) {
-        delete quickAction.modalData;
-
         const savedQuickAction = super.saveItem(quickAction);
         if (!savedQuickAction) {
             return;
