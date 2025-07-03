@@ -10,6 +10,26 @@
  */
 
 /**
+ * @typedef QuickActionProperties
+ * @prop {boolean} [customizable]
+ * @prop {boolean} [hasDefaultAction]
+ * @prop {Array<string>} [customHelpText]
+ * @prop {Array<string>} [defaultHelpText]
+ */
+
+/**
+ * @typedef QuickActionTrigger
+ * @prop {string} quickActionId
+ * @prop {Object} [params]
+ */
+
+/**
+ * @typedef QuickActionTriggerEvent
+ * @prop {object} config
+ * @prop {Object} params
+ */
+
+/**
  * @typedef FontAwesomeIcon
  * @prop {string} name
  * @prop {string} className
