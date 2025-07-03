@@ -33,7 +33,7 @@
                             />
                         </div>
                         <div ng-if="$ctrl.listType === 'custom'" class="mt-8">
-                            <p class="muted" ng-if="$ctrl.helpText">{{ $ctrl.helpText }}</p>
+                            <p class="muted" ng-repeat="text in $ctrl.customHelpText">{{ text }}</p>
                             <effect-list effects="$ctrl.quickAction.effectList"
                                 trigger="quick_action"
                                 trigger-meta="$ctrl.triggerMeta"
@@ -42,7 +42,7 @@
                             ></effect-list>
                         </div>
                         <div ng-if="$ctrl.listType === 'default'" class="mt-8">
-                            <p class="muted">This Quick Action will use default effects.</p>
+                            <p class="muted" ng-repeat="text in $ctrl.defaultHelpText">{{ text }}</p>
                         </div>
                     </div>
                     <div ng-if="$ctrl.listType === 'preset' && $ctrl.currentPresetArgs.length > 0">
@@ -109,7 +109,8 @@
                     $ctrl.quickAction.effectList = effects;
                 };
 
-                $ctrl.helpText = "";
+                $ctrl.customHelpText = [];
+                $ctrl.defaultHelpText = [];
 
                 $ctrl.quickAction = {
                     id: null,
@@ -152,7 +153,8 @@
                             $ctrl.listType = "default";
                         }
 
-                        $ctrl.helpText = $ctrl.quickActionProperties.modalHelpText || "";
+                        $ctrl.customHelpText = $ctrl.quickActionProperties.customHelpText || [];
+                        $ctrl.defaultHelpText = $ctrl.quickActionProperties.defaultHelpText || [];
                     }
 
                     if ($ctrl.listType === "preset") {

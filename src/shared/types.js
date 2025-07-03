@@ -13,7 +13,8 @@
  * @typedef QuickActionProperties
  * @prop {boolean} [customizable]
  * @prop {boolean} [hasDefaultAction]
- * @prop {string} [modalHelpText]
+ * @prop {Array<string>} [customHelpText]
+ * @prop {Array<string>} [defaultHelpText]
  */
 
 /**

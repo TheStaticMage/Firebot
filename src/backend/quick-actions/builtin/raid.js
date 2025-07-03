@@ -21,7 +21,13 @@ class RaidQuickAction extends SystemQuickAction {
         const properties = {
             customizable: true,
             hasDefaultAction: true,
-            modalHelpText: "Use the variables '$raidQuickActionTargetUsername' and '$raidQuickActionTargetUserDisplayName' to access the username and display name of the selected raid target."
+            customHelpText: [
+                "Note: This quick action will trigger only the effects that you define here. Be sure to include the 'Raid/Unraid Twitch Channel' effect somewhere in your custom effect list to initiate a raid.",
+                "You may use the variables '$raidQuickActionTargetUsername' and '$raidQuickActionTargetUserDisplayName' in your effects to access the username and display name of the selected raid target, respectively."
+            ],
+            defaultHelpText: [
+                "The default effect of this quick action is to initiate a raid to the selected channel."
+            ]
         };
         super(definition, properties);
     }
@@ -29,7 +35,7 @@ class RaidQuickAction extends SystemQuickAction {
     onTriggerEvent(/** @type {QuickActionTriggerEvent} */ event = {}) {
         if (!event.params || Object.keys(event.params).length === 0) {
             const resolveObj = {
-                streamerIsOnline: connectionManager.streamerIsOnline(),
+                streamerIsOnline: connectionManager.streamerIsOnline()
             };
             frontendCommunicator.send("trigger-quickaction:raid", resolveObj);
             return;
@@ -75,11 +81,11 @@ class RaidQuickAction extends SystemQuickAction {
             },
             effects: {
                 list: effects
-            },
+            }
         };
 
         effectRunner.processEffects(request)
-            .catch(error => {
+            .catch((error) => {
                 frontendCommunicator.send("error", `Error processing raid quick action: ${error.message}`);
             });
     }

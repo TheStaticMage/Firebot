@@ -49,7 +49,7 @@
                                             {{channel.displayName}}
                                         </div>
                                         <div style="font-weight: 200; font-size: 16px; color: #ddd;">
-                                            <span ng-if="channel.isMature">&#x26A0;&nbsp;</span>
+                                            <span title="Mature content" ng-if="channel.isMature">&#x26A0;&nbsp;</span>
                                             ({{channel.viewers || 0}}) [{{channel.uptimeString || "N/A"}}]
                                         </div>
                                     </div>
@@ -199,7 +199,7 @@
                         return;
                     }
                     backendCommunicator.fireEventAsync("search-twitch-channels", query)
-                        .then(channels => {
+                        .then((channels) => {
                             $ctrl.channels = $ctrl.sortAndFormatChannels(channels);
                         });
                 };
@@ -247,7 +247,7 @@
                     if ($ctrl.resolve) {
                         $ctrl.streamerIsOnline = $ctrl.resolve.streamerIsOnline || false;
                     }
-                    
+
                     backendCommunicator.fireEventAsync("get-channel-info")
                         .then((channelInfo) => {
                             if (channelInfo && channelInfo.gameId) {
