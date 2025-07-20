@@ -123,7 +123,7 @@
                 };
 
                 $ctrl.$onInit = () => {
-                    if ($ctrl.resolve.quickAction != null) {
+                    if ($ctrl.resolve.quickAction != null && $ctrl.resolve.quickAction.definition != null) {
                         $ctrl.quickAction = JSON.parse(angular.toJson($ctrl.resolve.quickAction.definition));
                         $ctrl.quickActionProperties = JSON.parse(angular.toJson($ctrl.resolve.quickAction.properties));
                     } else {

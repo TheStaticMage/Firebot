@@ -133,7 +133,7 @@
             service.showAddOrEditCustomQuickActionModal = (customQuickAction) => {
                 const quickAction = {
                     definition: customQuickAction,
-                    properties: service.quickActionProperties[customQuickAction.id] || {}
+                    properties: service.quickActionProperties[customQuickAction?.id] || {}
                 };
 
                 utilityService.showModal({
