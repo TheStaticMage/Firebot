@@ -138,7 +138,8 @@ class TwitchEventSubClient {
                 event.userName,
                 event.userDisplayName,
                 event.rewardType,
-                event.rewardCost
+                event.rewardCost,
+                event.messageText
             );
         });
         this._subscriptions.push(automaticRewardRedemptionSubscription);

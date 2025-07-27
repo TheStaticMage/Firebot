@@ -6,21 +6,22 @@ import { getAutomaticRewardTypes } from "../../../shared/event-constants";
 
 export function handleAutomaticRewardRedemption(
     redemptionId: string,
-    messageText: string,
+    input: string,
     userId: string,
     username: string,
     userDisplayName: string,
     rewardType: EventSubAutomaticRewardType,
     rewardCost: number,
+    messageText: string | null
 ): void {
     frontendCommunicator.send("twitch:chat:automaticrewardredemption", {
-        id: redemptionId,
+        id: redemptionId
     });
 
     let rewardTypeDisplay = "unknown";
     if (rewardType) {
         const rewardTypes = getAutomaticRewardTypes();
-        const rewardTypeObj = rewardTypes.find((reward) => reward.value === rewardType);
+        const rewardTypeObj = rewardTypes.find(reward => reward.value === rewardType);
         if (rewardTypeObj) {
             rewardTypeDisplay = rewardTypeObj.display;
         }
@@ -30,12 +31,13 @@ export function handleAutomaticRewardRedemption(
         username,
         userId,
         userDisplayName,
-        messageText,
-        args: (messageText ?? "").split(" "),
+        input,
+        args: (input ?? "").split(" "),
         redemptionId,
         rewardType,
         rewardTypeDisplay,
-        rewardCost
+        rewardCost,
+        messageText
     };
 
     eventManager.triggerEvent("twitch", "channel-automatic-reward-redemption", redemptionMeta);
