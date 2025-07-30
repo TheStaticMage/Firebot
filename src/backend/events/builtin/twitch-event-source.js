@@ -273,64 +273,6 @@ module.exports = {
             }
         },
         {
-            id: "bits-use",
-            name: "Bits Use",
-            description: "When someone uses bits in your channel (e.g. cheering, power-ups, combos)",
-            cached: false,
-            manualMetadata: {
-                username: "firebot",
-                userDisplayName: "Firebot",
-                userId: "",
-                bits: 100,
-                type: {
-                    type: "enum",
-                    options: {
-                        cheer: "Cheer",
-                        power_up: "Power Up",
-                        combo: "Combo"
-                    },
-                    value: "cheer"
-                },
-                messageText: "Test message",
-                powerUpType: {
-                    type: "enum",
-                    options: {
-                        message_effect: "Message Effect",
-                        celebration: "On-Screen Celebration",
-                        gigantify_an_emote: "Gigantify an Emote",
-                    },
-                    value: "gigantify_an_emote"
-                },
-            },
-            activityFeed: {
-                icon: "fad fa-coins",
-                getMessage: (eventData) => {
-                    const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
-                    let message = `**${eventData.userDisplayName}${
-                        showUserIdName ? ` (${eventData.username})` : ""
-                    }** used **${eventData.bits}** bits`;
-
-                    if (eventData.type === "cheer") {
-                        message += ` with a cheer: *${eventData.messageText}*`;
-                    } else if (eventData.type === "power_up") {
-                        if (eventData.power_up?.type === "message_effect") {
-                            message += ` with a power-up: *Message Effect*`;
-                        } else if (eventData.power_up?.type === "celebration") {
-                            message += ` with a power-up: *On-Screen Celebration*`;
-                        } else if (eventData.power_up?.type === "gigantify_an_emote") {
-                            message += ` with a power-up: *Gigantify an Emote*`;
-                        } else {
-                            message += ` with a power-up`;
-                        }
-                    } else if (eventData.type === "combo") {
-                        message += ` with a combo*`;
-                    }
-
-                    return message;
-                }
-            }
-        },
-        {
             id: "bits-badge-unlocked",
             name: "Bits Badge Unlocked",
             description: "When someone unlocks a new bits badge tier in your channel.",
@@ -403,7 +345,7 @@ module.exports = {
                 getMessage: (eventData) => {
                     const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
                     return `**${eventData.userDisplayName}${showUserIdName ? ` (${eventData.username})` : ""
-                        }** used a Message Effects Power-Up for **${eventData.bits}** bits.`;
+                    }** used a Message Effects Power-Up for **${eventData.bits}** bits.`;
                 }
             }
         },
@@ -424,7 +366,7 @@ module.exports = {
                 getMessage: (eventData) => {
                     const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
                     return `**${eventData.userDisplayName}${showUserIdName ? ` (${eventData.username})` : ""
-                        }** used a Celebration Power-Up for **${eventData.bits}** bits.`;
+                    }** used a Celebration Power-Up for **${eventData.bits}** bits.`;
                 }
             }
         },
@@ -448,7 +390,7 @@ module.exports = {
                 getMessage: (eventData) => {
                     const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
                     return `**${eventData.userDisplayName}${showUserIdName ? ` (${eventData.username})` : ""
-                        }** gigantified the **${eventData.emoteName}** emote for **${eventData.bits}** bits.`;
+                    }** gigantified the **${eventData.emoteName}** emote for **${eventData.bits}** bits.`;
                 }
             }
         },
@@ -621,35 +563,6 @@ module.exports = {
                     return message;
                 }
             }
-        },
-        {
-            id: "channel-automatic-reward-redemption",
-            name: "Channel Automatic Reward Redemption",
-            description: "When someone redeems an AUTOMATIC channel reward",
-            cached: true,
-            cacheMetaKey: "username",
-            cacheTtlInSecs: 1,
-            queued: false,
-            manualMetadata: {
-                username: "firebot",
-                userDisplayName: "Firebot",
-                userId: "",
-                rewardType: "send_highlighted_message",
-                rewardTypeDisplay: "Send Highlighted Message",
-                rewardCost: 100,
-                messageText: "Test message"
-            },
-            activityFeed: {
-                icon: "fad fa-circle",
-                getMessage: (eventData) => {
-                    const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
-                    return `**${eventData.userDisplayName}${
-                        showUserIdName ? ` (${eventData.username})` : ""
-                    }** redeemed an automatic reward: *${eventData.rewardTypeDisplay}*${
-                        eventData.messageText && !!eventData.messageText.length ? `: *${eventData.messageText}*` : ""
-                    }`;
-                }
-            },
         },
         {
             id: "channel-reward-redemption",

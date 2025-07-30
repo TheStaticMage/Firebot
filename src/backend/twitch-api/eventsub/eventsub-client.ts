@@ -11,7 +11,6 @@ import rewardManager from "../../channel-rewards/channel-reward-manager";
 import chatRolesManager from "../../roles/chat-roles-manager";
 import { EventSubAutoModMessageHoldV2Subscription } from "./custom-subscriptions/automod-v2/automod-message-hold-v2-subscription";
 import { EventSubAutoModMessageUpdateV2Subscription } from "./custom-subscriptions/automod-v2/automod-message-update-v2-subscription";
-import { EventSubChannelBitsUseSubscription } from "./custom-subscriptions/channel-bits-use/EventSubChannelBitsUseSubscription";
 
 class TwitchEventSubClient {
     private _eventSubListener: EventSubWsListener;
@@ -113,28 +112,6 @@ class TwitchEventSubClient {
         });
         this._subscriptions.push(bitsSubscription);
 
-        // channel.bits.use - Generic subscription for bits use events
-        // @ts-ignore
-        const channelBitsUseSubscription = this._eventSubListener._genericSubscribe(
-            EventSubChannelBitsUseSubscription,
-            (event) => {
-                twitchEventsHandler.bits.triggerBitsUse(
-                    event.userName,
-                    event.userId,
-                    event.userDisplayName,
-                    event.bits,
-                    event.type,
-                    event.messageText,
-                    event.powerUp?.type,
-                    event.powerUp?.emote,
-                    event.powerUp?.message_effect_id
-                );
-            },
-            this._eventSubListener,
-            streamer.userId
-        );
-        this._subscriptions.push(channelBitsUseSubscription);
-
         // AutoMod message hold v2
         // @ts-ignore
         const autoModMessageHoldSub = this._eventSubListener._genericSubscribe(
@@ -174,20 +151,60 @@ class TwitchEventSubClient {
         );
         this._subscriptions.push(autoModMessageUpdateSub);
 
-        // Channel automatic reward
-        const automaticRewardRedemptionSubscription = this._eventSubListener.onChannelAutomaticRewardRedemptionAdd(streamer.userId, async (event) => {
-            twitchEventsHandler.rewardRedemption.handleAutomaticRewardRedemption(
-                event.id,
-                event.input,
-                event.userId,
-                event.userName,
-                event.userDisplayName,
-                event.rewardType,
-                event.rewardCost,
-                event.messageText
-            );
+        // Channel automatic reward V1. Power-ups are included in the V1
+        // subscription (but the bits are not indicated in the payload).
+        // Power-ups were removed from the V2 subscription in favor of the
+        // channel.bits.use subscription, which is more appropriate for the
+        // power-ups. The V2 subscription is used for the automatic rewards that
+        // are not power-ups. The only reason for this logic is to trigger a
+        // Firebot event for streamers redeeming power-ups on their own channel,
+        // because channel.bits.use does not trigger for those events.
+        const automaticRewardRedemptionSubscriptionV1 = this._eventSubListener.onChannelAutomaticRewardRedemptionAdd(streamer.userId, async (event) => {
+            if (event.userId !== streamer.userId) {
+                return;
+            }
+
+            switch (event.rewardType) {
+                case "message_effect":
+                    twitchEventsHandler.bits.triggerPowerupMessageEffect(
+                        event.userName,
+                        event.userId,
+                        event.userDisplayName,
+                        0, // Bits not deducted for streamer on own channel
+                        0, // Total bits not relevant for streamer on own channel
+                        event.messageText ?? ""
+                    );
+                    break;
+                case "celebration":
+                    twitchEventsHandler.bits.triggerPowerupCelebration(
+                        event.userName,
+                        event.userId,
+                        event.userDisplayName,
+                        0, // Bits not deducted for streamer on own channel
+                        0 // Total bits not relevant for streamer on own channel
+                    );
+                    break;
+                case "gigantify_an_emote": {
+                    // The gigantified emote is always the last emote in the
+                    // message. The payload does not include the emote ID or
+                    // URL.
+                    const emoteName = event.messageText?.split(" ").pop() ?? "";
+
+                    twitchEventsHandler.bits.triggerPowerupGigantifyEmote(
+                        event.userName,
+                        event.userId,
+                        event.userDisplayName,
+                        0, // Bits not deducted for streamer on own channel
+                        0, // Total bits not relevant for streamer on own channel
+                        event.messageText ?? "",
+                        emoteName,
+                        ''
+                    );
+                    break;
+                }
+            }
         });
-        this._subscriptions.push(automaticRewardRedemptionSubscription);
+        this._subscriptions.push(automaticRewardRedemptionSubscriptionV1);
 
         // Channel custom reward
         const customRewardRedemptionSubscription = this._eventSubListener.onChannelRedemptionAdd(streamer.userId, async (event) => {
