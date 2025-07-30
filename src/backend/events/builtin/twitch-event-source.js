@@ -639,7 +639,7 @@ module.exports = {
         },
         {
             id: "channel-points-redemption-chosen-sub-emote-unlock",
-            name: "Channel Points Redemption: Chosen Sub Emote Unlock",
+            name: "Channel Points Redemption: Choose an Emote to Unlock",
             description: "When someone redeems \"Choose an Emote to Unlock\" to unlock an emote in your channel",
             cached: false,
             queued: false,
