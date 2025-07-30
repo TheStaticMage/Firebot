@@ -5,7 +5,6 @@ import { EffectTrigger } from "../../../../../shared/effect-constants";
 
 const triggers = {};
 triggers[EffectTrigger.EVENT] = [
-    "twitch:channel-points-redemption-single-message-bypass-sub-mode",
     "twitch:channel-points-redemption-send-highlighted-message"
 ];
 triggers[EffectTrigger.MANUAL] = true;

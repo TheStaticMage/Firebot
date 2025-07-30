@@ -4,8 +4,7 @@ export function triggerRedemptionSingleMessageBypassSubMode(
     username: string,
     userId: string,
     userDisplayName: string,
-    channelPoints: number,
-    messageText: string
+    channelPoints: number
 ): void {
     const rewardDescription = "Send a Message in Sub-Only Mode";
     eventManager.triggerEvent("twitch", "channel-points-redemption-single-message-bypass-sub-mode", {
@@ -13,7 +12,6 @@ export function triggerRedemptionSingleMessageBypassSubMode(
         userId,
         userDisplayName,
         channelPoints,
-        messageText,
         rewardDescription
     });
 }
@@ -45,7 +43,7 @@ export function triggerRedemptionRandomSubEmoteUnlock(
     emoteUrl: string
 ): void {
     const rewardDescription = "Unlock a Random Sub Emote";
-    eventManager.triggerEvent("twitch", "channel-points-redemption-unlock-random-sub-emote", {
+    eventManager.triggerEvent("twitch", "channel-points-redemption-random-sub-emote-unlock", {
         username,
         userId,
         userDisplayName,

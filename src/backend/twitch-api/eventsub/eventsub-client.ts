@@ -214,8 +214,7 @@ class TwitchEventSubClient {
                         event.userName,
                         event.userId,
                         event.userDisplayName,
-                        event.reward.channelPoints,
-                        event.messageText
+                        event.reward.channelPoints
                     );
                     break;
                 case "send_highlighted_message":
