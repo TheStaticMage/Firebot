@@ -575,7 +575,8 @@ module.exports = {
                 userDisplayName: "Firebot",
                 userId: "",
                 channelPoints: 200,
-                messageText: "Test message"
+                messageText: "Test message",
+                rewardDescription: "Send a Message in Sub-Only Mode"
             },
             activityFeed: {
                 icon: "fad fa-arrow-right",
@@ -599,7 +600,8 @@ module.exports = {
                 userDisplayName: "Firebot",
                 userId: "",
                 channelPoints: 200,
-                messageText: "Test message"
+                messageText: "Test message",
+                rewardDescription: "Highlight My Message"
             },
             activityFeed: {
                 icon: "fad fa-highlighter",
@@ -624,7 +626,8 @@ module.exports = {
                 userId: "",
                 channelPoints: 200,
                 emoteName: "PogChamp",
-                emoteUrl: "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0"
+                emoteUrl: "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0",
+                rewardDescription: "Unlock a Random Sub Emote"
             },
             activityFeed: {
                 icon: "fad fa-images",
@@ -649,7 +652,8 @@ module.exports = {
                 userId: "",
                 channelPoints: 200,
                 emoteName: "PogChamp",
-                emoteUrl: "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0"
+                emoteUrl: "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0",
+                rewardDescription: "Choose an Emote to Unlock"
             },
             activityFeed: {
                 icon: "fad fa-images",
@@ -674,7 +678,8 @@ module.exports = {
                 userId: "",
                 channelPoints: 200,
                 emoteName: "PogChamp",
-                emoteUrl: "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0"
+                emoteUrl: "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0",
+                rewardDescription: "Modify a Single Emote"
             },
             activityFeed: {
                 icon: "fad fa-images",
