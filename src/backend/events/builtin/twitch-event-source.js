@@ -498,6 +498,129 @@ module.exports = {
             }
         },
         {
+            id: "channel-points-redemption-single-message-bypass-sub-mode",
+            name: "Channel Points Redemption: Send a Message in Sub-Only Mode",
+            description: "When someone redeems \"Send a Message in Sub-Only Mode\" to post a message in your channel",
+            cached: false,
+            queued: false,
+            manualMetadata: {
+                username: "firebot",
+                userDisplayName: "Firebot",
+                userId: "",
+                channelPoints: 200,
+                messageText: "Test message"
+            },
+            activityFeed: {
+                icon: "fad fa-stopwatch",
+                getMessage: (eventData) => {
+                    const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
+                    const message = `**${eventData.userDisplayName}${
+                        showUserIdName ? ` (${eventData.username})` : ""
+                    }** redeemed **Send a Message in Sub-Only Mode**.`;
+                    return message;
+                }
+            }
+        },
+        {
+            id: "channel-points-redemption-send-highlighted-message",
+            name: "Channel Points Redemption: Highlight My Message",
+            description: "When someone redeems \"Highlight My Message\" in your channel",
+            cached: false,
+            queued: false,
+            manualMetadata: {
+                username: "firebot",
+                userDisplayName: "Firebot",
+                userId: "",
+                channelPoints: 200,
+                messageText: "Test message"
+            },
+            activityFeed: {
+                icon: "fad fa-stopwatch",
+                getMessage: (eventData) => {
+                    const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
+                    const message = `**${eventData.userDisplayName}${
+                        showUserIdName ? ` (${eventData.username})` : ""
+                    }** redeemed **Highlight My Message**.`;
+                    return message;
+                }
+            }
+        },
+        {
+            id: "channel-points-redemption-random-sub-emote-unlock",
+            name: "Channel Points Redemption: Unlock a Random Sub Emote",
+            description: "When someone redeems \"Unlock a Random Sub Emote\" to unlock an emote in your channel",
+            cached: false,
+            queued: false,
+            manualMetadata: {
+                username: "firebot",
+                userDisplayName: "Firebot",
+                userId: "",
+                channelPoints: 200,
+                emoteName: "PogChamp",
+                emoteUrl: "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0"
+            },
+            activityFeed: {
+                icon: "fad fa-stopwatch",
+                getMessage: (eventData) => {
+                    const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
+                    const message = `**${eventData.userDisplayName}${
+                        showUserIdName ? ` (${eventData.username})` : ""
+                    }** redeemed **Unlock a Random Sub Emote**.`;
+                    return message;
+                }
+            }
+        },
+        {
+            id: "channel-points-redemption-chosen-sub-emote-unlock",
+            name: "Channel Points Redemption: Chosen Sub Emote Unlock",
+            description: "When someone redeems \"Choose an Emote to Unlock\" to unlock an emote in your channel",
+            cached: false,
+            queued: false,
+            manualMetadata: {
+                username: "firebot",
+                userDisplayName: "Firebot",
+                userId: "",
+                channelPoints: 200,
+                emoteName: "PogChamp",
+                emoteUrl: "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0"
+            },
+            activityFeed: {
+                icon: "fad fa-stopwatch",
+                getMessage: (eventData) => {
+                    const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
+                    const message = `**${eventData.userDisplayName}${
+                        showUserIdName ? ` (${eventData.username})` : ""
+                    }** redeemed **Choose an Emote to Unlock**.`;
+                    return message;
+                }
+            }
+        },
+        {
+            id: "channel-points-redemption-chosen-modified-sub-emote-unlock",
+            name: "Channel Points Redemption: Modify a Single Emote",
+            description: "When someone redeems \"Modify a Single Emote\" to modify and unlock an emote in your channel",
+            cached: false,
+            queued: false,
+            manualMetadata: {
+                username: "firebot",
+                userDisplayName: "Firebot",
+                userId: "",
+                channelPoints: 200,
+                emoteName: "PogChamp",
+                emoteUrl: "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0"
+            },
+            activityFeed: {
+                icon: "fad fa-stopwatch",
+                getMessage: (eventData) => {
+                    const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
+                    const message = `**${eventData.userDisplayName}${
+                        showUserIdName ? ` (${eventData.username})` : ""
+                    }** redeemed **Modify a Single Emote**.`;
+                    return message;
+                }
+            }
+        },
+        {
             id: "channel-reward-redemption",
             name: "Channel Reward Redemption",
             description: "When someone redeems a CUSTOM channel reward",
