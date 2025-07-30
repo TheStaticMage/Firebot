@@ -578,7 +578,7 @@ module.exports = {
                 messageText: "Test message"
             },
             activityFeed: {
-                icon: "fad fa-stopwatch",
+                icon: "fad fa-arrow-right",
                 getMessage: (eventData) => {
                     const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
                     const message = `**${eventData.userDisplayName}${
@@ -602,7 +602,7 @@ module.exports = {
                 messageText: "Test message"
             },
             activityFeed: {
-                icon: "fad fa-stopwatch",
+                icon: "fad fa-highlighter",
                 getMessage: (eventData) => {
                     const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
                     const message = `**${eventData.userDisplayName}${
@@ -627,7 +627,7 @@ module.exports = {
                 emoteUrl: "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0"
             },
             activityFeed: {
-                icon: "fad fa-stopwatch",
+                icon: "fad fa-images",
                 getMessage: (eventData) => {
                     const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
                     const message = `**${eventData.userDisplayName}${
@@ -652,7 +652,7 @@ module.exports = {
                 emoteUrl: "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0"
             },
             activityFeed: {
-                icon: "fad fa-stopwatch",
+                icon: "fad fa-images",
                 getMessage: (eventData) => {
                     const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
                     const message = `**${eventData.userDisplayName}${
@@ -677,7 +677,7 @@ module.exports = {
                 emoteUrl: "https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/3.0"
             },
             activityFeed: {
-                icon: "fad fa-stopwatch",
+                icon: "fad fa-images",
                 getMessage: (eventData) => {
                     const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
                     const message = `**${eventData.userDisplayName}${
