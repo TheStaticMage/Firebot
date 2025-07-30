@@ -1,31 +1,95 @@
-import eventManager from "../EventManager";
+import eventManager from "../../events/EventManager";
 
-export function triggerBitsUse(
+export function triggerCheer(
     username: string,
     userId: string,
     userDisplayName: string,
     bits: number,
-    type: 'cheer' | 'power_up' | 'combo',
-    messageText: string,
-    powerUpType: 'message_effect' | 'celebration' | 'gigantify_an_emote' | null,
-    powerUpEmote: { id: string, name: string } | null,
-    powerUpMessageEffectId: string | null
+    totalBits: number,
+    cheerMessage: string
 ): void {
-    // Trigger the generic "bits used" event. This will trigger for all types of
-    // bits usage in the channel.
-    eventManager.triggerEvent('twitch', 'bits-use', {
+    eventManager.triggerEvent("twitch", "cheer", {
         username,
         userId,
         userDisplayName,
+        isAnonymous: false,
         bits,
-        type,
-        messageText,
-        powerUpType,
-        powerUpEmote,
-        powerUpMessageEffectId
+        totalBits,
+        cheerMessage
     });
+}
 
-    // If we want to trigger specific events for different types of bits usage,
-    // we could do that here. For now we'll see how far using triggers on the
-    // generic event gets us.
+export function triggerBitsBadgeUnlock(
+    username: string,
+    userId: string,
+    userDisplayName: string,
+    message: string,
+    badgeTier: number
+): void {
+    eventManager.triggerEvent("twitch", "bits-badge-unlocked", {
+        username,
+        userId,
+        userDisplayName,
+        message,
+        badgeTier
+    });
+}
+
+export function triggerPowerupMessageEffect(
+    username: string,
+    userId: string,
+    userDisplayName: string,
+    bits: number,
+    totalBits: number,
+    cheerMessage: string
+): void {
+    eventManager.triggerEvent("twitch", "bits-powerup-message-effect", {
+        username,
+        userId,
+        userDisplayName,
+        isAnonymous: false,
+        bits,
+        totalBits,
+        cheerMessage
+    });
+}
+
+export function triggerPowerupCelebration(
+    username: string,
+    userId: string,
+    userDisplayName: string,
+    bits: number,
+    totalBits: number
+): void {
+    eventManager.triggerEvent("twitch", "bits-powerup-celebration", {
+        username,
+        userId,
+        userDisplayName,
+        isAnonymous: false,
+        bits,
+        totalBits
+    });
+}
+
+export function triggerPowerupGigantifyEmote(
+    username: string,
+    userId: string,
+    userDisplayName: string,
+    bits: number,
+    totalBits: number,
+    cheerMessage: string,
+    emoteName: string,
+    emoteUrl: string
+): void {
+    eventManager.triggerEvent("twitch", "bits-powerup-gigantified-emote", {
+        username,
+        userId,
+        userDisplayName,
+        isAnonymous: false,
+        bits,
+        totalBits,
+        cheerMessage,
+        emoteName,
+        emoteUrl
+    });
 }
