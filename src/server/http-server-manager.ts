@@ -174,8 +174,11 @@ class HttpServerManager extends EventEmitter {
 
             // Find the matching registered custom route
             const customRouteEntry = this.customRoutes.find(cr =>
-                cr.fullRoute === fullCustomRoute &&
-                cr.method === req.method
+                (cr.fullRoute === fullCustomRoute &&
+                cr.method === req.method) ||
+                (cr.fullRoute.endsWith("*") &&
+                fullCustomRoute.startsWith(cr.fullRoute.slice(0, -1)) &&
+                cr.method === req.method)
             );
 
             if (customRouteEntry == null) {
