@@ -14,7 +14,8 @@
 
             $scope.canUseChannelRewards = () => accountAccess.accounts["streamer"].loggedIn
                 && (accountAccess.accounts["streamer"].broadcasterType === "affiliate"
-                    || accountAccess.accounts["streamer"].broadcasterType === "partner");
+                    || accountAccess.accounts["streamer"].broadcasterType === "partner"
+                    || true);
 
             // triggering twitch sync
             channelRewardsService.syncChannelRewards();
