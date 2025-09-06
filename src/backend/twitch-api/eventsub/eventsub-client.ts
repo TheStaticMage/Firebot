@@ -67,8 +67,24 @@ class TwitchEventSubClient {
                     );
                     break;
                 }
-                case "combo":
+                case "combo": {
+                    logger.info("Received combo bits event, which is not currently handled by Firebot.");
+                    const eventData = {
+                        user_id: event.userId,
+                        user_login: event.userName,
+                        user_name: event.userDisplayName,
+                        broadcaster_user_id: event.broadcasterId,
+                        broadcaster_user_login: event.broadcasterName,
+                        broadcaster_user_name: event.broadcasterDisplayName,
+                        bits: event.bits,
+                        type: event.type,
+                        power_up: event.powerUp,
+                        messageText: event.messageText,
+                        messageParts: event.messageParts ?? []
+                    };
+                    logger.info(JSON.stringify(eventData, null, 4));
                     break;
+                }
                 case "power_up": {
                     const totalBits = await twitchApi.bits.getChannelBitsLeaderboard(1, "all", new Date(), event.userId)[0]?.amount ?? 0;
                     switch (event.powerUp.type) {
