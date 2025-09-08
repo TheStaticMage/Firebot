@@ -52,6 +52,7 @@ class TwitchEventSubClient {
         // Bits Used
         const bitsSubscription = this._eventSubListener.onChannelBitsUse(streamer.userId, async (event) => {
             switch (event.type) {
+                case "combo":
                 case "cheer": {
                     const totalBits = await twitchApi.bits.getChannelBitsLeaderboard(1, "all", new Date(), event.userId)[0]?.amount ?? 0;
                     // Future: We could parse event.messageParts into a FirebotChatMessage
@@ -65,24 +66,6 @@ class TwitchEventSubClient {
                         totalBits,
                         event.messageText ?? ""
                     );
-                    break;
-                }
-                case "combo": {
-                    logger.info("Received combo bits event, which is not currently handled by Firebot.");
-                    const eventData = {
-                        user_id: event.userId,
-                        user_login: event.userName,
-                        user_name: event.userDisplayName,
-                        broadcaster_user_id: event.broadcasterId,
-                        broadcaster_user_login: event.broadcasterName,
-                        broadcaster_user_name: event.broadcasterDisplayName,
-                        bits: event.bits,
-                        type: event.type,
-                        power_up: event.powerUp,
-                        messageText: event.messageText,
-                        messageParts: event.messageParts ?? []
-                    };
-                    logger.info(JSON.stringify(eventData, null, 4));
                     break;
                 }
                 case "power_up": {
