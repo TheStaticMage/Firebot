@@ -135,66 +135,11 @@ class TwitchEventSubClient {
         });
         this._subscriptions.push(autoModMessageUpdateSub);
 
-        // Channel automatic reward V1. Power-ups are included in the V1
-        // subscription (but the bits are not indicated in the payload).
-        // Power-ups were removed from the V2 subscription in favor of the
-        // channel.bits.use subscription, which is more appropriate for the
-        // power-ups. The V2 subscription is used for the automatic rewards that
-        // are not power-ups. The only reason for this logic is to trigger a
-        // Firebot event for streamers redeeming power-ups on their own channel,
-        // because channel.bits.use does not trigger for those events.
-        const automaticRewardRedemptionSubscriptionV1 = this._eventSubListener.onChannelAutomaticRewardRedemptionAdd(streamer.userId, async (event) => {
-            if (event.userId !== streamer.userId) {
-                return;
-            }
-
-            switch (event.rewardType) {
-                case "message_effect":
-                    twitchEventsHandler.bits.triggerPowerupMessageEffect(
-                        event.userName,
-                        event.userId,
-                        event.userDisplayName,
-                        0, // Bits not deducted for streamer on own channel
-                        0, // Total bits not relevant for streamer on own channel
-                        event.messageText ?? ""
-                    );
-                    break;
-                case "celebration":
-                    twitchEventsHandler.bits.triggerPowerupCelebration(
-                        event.userName,
-                        event.userId,
-                        event.userDisplayName,
-                        0, // Bits not deducted for streamer on own channel
-                        0 // Total bits not relevant for streamer on own channel
-                    );
-                    break;
-                case "gigantify_an_emote": {
-                    // The gigantified emote is always the last emote in the
-                    // message. The payload does not include the emote ID or
-                    // URL.
-                    const emoteName = event.messageText?.split(" ").pop() ?? "";
-
-                    twitchEventsHandler.bits.triggerPowerupGigantifyEmote(
-                        event.userName,
-                        event.userId,
-                        event.userDisplayName,
-                        0, // Bits not deducted for streamer on own channel
-                        0, // Total bits not relevant for streamer on own channel
-                        event.messageText ?? "",
-                        emoteName,
-                        ''
-                    );
-                    break;
-                }
-            }
-        });
-        this._subscriptions.push(automaticRewardRedemptionSubscriptionV1);
-
         // Channel automatic reward
         const channelAutomaticRewardSubscription = this._eventSubListener.onChannelAutomaticRewardRedemptionAddV2(streamer.userId, async (event) => {
             switch (event.reward.type) {
                 case "single_message_bypass_sub_mode":
-                    twitchEventsHandler.pointsRedemption.triggerRedemptionSingleMessageBypassSubMode(
+                    twitchEventsHandler.rewardRedemption.triggerRedemptionSingleMessageBypassSubMode(
                         event.userName,
                         event.userId,
                         event.userDisplayName,
@@ -202,7 +147,7 @@ class TwitchEventSubClient {
                     );
                     break;
                 case "send_highlighted_message":
-                    twitchEventsHandler.pointsRedemption.triggerRedemptionSendHighlightedMessage(
+                    twitchEventsHandler.rewardRedemption.triggerRedemptionSendHighlightedMessage(
                         event.userName,
                         event.userId,
                         event.userDisplayName,
@@ -211,7 +156,7 @@ class TwitchEventSubClient {
                     );
                     break;
                 case "random_sub_emote_unlock":
-                    twitchEventsHandler.pointsRedemption.triggerRedemptionRandomSubEmoteUnlock(
+                    twitchEventsHandler.rewardRedemption.triggerRedemptionRandomSubEmoteUnlock(
                         event.userName,
                         event.userId,
                         event.userDisplayName,
@@ -221,7 +166,7 @@ class TwitchEventSubClient {
                     );
                     break;
                 case "chosen_sub_emote_unlock":
-                    twitchEventsHandler.pointsRedemption.triggerRedemptionChosenSubEmoteUnlock(
+                    twitchEventsHandler.rewardRedemption.triggerRedemptionChosenSubEmoteUnlock(
                         event.userName,
                         event.userId,
                         event.userDisplayName,
@@ -231,7 +176,7 @@ class TwitchEventSubClient {
                     );
                     break;
                 case "chosen_modified_sub_emote_unlock":
-                    twitchEventsHandler.pointsRedemption.triggerRedemptionChosenModifiedSubEmoteUnlock(
+                    twitchEventsHandler.rewardRedemption.triggerRedemptionChosenModifiedSubEmoteUnlock(
                         event.userName,
                         event.userId,
                         event.userDisplayName,
@@ -755,6 +700,7 @@ class TwitchEventSubClient {
                     );
                     break;
 
+                // Chat Message Deleted
                 case "delete":
                     twitchEventsHandler.chatMessage.triggerChatMessageDeleted(
                         event.userName,
@@ -766,11 +712,40 @@ class TwitchEventSubClient {
                     frontendCommunicator.send("twitch:chat:message:deleted", event.messageId);
                     break;
 
+                // Outbound Raid Starting
+                case "raid":
+                    twitchEventsHandler.raid.triggerOutgoingRaidStarted(
+                        event.broadcasterName,
+                        event.broadcasterId,
+                        event.broadcasterDisplayName,
+                        event.userName,
+                        event.userId,
+                        event.userDisplayName,
+                        event.moderatorName,
+                        event.moderatorId,
+                        event.moderatorDisplayName,
+                        event.viewerCount
+                    );
+                    break;
+
+                // Outbound Raid Canceled
+                case "unraid":
+                    twitchEventsHandler.raid.triggerOutgoingRaidCanceled(
+                        event.broadcasterName,
+                        event.broadcasterId,
+                        event.broadcasterDisplayName,
+                        event.userName,
+                        event.userId,
+                        event.userDisplayName,
+                        event.moderatorName,
+                        event.moderatorId,
+                        event.moderatorDisplayName
+                    );
+                    break;
+
                 // Reserving; already handled in bespoke events; less expensive to move those here.
                 case "ban":
                 case "unban":
-                case "raid":
-                case "unraid":
                 case "timeout":
                 case "untimeout":
                     break;

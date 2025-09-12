@@ -5,8 +5,8 @@ import rewardImageUrl from './reward-image-url';
 import rewardMessage from './reward-message';
 import rewardName from './reward-name';
 import rewardRedemptionId from './reward-redemption-id';
-import rewardType from './reward-type';
-import rewardTypeDisplay from './reward-type-display';
+import unlockedEmoteName from './unlocked-emote-name';
+import unlockedEmoteUrl from './unlocked-emote-url';
 
 export default [
     rewardCost,
@@ -16,6 +16,6 @@ export default [
     rewardMessage,
     rewardName,
     rewardRedemptionId,
-    rewardType,
-    rewardTypeDisplay
+    unlockedEmoteName,
+    unlockedEmoteUrl
 ];

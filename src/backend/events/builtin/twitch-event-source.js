@@ -28,11 +28,55 @@ module.exports = {
             }
         },
         {
+            id: "outgoing-raid-started",
+            name: "Outgoing Raid Started",
+            description: "When you or a moderator starts an outgoing raid to another channel.",
+            cached: false,
+            manualMetadata: {
+                username: "firebot",
+                userId: "",
+                userDisplayName: "Firebot",
+                raidTargetUsername: "user",
+                raidTargetUserId: "",
+                raidTargetUserDisplayName: "User",
+                moderator: "BestMod",
+                viewerCount: 5
+            },
+            activityFeed: {
+                icon: "fad fa-inbox-out",
+                getMessage: (eventData) => {
+                    return `**${eventData.moderator}** started raid to user **${eventData.raidTargetUserDisplayName}** with **${
+                        eventData.viewerCount
+                    }** viewer(s)`;
+                }
+            }
+        },
+        {
+            id: "outgoing-raid-canceled",
+            name: "Outgoing Raid Canceled",
+            description: "When you or a moderator cancels an outgoing raid to another channel.",
+            cached: false,
+            manualMetadata: {
+                username: "firebot",
+                userId: "",
+                userDisplayName: "Firebot",
+                raidTargetUsername: "user",
+                raidTargetUserId: "",
+                raidTargetUserDisplayName: "User",
+                moderator: "BestMod"
+            },
+            activityFeed: {
+                icon: "fad fa-undo",
+                getMessage: (eventData) => {
+                    return `**${eventData.moderator}** canceled raid to user **${eventData.raidTargetUserDisplayName}**`;
+                }
+            }
+        },
+        {
             id: "raid-sent-off",
-            name: "Outgoing Raid",
+            name: "Outgoing Raid Complete",
             description: "When your outgoing raid is completed.",
             cached: false,
-            cacheMetaKey: "fromUsername",
             manualMetadata: {
                 username: "firebot",
                 userId: "",
