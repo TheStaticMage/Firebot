@@ -11,7 +11,6 @@ import lifetimeGiftCount from "./lifetime-gift-count";
 import message from "./message";
 import raidViewerCount from "./raid-viewer-count";
 import rewardName from "./reward-name";
-import rewardType from "./reward-type";
 import reward from "./reward";
 import sharedChat from "./shared-chat";
 import sharedTrain from "./shared-train";
@@ -35,7 +34,6 @@ export default [
     message,
     raidViewerCount,
     rewardName,
-    rewardType,
     reward,
     sharedChat,
     sharedTrain,

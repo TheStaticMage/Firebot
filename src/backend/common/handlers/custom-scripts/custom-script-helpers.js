@@ -118,7 +118,7 @@ function buildModules(scriptManifest) {
             getNotifications: () => {
                 return notificationManager
                     .getNotifications()
-                    .filter(n => n.source === "script" && n.scriptName === (scriptManifest.name ?? "unknown"));
+                    .filter((n) => n.source === "script" && n.scriptName === (scriptManifest.name ?? "unknown"));
             },
             deleteNotification: (id) => {
                 const notification = notificationManager.getNotification(id);
@@ -133,8 +133,8 @@ function buildModules(scriptManifest) {
             clearAllNotifications: () => {
                 notificationManager
                     .getNotifications()
-                    .filter(n => n.source === "script" && n.scriptName === (scriptManifest.name ?? "unknown"))
-                    .forEach(n => notificationManager.deleteNotification(n.id));
+                    .filter((n) => n.source === "script" && n.scriptName === (scriptManifest.name ?? "unknown"))
+                    .forEach((n) => notificationManager.deleteNotification(n.id));
             }
         },
         uiExtensionManager: require("../../../ui-extensions/ui-extension-manager"),
