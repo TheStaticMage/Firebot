@@ -33,7 +33,6 @@ const EffectTrigger = Object.freeze({
     COUNTER: "counter",
     PRESET_LIST: "preset",
     CHANNEL_REWARD: "channel_reward",
-    CHANNEL_AUTOMATIC_REWARD: "channel_automatic_reward",
     MANUAL: "manual",
     QUICK_ACTION: "quick_action",
     ALL: "all"
