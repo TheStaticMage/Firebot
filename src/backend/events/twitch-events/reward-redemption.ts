@@ -95,7 +95,8 @@ export function triggerRedemptionSingleMessageBypassSubMode(
     username: string,
     userId: string,
     userDisplayName: string,
-    channelPoints: number
+    channelPoints: number,
+    messageText: string
 ): void {
     const rewardDescription = "Send a Message in Sub-Only Mode";
     eventManager.triggerEvent("twitch", "channel-points-redemption-single-message-bypass-sub-mode", {
@@ -103,6 +104,7 @@ export function triggerRedemptionSingleMessageBypassSubMode(
         userId,
         userDisplayName,
         channelPoints,
+        messageText,
         rewardDescription
     });
 }
