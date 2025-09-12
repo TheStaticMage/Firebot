@@ -17,8 +17,9 @@ export class TwitchUsersApi {
 
     async getUsersByIds(userIds: string[]): Promise<HelixUser[]> {
         const users: HelixUser[] = [];
-        for (let x = 0; x < userIds.length; x += 100) {
-            const userBatch = userIds.slice(x, x + 100);
+        const validUserIds = userIds.filter(id => /^\d+$/.test(id));
+        for (let x = 0; x < validUserIds.length; x += 100) {
+            const userBatch = validUserIds.slice(x, x + 100);
             try {
                 users.push(...await this._streamerClient.users.getUsersByIds(userBatch));
             } catch (error) {
