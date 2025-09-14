@@ -55,7 +55,6 @@ class TwitchEventSubClient {
         // Bits Used
         const bitsSubscription = this._eventSubListener.onChannelBitsUse(streamer.userId, async (event) => {
             switch (event.type) {
-                case "combo":
                 case "cheer": {
                     const totalBits = await twitchApi.bits.getChannelBitsLeaderboard(1, "all", new Date(), event.userId)[0]?.amount ?? 0;
                     // Future: We could parse event.messageParts into a FirebotChatMessage
@@ -68,6 +67,15 @@ class TwitchEventSubClient {
                         event.bits,
                         totalBits,
                         event.messageText ?? ""
+                    );
+                    break;
+                }
+                case "combo": {
+                    twitchEventsHandler.bits.triggerCombo(
+                        event.userName,
+                        event.userId,
+                        event.userDisplayName,
+                        event.bits
                     );
                     break;
                 }
