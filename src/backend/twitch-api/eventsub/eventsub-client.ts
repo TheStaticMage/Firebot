@@ -71,12 +71,12 @@ class TwitchEventSubClient {
                     break;
                 }
                 case "combo": {
-                    twitchEventsHandler.bits.triggerCombo(
-                        event.userName,
-                        event.userId,
-                        event.userDisplayName,
-                        event.bits
-                    );
+                    // twitchEventsHandler.bits.triggerCombo(
+                    //     event.userName,
+                    //     event.userId,
+                    //     event.userDisplayName,
+                    //     event.bits
+                    // );
                     break;
                 }
                 case "power_up": {

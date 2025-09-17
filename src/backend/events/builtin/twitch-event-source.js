@@ -317,28 +317,28 @@ module.exports = {
                 }
             }
         },
-        {
-            id: "bits-combo",
-            name: "Combo",
-            description: "When someone uses bits on a Combo in your channel.",
-            cached: false,
-            manualMetadata: {
-                username: "firebot",
-                userDisplayName: "Firebot",
-                userId: "",
-                isAnonymous: false,
-                bits: 5
-            },
-            activityFeed: {
-                icon: "fad fa-diamond",
-                getMessage: (eventData) => {
-                    const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
-                    return `**${eventData.userDisplayName}${
-                        showUserIdName ? ` (${eventData.username})` : ""
-                    }** cheered **${eventData.bits}** bits in a combo.`;
-                }
-            }
-        },
+        // {
+        //     id: "bits-combo",
+        //     name: "Combo",
+        //     description: "When someone uses bits on a Combo in your channel.",
+        //     cached: false,
+        //     manualMetadata: {
+        //         username: "firebot",
+        //         userDisplayName: "Firebot",
+        //         userId: "",
+        //         isAnonymous: false,
+        //         bits: 5
+        //     },
+        //     activityFeed: {
+        //         icon: "fad fa-diamond",
+        //         getMessage: (eventData) => {
+        //             const showUserIdName = eventData.username.toLowerCase() !== eventData.userDisplayName.toLowerCase();
+        //             return `**${eventData.userDisplayName}${
+        //                 showUserIdName ? ` (${eventData.username})` : ""
+        //             }** cheered **${eventData.bits}** bits in a combo.`;
+        //         }
+        //     }
+        // },
         {
             id: "bits-badge-unlocked",
             name: "Bits Badge Unlocked",
