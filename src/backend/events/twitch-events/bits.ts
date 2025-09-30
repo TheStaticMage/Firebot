@@ -19,21 +19,6 @@ export function triggerCheer(
     });
 }
 
-export function triggerCombo(
-    username: string,
-    userId: string,
-    userDisplayName: string,
-    bits: number
-): void {
-    eventManager.triggerEvent("twitch", "bits-combo", {
-        username,
-        userId,
-        userDisplayName,
-        isAnonymous: false,
-        bits
-    });
-}
-
 export function triggerBitsBadgeUnlock(
     username: string,
     userId: string,

@@ -70,15 +70,8 @@ class TwitchEventSubClient {
                     );
                     break;
                 }
-                case "combo": {
-                    // twitchEventsHandler.bits.triggerCombo(
-                    //     event.userName,
-                    //     event.userId,
-                    //     event.userDisplayName,
-                    //     event.bits
-                    // );
+                case "combo":
                     break;
-                }
                 case "power_up": {
                     const totalBits = await twitchApi.bits.getChannelBitsLeaderboard(1, "all", new Date(), event.userId)[0]?.amount ?? 0;
                     switch (event.powerUp.type) {
