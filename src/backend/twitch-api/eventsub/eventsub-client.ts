@@ -151,8 +151,7 @@ class TwitchEventSubClient {
                         event.userName,
                         event.userId,
                         event.userDisplayName,
-                        event.reward.channelPoints,
-                        event.messageText
+                        event.reward.channelPoints
                     );
                     break;
                 case "send_highlighted_message":
@@ -552,19 +551,6 @@ class TwitchEventSubClient {
         });
         this._subscriptions.push(banSubscription);
 
-        // Unban
-        const unbanSubscription = this._eventSubListener.onChannelUnban(streamer.userId, (event) => {
-            twitchEventsHandler.viewerBanned.triggerUnbanned(
-                event.userName,
-                event.userId,
-                event.userDisplayName,
-                event.moderatorName,
-                event.moderatorId,
-                event.moderatorDisplayName
-            );
-        });
-        this._subscriptions.push(unbanSubscription);
-
         // Charity Campaign Start
         const charityCampaignStartSubscription = this._eventSubListener.onChannelCharityCampaignStart(streamer.userId, (event) => {
             twitchEventsHandler.charity.triggerCharityCampaignStart(
@@ -752,11 +738,21 @@ class TwitchEventSubClient {
                     );
                     break;
 
+                case "unban":
+                case "untimeout":
+                    twitchEventsHandler.viewerBanned.triggerUnbanned(
+                        event.userName,
+                        event.userId,
+                        event.userDisplayName,
+                        event.moderatorName,
+                        event.moderatorId,
+                        event.moderatorDisplayName
+                    );
+                    break;
+
                 // Reserving; already handled in bespoke events; less expensive to move those here.
                 case "ban":
-                case "unban":
                 case "timeout":
-                case "untimeout":
                     break;
 
                 // Available for future use:
