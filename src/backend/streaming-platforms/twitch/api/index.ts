@@ -50,10 +50,9 @@ class TwitchApi {
         frontendCommunicator.onAsync("get-streams", async (filter: HelixStreamFilter, includeStreamer = false, limit: number = 50) => {
             const paginatedRequest = this.streamerClient.streams.getStreamsPaginated(filter); // Returns from largest to smallest number of viewers
             const results = [];
-            const accountAccess = require("../common/account-access");
-            const streamerChannelId = accountAccess.getAccounts().streamer.channelId;
+            const streamerUserId = accountAccess.getAccounts().streamer.userId;
             for await (const stream of paginatedRequest) {
-                if (!includeStreamer && stream.userId === streamerChannelId) {
+                if (!includeStreamer && stream.userId === streamerUserId) {
                     continue;
                 }
                 results.push({
@@ -76,9 +75,8 @@ class TwitchApi {
 
         // eslint-disable-next-line @typescript-eslint/no-inferrable-types
         frontendCommunicator.onAsync("get-followed-streams", async (limit: number = 50) => {
-            const accountAccess = require("../common/account-access");
-            const streamerChannelId = accountAccess.getAccounts().streamer.channelId;
-            const paginatedRequest = this.streamerClient.streams.getFollowedStreamsPaginated(streamerChannelId);
+            const streamerUserId = accountAccess.getAccounts().streamer.userId;
+            const paginatedRequest = this.streamerClient.streams.getFollowedStreamsPaginated(streamerUserId);
             const results = [];
             for await (const stream of paginatedRequest) {
                 results.push({
