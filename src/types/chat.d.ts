@@ -121,6 +121,8 @@ export type FirebotChatMessage = {
     customBannerIcon?: string;
     customBannerText?: string;
     isDelayed?: boolean;
+    viewerRanks?: Record<string, string>;
+    viewerCustomRoles?: string[]
 };
 
 export type FirebotEmote = {

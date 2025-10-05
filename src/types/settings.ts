@@ -62,6 +62,7 @@ export type FirebotSettingsTypes = {
     EventSettings: object; //TODO
     FirstTimeUse: boolean;
     ForceOverlayEffectsToContinueOnRefresh: boolean;
+    GlobalValues: Array<{ name: string; secret?: boolean, value: string; }>;
     IgnoreSubsequentSubEventsAfterCommunitySub: boolean;
     JustUpdated: boolean;
     LastBackupDate: Date;
@@ -189,6 +190,7 @@ export const FirebotSettingsDefaults: FirebotSettingsTypes = {
     EventSettings: {},
     FirstTimeUse: true,
     ForceOverlayEffectsToContinueOnRefresh: true,
+    GlobalValues: [],
     IgnoreSubsequentSubEventsAfterCommunitySub: true,
     JustUpdated: false,
     LegacySortTagsImported: false,
