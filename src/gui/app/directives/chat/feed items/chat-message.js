@@ -243,7 +243,7 @@
                             <span>Flagged by AutoMod ({{$ctrl.message.autoModReason}}): Expired</span>
                         </div>
                     </div>
-                    <div ng-if="$ctrl.message.isAnnouncement || $ctrl.message.isFirstChat || $ctrl.message.isReturningChatter || $ctrl.message.isRaider || $ctrl.message.isSuspiciousUser || $ctrl.message.customHighlightColor" style="margin-bottom:5px">
+                    <div ng-if="$ctrl.message.isAnnouncement || $ctrl.message.isFirstChat || $ctrl.message.isReturningChatter || $ctrl.message.isRaider || $ctrl.message.isSuspiciousUser || $ctrl.message.customBannerText || $ctrl.message.customBannerIcon" style="margin-bottom:5px">
                 </div>
             `,
             controller: function(chatMessagesService, utilityService, connectionService, pronounsService, backendCommunicator) {

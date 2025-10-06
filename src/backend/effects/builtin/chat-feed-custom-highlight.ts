@@ -86,14 +86,10 @@ const model: EffectType<{
         if (!effect.highlightEnabled && !effect.bannerEnabled) {
             errors.push("At least one of 'Highlight Message' or 'Add a Banner' must be enabled, or this effect will not do anything.");
         }
-        if (effect.bannerEnabled && !effect.customBannerText) {
-            errors.push("If 'Add a Banner' is enabled, you must provide banner text.");
-        }
         if (effect.highlightEnabled) {
             if (!effect.customHighlightColor) {
                 errors.push("If 'Highlight Message' is enabled, you must provide a highlight color.");
-            }
-            if (!/^#[0-9A-Fa-f]{6}$/.test(effect.customHighlightColor)) {
+            } else if (!/^#[0-9A-Fa-f]{6}$/.test(effect.customHighlightColor)) {
                 errors.push("The highlight color must be a valid hex color code (e.g., #ffcc00).");
             }
         }
@@ -110,28 +106,24 @@ const model: EffectType<{
     onTriggerEvent: async (event) => {
         const { effect, trigger } = event;
 
-        try {
-            let messageId = null;
-            if (trigger.type === EffectTrigger.COMMAND) {
-                messageId = trigger.metadata.chatMessage.id;
-            } else if (trigger.type === EffectTrigger.EVENT) {
-                messageId = trigger.metadata.eventData.chatMessage.id;
-            }
+        let messageId: string | null = null;
+        if (trigger.type === EffectTrigger.COMMAND) {
+            messageId = trigger.metadata.chatMessage?.id;
+        } else if (trigger.type === EffectTrigger.EVENT) {
+            messageId = trigger.metadata.eventData?.chatMessage?.id;
+        }
 
-            if (messageId) {
-                const highlightData = {
-                    messageId: messageId,
-                    customHighlightColor: effect.highlightEnabled ? effect.customHighlightColor : undefined,
-                    customBannerText: effect.bannerEnabled ? effect.customBannerText : undefined,
-                    customBannerIcon: effect.bannerEnabled ? effect.customBannerIcon : undefined
-                };
-                logger.debug("chat-feed-custom-highlight: Highlighting message in chat feed: messageId=", messageId);
-                frontendCommunicator.send("chat-feed-custom-highlight", highlightData);
-            } else {
-                logger.warn("chat-feed-custom-highlight: No messageId found in trigger. Cannot highlight message.");
-            }
-        } catch (error) {
-            logger.error("chat-feed-custom-highlight: Error highlighting message in chat feed: ", error);
+        if (messageId) {
+            const highlightData = {
+                messageId: messageId,
+                customHighlightColor: effect.highlightEnabled ? effect.customHighlightColor : undefined,
+                customBannerText: effect.bannerEnabled ? effect.customBannerText : undefined,
+                customBannerIcon: effect.bannerEnabled ? effect.customBannerIcon : undefined
+            };
+            logger.debug("chat-feed-custom-highlight: Highlighting message in chat feed: messageId=", messageId);
+            frontendCommunicator.send("chat-feed-custom-highlight", highlightData);
+        } else {
+            logger.warn("chat-feed-custom-highlight: No messageId found in trigger. Cannot highlight message.");
         }
     }
 };
