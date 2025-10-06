@@ -117,9 +117,6 @@ export type FirebotChatMessage = {
     isSharedChatMessage: boolean;
     sharedChatRoomId?: string;
     isHiddenFromChatFeed?: boolean;
-    customHighlightColor?: string;
-    customBannerIcon?: string;
-    customBannerText?: string;
     isDelayed?: boolean;
     viewerRanks?: Record<string, string>;
     viewerCustomRoles?: string[];
