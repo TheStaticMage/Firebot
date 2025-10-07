@@ -36,10 +36,10 @@ const model: EffectType<{
         const { trigger } = event;
 
         try {
-            let messageId = null;
-            if (trigger.type === EffectTrigger.COMMAND) {
+            let messageId = "";
+            if (typeof trigger.metadata.chatMessage?.id === "string") {
                 messageId = trigger.metadata.chatMessage.id;
-            } else if (trigger.type === EffectTrigger.EVENT) {
+            } else if (typeof trigger.metadata.eventData?.chatMessage?.id === "string") {
                 messageId = trigger.metadata.eventData.chatMessage.id;
             }
 
