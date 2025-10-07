@@ -6,6 +6,7 @@ import logger from "../../logwrapper";
 const triggers = {};
 triggers[EffectTrigger.COMMAND] = true;
 triggers[EffectTrigger.EVENT] = ["twitch:chat-message"];
+triggers[EffectTrigger.PRESET_LIST] = true;
 
 const model: EffectType<{
     hidden: boolean;
