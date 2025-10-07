@@ -6,7 +6,7 @@ export type Position = {
     y: number;
     width: number;
     height: number;
-}
+};
 
 export type Animation = {
     /**
@@ -17,14 +17,14 @@ export type Animation = {
      * Custom duration in seconds
      */
     duration?: number;
-}
+};
 
 type WidgetEvent<Settings, State> = {
     id: string;
     settings: Settings;
     state: State;
     previewMode: boolean;
-}
+};
 
 type WidgetEventResult<State> = {
     newState?: State | null;
@@ -33,7 +33,7 @@ type WidgetEventResult<State> = {
      * @default false
      */
     persistState?: boolean;
-}
+};
 
 export type WidgetEventHandler<Settings, State> = (event: WidgetEvent<Settings, State>) => Awaitable<WidgetEventResult<State> | undefined>;
 
@@ -44,11 +44,11 @@ export type WidgetUIAction<
     id: string;
     label: string;
     icon: string;
-    // eslint-disable-next-line no-use-before-define
+
     click: (config: OverlayWidgetConfig<Settings, State>) => Awaitable<{
         newState?: State | null;
     } | void>;
-}
+};
 
 export type OverlayWidgetType<
     Settings extends Record<string, unknown> = Record<string, unknown>,
@@ -110,7 +110,7 @@ export type OverlayWidgetType<
      * This is shown in the overlay widget list to give the user a quick overview of the widget's state.
      * If null or undefined, no state display is shown.
      */
-    // eslint-disable-next-line no-use-before-define
+
     stateDisplay?: (config: OverlayWidgetConfig<Settings, State>) => string | null;
     /**
      * Actions are buttons shown in the overlay widget list for each widget instance.
@@ -138,12 +138,12 @@ export type OverlayWidgetType<
             js?: string[];
             globalStyles?: string;
         };
-        // eslint-disable-next-line no-use-before-define
-        eventHandler: (event: WidgetOverlayEvent, utils: IOverlayWidgetUtils) => void;
+
+        eventHandler: (event: WidgetOverlayEvent, utils: IOverlayWidgetEventUtils) => void;
         /**
          * Called when the overlay is loaded. Can be async.
          */
-        onInitialLoad?: () => void | Promise<void>;
+        onInitialLoad?: (utils: IOverlayWidgetInitUtils) => void | Promise<void>;
     };
 };
 
@@ -167,7 +167,7 @@ type OverlayWidgetConfig<Settings = Record<string, unknown>, State = Record<stri
     exitAnimation?: Animation | null;
     settings: Settings;
     state?: State;
-}
+};
 
 export type WidgetOverlayEvent<Settings = Record<string, unknown>, State = Record<string, unknown>> = {
     name: "show" | "settings-update" | "state-update" | "message" | "remove";
@@ -184,15 +184,21 @@ export type WidgetOverlayEvent<Settings = Record<string, unknown>, State = Recor
          */
         messageData?: unknown;
     };
-}
+};
 
 /**
  * Utility functions for managing overlay widgets. These functions can used within the overlayExtension.eventHandler
  */
-export interface IOverlayWidgetUtils {
-    handleOverlayEvent(generateWidgetHtml: (widgetConfig: WidgetOverlayEvent["data"]["widgetConfig"]) => string): void;
+export interface IOverlayWidgetEventUtils {
+    /**
+     * Automatically handles overlay events for the widget, including showing, updating, and removing the widget using the provided HTML generator function.
+     *
+     * @param generateWidgetHtml Function that generates the HTML for the widget based on its current configuration.
+     * @param updateOnMessage If true, the widget HTML will be updated when a "message" event is received. Default is false.
+     */
+    handleOverlayEvent(generateWidgetHtml: (widgetConfig: WidgetOverlayEvent["data"]["widgetConfig"]) => string, updateOnMessage = false): void;
     getWidgetPositionStyle(position?: Position): string;
-    getWidgetElement(): HTMLElement | null;
+    getWidgetContainerElement(): HTMLElement | null;
     initializeWidget(
         html: string
     ): void;
@@ -203,4 +209,8 @@ export interface IOverlayWidgetUtils {
     removeWidget(): void;
     stylesToString(styles: Record<string, string | number | undefined>): string;
     getFontOptionsStyles(fontOptions?: FontOptions): Record<string, string | number | undefined>;
+}
+
+export interface IOverlayWidgetInitUtils {
+    getWidgetContainerElements(): NodeListOf<HTMLElement>;
 }

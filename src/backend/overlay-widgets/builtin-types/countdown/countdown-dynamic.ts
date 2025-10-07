@@ -1,5 +1,5 @@
 import { FontOptions } from "../../../../types/parameters";
-import { OverlayWidgetType, OverlayWidgetConfig, IOverlayWidgetUtils } from "../../../../types/overlay-widgets";
+import { OverlayWidgetType, OverlayWidgetConfig, IOverlayWidgetEventUtils } from "../../../../types/overlay-widgets";
 import { WidgetOverlayEvent } from "../../../../types/overlay-widgets";
 import { Duration } from "luxon";
 import frontendCommunicator from "../../../common/frontend-communicator";
@@ -8,16 +8,16 @@ export type Settings = {
     fontOptions: FontOptions;
     alignment: "left" | "center" | "right";
     runWhenInactive?: boolean;
-}
+};
 
 export type State = {
     remainingSeconds: number;
     mode: "running" | "paused";
-}
+};
 
 export type DynamicCountdownWidgetConfig = OverlayWidgetConfig<Settings, State> & {
     type: "firebot:countdown-dynamic";
-}
+};
 
 export const dynamicCountdown: OverlayWidgetType<Settings, State> = {
     id: "firebot:countdown-dynamic",
@@ -169,9 +169,9 @@ export const dynamicCountdown: OverlayWidgetType<Settings, State> = {
         }
     ],
     overlayExtension: {
-        eventHandler: (event: WidgetOverlayEvent<Settings, State>, utils: IOverlayWidgetUtils) => {
+        eventHandler: (event: WidgetOverlayEvent<Settings, State>, utils: IOverlayWidgetEventUtils) => {
             const generateWidgetHtml = (config: typeof event["data"]["widgetConfig"]) => {
-                const remainingSeconds = config.state?.remainingSeconds as number ?? 0;
+                const remainingSeconds = config.state?.remainingSeconds ?? 0;
 
                 // show time as hh:mm:ss
                 const hours = Math.floor(remainingSeconds / 3600);

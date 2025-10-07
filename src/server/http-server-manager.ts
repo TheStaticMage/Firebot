@@ -143,7 +143,6 @@ class HttpServerManager extends EventEmitter {
                     .map(we => we.dependencies.globalStyles)
             ];
 
-            // eslint-disable-next-line @typescript-eslint/ban-types
             const widgetEvents: Array<{ name: string; callback: Function }> = [];
             for (const widgetExtension of widgetExtensions) {
                 if (widgetExtension.eventHandler) {
@@ -158,7 +157,7 @@ class HttpServerManager extends EventEmitter {
             res.render(overlayTemplate, {
                 effectEvents: effectDefs.map(ed => ed.event),
                 widgetEvents: widgetEvents,
-                widgetInitCallbacks: widgetExtensions.map(we => we.onInitialLoad).filter(il => il != null),
+                widgetInitCallbacks: widgetExtensions.filter(we => we.onInitialLoad).map(we => ({ typeId: we.typeId, callback: we.onInitialLoad })),
                 dependencies: {
                     css: combinedCssDeps,
                     js: combinedJsDeps,
