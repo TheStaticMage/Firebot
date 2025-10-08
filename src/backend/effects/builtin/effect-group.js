@@ -3,6 +3,7 @@
 const effectRunner = require("../../common/effect-runner");
 const { EffectCategory, EffectTrigger } = require('../../../shared/effect-constants');
 const presetEffectListManager = require("../preset-lists/preset-effect-list-manager");
+const logger = require("../../logwrapper");
 
 const effectGroup = {
     definition: {
@@ -158,6 +159,21 @@ const effectGroup = {
 
                 newTrigger.type = EffectTrigger.PRESET_LIST;
                 newTrigger.metadata.presetListArgs = effect.presetListArgs;
+
+                // Prevent loops if a preset list directly or indirectly calls
+                // itself.
+                if (newTrigger.metadata.stackDepth == null) {
+                    newTrigger.metadata.stackDepth = {};
+                }
+                if (newTrigger.metadata.stackDepth[presetList.id] == null) {
+                    newTrigger.metadata.stackDepth[presetList.id] = 0;
+                }
+                newTrigger.metadata.stackDepth[presetList.id] += 1;
+
+                if (newTrigger.metadata.stackDepth[presetList.id] > 5) {
+                    logger.warn(`Preset Effect List '${presetList.name}' (ID: ${presetList.id}) has been triggered more than 5 times in the same chain. Stopping execution to prevent infinite loop.`);
+                    return resolve(true);
+                }
 
                 processEffectsRequest = {
                     trigger: newTrigger,
