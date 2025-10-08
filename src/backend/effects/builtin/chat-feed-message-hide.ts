@@ -37,18 +37,17 @@ const model: EffectType<{
 
         try {
             let messageId = "";
-            if (typeof trigger.metadata.chatMessage?.id === "string") {
+            if (typeof trigger.metadata.chatMessage?.id === "string" && trigger.metadata.chatMessage.id.length > 0) {
                 messageId = trigger.metadata.chatMessage.id;
-            } else if (typeof trigger.metadata.eventData?.chatMessage?.id === "string") {
+            } else if (typeof trigger.metadata.eventData?.chatMessage?.id === "string" && trigger.metadata.eventData.chatMessage.id.length > 0) {
                 messageId = trigger.metadata.eventData.chatMessage.id;
-            }
-
-            if (messageId) {
-                logger.debug("chat-feed-message-hide: Hiding message in chat feed: messageId=", messageId);
-                frontendCommunicator.send("chat-feed-message-hide", { messageId: messageId });
             } else {
                 logger.warn("chat-feed-message-hide: No messageId found in trigger. Cannot hide message.");
+                return;
             }
+
+            logger.debug("chat-feed-message-hide: Hiding message in chat feed: messageId=", messageId);
+            frontendCommunicator.send("chat-feed-message-hide", { messageId: messageId });
         } catch (error) {
             logger.error("chat-feed-message-hide: Error hiding message in chat feed: ", error);
         }
