@@ -5,7 +5,7 @@ import logger from "../../logwrapper";
 
 const triggers = {};
 triggers[EffectTrigger.COMMAND] = true;
-triggers[EffectTrigger.EVENT] = ["twitch:chat-message", "twitch:viewer-arrived", "mage-kick-integration:chat-message", "mage-kick-integration:viewer-arrived"];
+triggers[EffectTrigger.EVENT] = ["twitch:chat-message", "twitch:viewer-arrived"];
 
 const model: EffectType<{
     highlightEnabled: boolean;
