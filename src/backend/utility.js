@@ -105,14 +105,10 @@ const formattedSeconds = (secs, simpleOutput = false) => {
 };
 
 const getTriggerIdFromTriggerData = (trigger) => {
-    const { eventSource, event, quickAction } = trigger.metadata;
+    const { eventSource, event } = trigger.metadata;
 
     if (eventSource && event) {
         return `${eventSource.id}:${event.id}`;
-    }
-
-    if (quickAction && quickAction.id) {
-        return quickAction.id;
     }
 
     return undefined;

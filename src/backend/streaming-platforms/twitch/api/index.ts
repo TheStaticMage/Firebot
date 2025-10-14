@@ -1,4 +1,4 @@
-import { ApiClient, HelixChannelUpdate, HelixStreamFilter } from "@twurple/api";
+import { ApiClient, HelixChannelUpdate } from "@twurple/api";
 import { AuthProvider } from "@twurple/auth";
 
 import { UserContextApiClient } from "./user-context-api-client";
@@ -42,60 +42,8 @@ class TwitchApi {
                 id: c.id,
                 username: c.name,
                 displayName: c.displayName,
-                avatarUrl: c.thumbnailUrl,
-                isLive: c.isLive
+                avatarUrl: c.thumbnailUrl
             }));
-        });
-
-        // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-        frontendCommunicator.onAsync("get-streams", async (filter: HelixStreamFilter, includeStreamer = false, limit: number = 50) => {
-            const paginatedRequest = this.streamerClient.streams.getStreamsPaginated(filter); // Returns from largest to smallest number of viewers
-            const results = [];
-            const streamerUserId = accountAccess.getAccounts().streamer.userId;
-            for await (const stream of paginatedRequest) {
-                if (!includeStreamer && stream.userId === streamerUserId) {
-                    continue;
-                }
-                results.push({
-                    id: stream.userId,
-                    username: stream.userName,
-                    displayName: stream.userDisplayName,
-                    isMature: stream.isMature,
-                    viewers: stream.viewers,
-                    uptime: Math.floor((Date.now() - stream.startDate.getTime()) / 1000),
-                    gameName: stream.gameName,
-                    language: stream.language,
-                    isLive: true
-                });
-                if (results.length >= limit) {
-                    break;
-                }
-            }
-            return results;
-        });
-
-        // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-        frontendCommunicator.onAsync("get-followed-streams", async (limit: number = 50) => {
-            const streamerUserId = accountAccess.getAccounts().streamer.userId;
-            const paginatedRequest = this.streamerClient.streams.getFollowedStreamsPaginated(streamerUserId);
-            const results = [];
-            for await (const stream of paginatedRequest) {
-                results.push({
-                    id: stream.userId,
-                    username: stream.userName,
-                    displayName: stream.userDisplayName,
-                    isMature: stream.isMature,
-                    viewers: stream.viewers,
-                    uptime: Math.floor((Date.now() - stream.startDate.getTime()) / 1000),
-                    gameName: stream.gameName,
-                    language: stream.language,
-                    isLive: true
-                });
-                if (results.length >= limit) {
-                    break;
-                }
-            }
-            return results;
         });
 
         frontendCommunicator.onAsync("process-automod-message", async ({ messageId, allow }: { messageId: string, allow: boolean }) =>

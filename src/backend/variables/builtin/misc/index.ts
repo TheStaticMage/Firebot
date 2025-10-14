@@ -7,8 +7,6 @@ import profilePageByteBinToken from './profile-page-bytebin-token';
 import quote from './quote';
 import quoteAsObject from './quote-as-object';
 import quoteAsObjectRaw from './quote-as-raw-object';
-import raidQuickActionTargetUserDisplayName from './raid-quick-action-target-user-display-name';
-import raidQuickActionTargetUsername from './raid-quick-action-target-username';
 import randomAdvice from './random-advice';
 import randomDadJoke from './random-dad-joke';
 import randomRedditImage from './random-reddit-image';
@@ -27,8 +25,6 @@ export default [
     date,
     discordTimestamp,
     profilePageByteBinToken,
-    raidQuickActionTargetUserDisplayName,
-    raidQuickActionTargetUsername,
     quote,
     quoteAsObject,
     quoteAsObjectRaw,
