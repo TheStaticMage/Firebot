@@ -1,4 +1,4 @@
-import { QuickActionDefinition, QuickActionTriggerEvent, SystemQuickAction } from "../../types/quick-actions";
+import { QuickActionDefinition, SystemQuickAction } from "../../types/quick-actions";
 import { EffectList } from "../../types/effects";
 import { EffectTrigger } from "../../shared/effect-constants";
 import JsonDbManager from "../database/json-db-manager";
@@ -12,6 +12,7 @@ import { GiveCurrencyQuickAction } from "./builtin/give-currency";
 import { OpenRewardQueueQuickAction } from "./builtin/open-reward-request-queue";
 import { StreamInfoQuickAction } from "./builtin/stream-info";
 import { StreamPreviewQuickAction } from "./builtin/stream-preview";
+
 
 class QuickActionManager extends JsonDbManager<QuickActionDefinition> {
     systemQuickActions: SystemQuickAction[] = [
@@ -44,7 +45,7 @@ class QuickActionManager extends JsonDbManager<QuickActionDefinition> {
         );
 
         frontendCommunicator.on("quick-actions:trigger-quick-action",
-            (quickActionId: string, params: Record<string, unknown> = {}) => this.triggerQuickAction(quickActionId, params)
+            (quickActionId: string) => this.triggerQuickAction(quickActionId)
         );
     }
 
@@ -54,10 +55,7 @@ class QuickActionManager extends JsonDbManager<QuickActionDefinition> {
 
     getAllItems(): QuickActionDefinition[] {
         return [
-            ...this.getSystemQuickActionDefinitions().map((sqa) => {
-                const customization = Object.values(this.items).find(qa => qa.id === sqa.id);
-                return customization || sqa;
-            }),
+            ...this.getSystemQuickActionDefinitions(),
             ...Object.values(this.items)
         ];
     }
@@ -90,7 +88,7 @@ class QuickActionManager extends JsonDbManager<QuickActionDefinition> {
         return this.systemQuickActions.map(sqa => sqa.definition);
     }
 
-    triggerQuickAction(quickActionId: string, params: Record<string, unknown> = {}): void {
+    triggerQuickAction(quickActionId: string): void {
         const triggeredQuickAction = [
             ...this.getSystemQuickActionDefinitions(),
             ...Object.values(this.items)
@@ -127,24 +125,8 @@ class QuickActionManager extends JsonDbManager<QuickActionDefinition> {
             return;
         }
 
-        const systemQuickAction = this.systemQuickActions.find(sqa => sqa.definition.id === triggeredQuickAction.id);
-        if (systemQuickAction) {
-            if (!systemQuickAction.definition.properties?.customizable) {
-                systemQuickAction.onTriggerEvent();
-                return;
-            }
-
-            const customizedAction = Object.values(this.items).find(qa => qa.id === triggeredQuickAction.id);
-            const triggerEvent: QuickActionTriggerEvent = {
-                config: customizedAction || {},
-                params
-            };
-            systemQuickAction.onTriggerEvent(triggerEvent);
-            return;
-        }
-
-        // Should never get here, but throw an error just in case
-        throw new Error(`Quick action with ID ${triggeredQuickAction.id} not found.`);
+        const systemQuickAction = this.systemQuickActions.find(sqa => sqa.definition.id === quickActionId);
+        systemQuickAction.onTriggerEvent();
     }
 
     triggerUiRefresh(): void {

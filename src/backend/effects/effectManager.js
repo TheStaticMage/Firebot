@@ -230,7 +230,6 @@ frontendCommunicator.onAsync("getEffectDefinitions", async (triggerData) => {
 
                     switch (triggerType) {
                         case EffectTrigger.EVENT:
-                        case EffectTrigger.QUICK_ACTION:
                             if (effectTriggerData === true) {
                                 return true;
                             }

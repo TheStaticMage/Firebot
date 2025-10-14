@@ -2,7 +2,6 @@
 
 (function() {
     /** @typedef {import("../../../types/quick-actions").QuickActionDefinition} QuickAction */
-    /** @typedef {import("../../../types/quick-actions").QuickActionProperties} QuickActionProperties */
 
     angular
         .module("firebotApp")
@@ -11,9 +10,6 @@
 
             /** @type {QuickAction[]} */
             service.quickActions = [];
-
-            /** @type {Record<string, QuickActionProperties>} */
-            service.quickActionProperties = {};
 
             /**
              * @memberof quickActionService
@@ -33,11 +29,10 @@
              * @returns {Promise.<void>}
              */
             service.loadQuickActions = async () => {
-                const response = await backendCommunicator.fireEventAsync("getQuickActions");
+                const quickActions = await backendCommunicator.fireEventSync("quick-actions:get-quick-actions");
 
-                if (response) {
-                    service.quickActions = response.definitions || [];
-                    service.quickActionProperties = response.properties || {};
+                if (quickActions) {
+                    service.quickActions = quickActions;
                 }
 
                 service.setupListeners();
@@ -71,14 +66,6 @@
                     utilityService.showModal({
                         component: "rewardQueueModal",
                         size: "lg"
-                    });
-                });
-
-                backendCommunicator.on("trigger-quickaction:raid", (resolveObj) => {
-                    utilityService.showModal({
-                        component: "raidModal",
-                        size: "md",
-                        resolveObj: resolveObj
                     });
                 });
             };
@@ -131,16 +118,11 @@
              * @returns {void}
              */
             service.showAddOrEditCustomQuickActionModal = (customQuickAction) => {
-                const quickAction = {
-                    definition: customQuickAction,
-                    properties: service.quickActionProperties[customQuickAction?.id] || {}
-                };
-
                 utilityService.showModal({
                     component: "addOrEditCustomQuickActionModal",
                     size: "md",
                     resolveObj: {
-                        quickAction: () => quickAction
+                        quickAction: () => customQuickAction
                     }
                 });
             };

@@ -48,17 +48,11 @@ export type Trigger = {
             minimum?: number;
             maximum?: number;
         };
-        quickAction?: {
-            id: string;
-            [x: string]: unknown;
-        };
         [x: string]: unknown;
     };
     effectOutputs?: { [key: string]: unknown };
 };
 
-type TriggerValueType<T extends TriggerType> = T extends "event" | "quick_action" ? string[] | boolean : boolean;
-
 export type TriggersObject = {
-    [T in TriggerType]?: TriggerValueType<T>;
+    [T in TriggerType]?: T extends "event" ? string[] | boolean : boolean;
 };
