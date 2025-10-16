@@ -4,13 +4,15 @@ import http from "http";
 import bodyParser from "body-parser";
 import cors from 'cors';
 import path from 'path';
-import logger from "../backend/logwrapper";
+
+import { Awaitable } from "../types/util-types";
 import { SettingsManager } from "../backend/common/settings-manager";
 import effectManager from "../backend/effects/effectManager";
 import { ResourceTokenManager } from "../backend/resource-token-manager";
 import websocketServerManager from "./websocket-server-manager";
 import { CustomWebSocketHandler } from "../types/websocket";
 import overlayWidgetManager from "../backend/overlay-widgets/overlay-widgets-manager";
+import logger from "../backend/logwrapper";
 
 import dataAccess from "../backend/common/data-access";
 import frontendCommunicator from "../backend/common/frontend-communicator";
@@ -39,7 +41,7 @@ interface CustomRoute {
     route: string;
     fullRoute: string;
     method: HttpMethod;
-    callback: (req: Request, res: Response) => Promise<void> | void;
+    callback: (req: Request, res: Response) => Awaitable<void>;
 }
 
 class HttpServerManager extends EventEmitter {
@@ -97,7 +99,7 @@ class HttpServerManager extends EventEmitter {
         app.set("view engine", "ejs");
 
         // Get our router for the current v1 api methods
-        const v1Router = require("./api/v1/v1Router");
+        const v1Router = require("./api/v1/v1-router");
         app.use("/api/v1", v1Router);
 
         app.get("/api/v1/auth/callback", (_, res) => {
