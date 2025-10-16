@@ -202,6 +202,13 @@
                         ></chat-settings-toggle>
 
                         <chat-settings-toggle
+                            setting="settings.getSetting('ChatHideRewardRedemptions')"
+                            title="Hide reward redemptions"
+                            input-id="hideRewardRedemptions"
+                            on-update="settings.saveSetting('ChatHideRewardRedemptions', setting)"
+                        ></chat-settings-toggle>
+
+                        <chat-settings-toggle
                             setting="settings.getSetting('ChatHideWhispers')"
                             title="Hide whispers in chat feed"
                             input-id="chatHideWhispers"

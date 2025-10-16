@@ -606,6 +606,19 @@
         };
     });
 
+    app.filter("hideRewardRedemptions", function(settingsService) {
+        return function(elements) {
+            const shouldHide = settingsService.getSetting("ChatHideRewardRedemptions");
+            if (!shouldHide) {
+                return elements;
+            }
+            return elements.filter((e) => {
+                return e.type !== 'redemption';
+            }
+            );
+        };
+    });
+
     app.filter("hideWhispers", function(settingsService) {
         return function(elements) {
             const shouldHide = settingsService.getSetting("ChatHideWhispers");
