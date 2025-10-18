@@ -1,12 +1,15 @@
 "use strict";
+
+const { app } = require("electron");
+const EventEmitter = require("events");
+const path = require("path");
+
 const twitchChat = require("../../../chat/twitch-chat");
 const { TwitchApi } = require("../../../streaming-platforms/twitch/api");
 const profileManager = require("../../profile-manager");
 const settings = require("../../settings-manager").SettingsManager;
-const path = require("path");
 const logger = require("../../../logwrapper");
-const { app } = require("electron");
-const EventEmitter = require("events");
+const utils = require("../../../utils");
 
 const webhookManager = require("../../../webhooks/webhook-config-manager");
 
@@ -148,7 +151,7 @@ function buildModules(scriptManifest) {
         effectManager: require("../../../effects/effectManager"),
         effectRunner: require("../../effect-runner"),
         conditionManager: require("../../../effects/builtin/conditional-effects/conditions/condition-manager"),
-        restrictionManager: require("../../../restrictions/restriction-manager"),
+        restrictionManager: require("../../../restrictions/restriction-manager").RestrictionsManager,
         commandManager: require("../../../chat/commands/command-manager"),
         eventManager: require("../../../events/EventManager"),
         eventFilterManager: require("../../../events/filters/filter-manager"),
@@ -184,7 +187,14 @@ function buildModules(scriptManifest) {
         quotesManager: require("../../../quotes/quote-manager").QuoteManager,
         frontendCommunicator: require("../../frontend-communicator"),
         counterManager: require("../../../counters/counter-manager").CounterManager,
-        utils: require("../../../utility"),
+        utils: {
+            ...utils,
+            // These are for back-compat
+            secondsForHumans: secs => utils.humanizeTime(secs),
+            getUptime: async () => await TwitchApi.streams.getStreamUptime(),
+            formattedSeconds: (secs, simpleOutput = false) =>
+                utils.humanizeTime(secs, simpleOutput === true ? "simple" : "default")
+        },
         resourceTokenManager: require("../../../resource-token-manager").ResourceTokenManager,
         webhookManager: new ScriptWebhookManager(scriptNameNormalized),
         notificationManager: {
