@@ -157,7 +157,6 @@ function buildModules(scriptManifest) {
         replaceVariableFactory: require("../../../variables/variable-factory"),
         integrationManager: require("../../../integrations/integration-manager"),
         customVariableManager: require("../../../common/custom-variable-manager").CustomVariableManager,
-        chatRolesManager: require("../../../roles/chat-roles-manager").ChatRolesManager,
         customRolesManager: require("../../../roles/custom-roles-manager"),
         firebotRolesManager: require("../../../roles/firebot-roles-manager"),
         timerManager: require("../../../timers/timer-manager").TimerManager,
