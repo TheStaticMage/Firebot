@@ -173,7 +173,7 @@ const effectGroup = {
                 newTrigger.metadata.presetListArgs = effect.presetListArgs;
 
                 // Prevent loops if a preset list directly or indirectly calls
-                // itself.
+                // itself. Some recursion is allowed, but we cap it at 100 calls.
                 if (newTrigger.metadata.stackDepth == null) {
                     newTrigger.metadata.stackDepth = {};
                 }
@@ -182,8 +182,8 @@ const effectGroup = {
                 }
                 newTrigger.metadata.stackDepth[presetList.id] += 1;
 
-                if (newTrigger.metadata.stackDepth[presetList.id] > 5) {
-                    logger.warn(`Preset Effect List '${presetList.name}' (ID: ${presetList.id}) has been triggered more than 5 times in the same chain. Stopping execution to prevent infinite loop.`);
+                if (newTrigger.metadata.stackDepth[presetList.id] > 100) {
+                    logger.error(`Preset Effect List '${presetList.name}' (ID: ${presetList.id}) has been triggered more than 100 times in the same chain. Stopping execution to prevent infinite loop.`);
                     return resolve(true);
                 }
 
