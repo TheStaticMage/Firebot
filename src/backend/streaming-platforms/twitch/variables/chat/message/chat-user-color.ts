@@ -1,8 +1,6 @@
-import { ReplaceVariable } from "../../../../../../types/variables";
-import { EffectTrigger } from "../../../../../../shared/effect-constants";
-import { OutputDataType, VariableCategory } from "../../../../../../shared/variable-constants";
+import type { ReplaceVariable } from "../../../../../../types/variables";
+import { AccountAccess } from "../../../../../common/account-access";
 import { TwitchApi } from "../../../api";
-import accountAccess from "../../../../../common/account-access";
 import viewerDatabase from "../../../../../viewers/viewer-database";
 
 const DEFAULT_COLOR = "#ffffff";
@@ -21,8 +19,8 @@ const model : ReplaceVariable = {
                 description: "Gets the color for associated user (Ie who triggered command, pressed button, etc)."
             }
         ],
-        categories: [VariableCategory.COMMON, VariableCategory.TRIGGER, VariableCategory.USER],
-        possibleDataOutput: [OutputDataType.TEXT]
+        categories: ["common", "user based"],
+        possibleDataOutput: ["text"]
     },
     evaluator: async (trigger, username: string) => {
         try {
@@ -36,15 +34,15 @@ const model : ReplaceVariable = {
             }
             if (trigger.metadata.chatMessage) {
                 chatColor = trigger?.metadata?.chatMessage?.color;
-            } else if (trigger.type === EffectTrigger.EVENT || trigger.type === EffectTrigger.MANUAL) {
+            } else if (trigger.type === "event" || trigger.type === "manual") {
                 chatColor = trigger?.metadata?.eventData?.chatMessage?.color;
             }
             if (chatColor == null) {
-                const userId = trigger?.metadata?.userId as string ?? accountAccess.getAccounts().streamer.userId;
+                const userId = trigger?.metadata?.userId as string ?? AccountAccess.getAccounts().streamer.userId;
                 chatColor = await TwitchApi.chat.getColorForUser(userId);
             }
             return chatColor ?? DEFAULT_COLOR;
-        } catch (error) {
+        } catch {
             return DEFAULT_COLOR;
         }
     }

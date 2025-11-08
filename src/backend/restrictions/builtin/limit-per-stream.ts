@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
 
-import { Trigger } from "../../../types/triggers";
-import { RestrictionType } from "../../../types/restrictions";
-import accountAccess from "../../common/account-access";
+import type { RestrictionType } from "../../../types/restrictions";
+import type { Trigger } from "../../../types/triggers";
+
+import { AccountAccess } from "../../common/account-access";
 import connectionManager from "../../common/connection-manager";
 import frontendCommunicator from "../../common/frontend-communicator";
 
@@ -91,7 +92,7 @@ const limitPerStreamRestriction: RestrictionType<RestrictionData> = {
     },
     predicate: async (triggerData, restrictionData, inherited) => {
         return new Promise((resolve, reject) => {
-            const streamer = accountAccess.getAccounts().streamer;
+            const streamer = AccountAccess.getAccounts().streamer;
 
             if (!streamer.loggedIn) {
                 return reject("Streamer account is not logged in.");

@@ -1,13 +1,14 @@
 "use strict";
 const { shell } = require("electron");
-const { v4: uuid } = require("uuid");
-const logger = require("../../../logwrapper");
-const { wait } = require("../../../utils");
-const profileManager = require("../../profile-manager");
-const { getScriptPath, buildRunRequest, mapParameters } = require("./custom-script-helpers");
+const { randomUUID } = require("crypto");
+
+const { SettingsManager } = require("../../settings-manager");
+const { ProfileManager } = require("../../profile-manager");
 const effectRunner = require("../../effect-runner.js");
-import frontendCommunicator from "../../frontend-communicator";
-import { SettingsManager } from "../../settings-manager";
+const frontendCommunicator = require("../../frontend-communicator");
+const logger = require("../../../logwrapper");
+const { wait, simpleClone } = require("../../../utils");
+const { getScriptPath, buildRunRequest, mapParameters } = require("./custom-script-helpers");
 
 /**
  * @typedef { import('./script-types').ScriptData } ScriptData
@@ -75,7 +76,7 @@ async function executeScript(scriptData, trigger, isStartupScript = false) {
     if (manifest.startupOnly && !isStartupScript) {
         frontendCommunicator.send(
             "error",
-            `Could not run startup-only script "${manifest.name}" as it was executed outside of Firebot startup (Settings > Advanced > Startup Scripts)`
+            `Could not run startup-only script "${manifest.name}" as it was executed outside of Firebot startup (Settings > Scripts > Startup Scripts)`
         );
         return;
     }
@@ -121,18 +122,18 @@ async function executeScript(scriptData, trigger, isStartupScript = false) {
         effectsObj = effects;
     } else if (effectsIsArray) {
         effectsObj = {
-            id: uuid(),
+            id: randomUUID(),
             list: effects
                 .filter(e => e.type != null && e.type !== "")
                 .map((e) => {
                     if (e.id == null) {
-                        e.id = uuid();
+                        e.id = randomUUID();
                     }
                     return e;
                 })
         };
 
-        const clonedTrigger = JSON.parse(JSON.stringify(trigger || {}));
+        const clonedTrigger = simpleClone(trigger || {});
 
         const processEffectsRequest = {
             trigger: clonedTrigger,
@@ -255,7 +256,7 @@ async function stopAllScripts() {
 }
 
 frontendCommunicator.on("openScriptsFolder", () => {
-    shell.openPath(profileManager.getPathInProfile("/scripts"));
+    shell.openPath(ProfileManager.getPathInProfile("/scripts"));
 });
 
 exports.runScript = runScript;

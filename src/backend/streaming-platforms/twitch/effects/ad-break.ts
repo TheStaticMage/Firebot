@@ -1,5 +1,4 @@
-import { EffectType } from "../../../../types/effects";
-import { EffectCategory } from "../../../../shared/effect-constants";
+import type { EffectType } from "../../../../types/effects";
 import { TwitchApi } from "../api";
 
 const model: EffectType<{
@@ -10,7 +9,7 @@ const model: EffectType<{
         name: "Ad Break",
         description: "Trigger an ad break",
         icon: "fad fa-ad",
-        categories: [EffectCategory.COMMON, EffectCategory.MODERATION, EffectCategory.TWITCH],
+        categories: ["common", "Moderation", "twitch"],
         dependencies: {
             twitch: true
         }
@@ -68,4 +67,4 @@ const model: EffectType<{
     }
 };
 
-module.exports = model;
+export = model;

@@ -4,7 +4,7 @@
 
     angular
         .module("firebotApp")
-        .factory("presetEffectListsService", function($q, backendCommunicator,
+        .factory("presetEffectListsService", function(backendCommunicator,
             utilityService, objectCopyHelper, ngToast) {
             const service = {};
 
@@ -19,13 +19,8 @@
                 }
             }
 
-            service.loadPresetEffectLists = async function() {
-                $q.when(backendCommunicator.fireEventAsync("getPresetEffectLists"))
-                    .then((presetEffectLists) => {
-                        if (presetEffectLists) {
-                            service.presetEffectLists = presetEffectLists;
-                        }
-                    });
+            service.loadPresetEffectLists = () => {
+                service.presetEffectLists = backendCommunicator.fireEventSync("preset-effect-lists:get-preset-effect-lists");
             };
 
             backendCommunicator.on("all-preset-lists", (presetEffectLists) => {
@@ -42,20 +37,21 @@
                 return service.presetEffectLists.find(pel => pel.id === presetEffectListId);
             };
 
-            service.savePresetEffectList = function(presetEffectList, isNew = false) {
-                return $q.when(backendCommunicator.fireEventAsync("savePresetEffectList", { presetEffectList, isNew }))
-                    .then((savedPresetEffectList) => {
-                        if (savedPresetEffectList) {
-                            updatePresetEffectList(savedPresetEffectList);
-                            return savedPresetEffectList;
-                        }
-                        return null;
-                    });
+            service.savePresetEffectList = (presetEffectList, isNew = false) => {
+                const savedPresetEffectList = backendCommunicator.fireEventSync(
+                    "preset-effect-lists:save-preset-effect-list",
+                    { presetEffectList, isNew }
+                );
+                if (savedPresetEffectList) {
+                    updatePresetEffectList(savedPresetEffectList);
+                    return savedPresetEffectList;
+                }
+                return null;
             };
 
             service.saveAllPresetEffectLists = (presetEffectLists) => {
                 service.presetEffectLists = presetEffectLists;
-                backendCommunicator.fireEvent("saveAllPresetEffectLists", presetEffectLists);
+                backendCommunicator.fireEvent("preset-effect-lists:save-all-preset-effect-lists", presetEffectLists);
             };
 
             service.presetEffectListNameExists = (name) => {
@@ -114,21 +110,20 @@
                     copiedPresetEffectList.name += " copy";
                 }
 
-                service.savePresetEffectList(copiedPresetEffectList, true).then((savedList) => {
-                    if (savedList != null) {
-                        ngToast.create({
-                            className: 'success',
-                            content: 'Successfully duplicated a preset effect list!'
-                        });
-                    } else {
-                        ngToast.create("Unable to duplicate preset effect list.");
-                    }
-                });
+                const savedList = service.savePresetEffectList(copiedPresetEffectList, true);
+                if (savedList != null) {
+                    ngToast.create({
+                        className: 'success',
+                        content: 'Successfully duplicated a preset effect list!'
+                    });
+                } else {
+                    ngToast.create("Unable to duplicate preset effect list.");
+                }
             };
 
-            service.deletePresetEffectList = function(presetEffectListId) {
+            service.deletePresetEffectList = (presetEffectListId) => {
                 service.presetEffectLists = service.presetEffectLists.filter(pel => pel.id !== presetEffectListId);
-                backendCommunicator.fireEvent("deletePresetEffectList", presetEffectListId);
+                backendCommunicator.fireEvent("preset-effect-lists:delete-preset-effect-list", presetEffectListId);
             };
 
             service.showAddEditPresetEffectListModal = function(presetEffectList) {

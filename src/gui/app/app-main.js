@@ -1,12 +1,11 @@
 /* eslint-disable angular/no-run-logic */
-/* eslint-disable angular/di-unused */
+
 
 "use strict";
 (function() {
     const electron = require("electron");
     const shell = electron.shell;
 
-    const profileManager = require("../../backend/common/profile-manager");
     const secrets = require("../../secrets.json");
 
     const moment = require("moment");
@@ -112,10 +111,6 @@
     ]);
 
     app.run(function initializeApplication(
-        logger,
-        quickActionsService,
-        chatMessagesService,
-        activityFeedService,
         viewerRolesService,
         viewerRanksService,
         connectionService,
@@ -129,6 +124,7 @@
         ttsService,
         settingsService,
         countersService,
+        hotkeyService,
         gamesService,
         presetEffectListsService,
         startupScriptsService,
@@ -138,8 +134,6 @@
         channelRewardsService,
         sortTagsService,
         iconsService,
-        videoService,
-        replaceVariableService,
         variableMacroService,
         uiExtensionsService,
         webhooksService,
@@ -169,6 +163,8 @@
         chatModerationService.loadChatModerationData();
 
         countersService.loadCounters();
+
+        hotkeyService.loadHotkeys();
 
         gamesService.loadGames();
 
@@ -306,7 +302,7 @@
                 const successful = document.execCommand("copy");
                 const msg = successful ? "successful" : "unsuccessful";
                 logger.info(`Copying text command was ${msg}`);
-            } catch (err) {
+            } catch {
                 logger.error("Oops, unable to copy text to clipboard.");
             }
 
@@ -380,7 +376,7 @@
                 templateUrl: "renameProfileModal.html",
                 size: 'sm',
                 resolveObj: {
-                    currentProfileId: () => profileManager.getLoggedInProfile()
+                    currentProfileId: () => ipcRenderer.sendSync("profiles:get-logged-in-profile")
                 },
                 // This is the controller to be used for the modal.
                 controllerFunc: ($scope, $uibModalInstance, connectionService, ngToast, currentProfileId) => {
@@ -450,7 +446,7 @@
             }
         };
 
-        $scope.currentProfileId = profileManager.getLoggedInProfile();
+        $scope.currentProfileId = ipcRenderer.sendSync("profiles:get-logged-in-profile");
 
         /**
          * Initial App Load
@@ -763,6 +759,25 @@
     app.filter('commify', function() {
         return function(input) {
             return input ? input.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "";
+        };
+    });
+
+    app.filter('reverseChat', function() {
+        return (items, reverse) => {
+            return reverse === true
+                ? items.toSorted((a, b) => {
+                    // Keep chat message and associated redemption in their current order
+                    if (a.type === "message"
+                        && b.type === "redemption"
+                        && a.rewardMatched
+                        && a.data.customRewardId === b.data.reward.id
+                    ) {
+                        return 1;
+                    }
+
+                    return -1;
+                })
+                : items;
         };
     });
 

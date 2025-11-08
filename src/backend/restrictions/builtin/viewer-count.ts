@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
 
-import { RestrictionType } from "../../../types/restrictions";
+import type { RestrictionType } from "../../../types/restrictions";
 import { TwitchApi } from "../../streaming-platforms/twitch/api";
-import accountAccess from "../../common/account-access";
+import { AccountAccess } from "../../common/account-access";
 import logger from "../../logwrapper";
 
 type ComparisonType = "less" | "greater" | "equal";
@@ -75,7 +75,7 @@ const model: RestrictionType<{
     predicate: (triggerData, restrictionData) => {
         return new Promise(async (resolve, reject) => {
             const client = TwitchApi.streamerClient;
-            const streamer = accountAccess.getAccounts().streamer;
+            const streamer = AccountAccess.getAccounts().streamer;
 
             let currentViewers = null;
             try {

@@ -1,33 +1,17 @@
 import { TypedEmitter } from "tiny-typed-emitter";
-import logger from "../../logwrapper";
+
+import type {
+    EffectQueueConfig,
+    QueueItem,
+    QueueState,
+    RunEffectsContext
+} from "../../../types/effects";
+
+import { EventManager } from "../../events/event-manager";
 import effectRunner from "../../common/effect-runner";
-import { wait } from "../../utils";
-import eventManager from "../../events/EventManager";
+import logger from "../../logwrapper";
 import { abortEffectList } from "../../common/effect-abort-helpers";
-import { EffectQueueConfig } from "./effect-queue-config-manager";
-import { EffectList } from "../../../types/effects";
-
-export type QueueStatus = "running" | "paused" | "idle" | "canceled";
-
-export type RunEffectsContext = {
-    effects?: EffectList;
-    [key: string]: unknown;
-};
-
-type QueueItem = {
-    runEffectsContext: RunEffectsContext;
-    duration?: number;
-    priority?: "none" | "high";
-};
-
-export type QueueState = {
-    status: QueueStatus;
-    queuedItems: QueueItem[];
-    activeItems: QueueItem[];
-    interval: number;
-    mode: "auto" | "interval" | "custom" | "manual";
-    runEffectsImmediatelyWhenPaused?: boolean;
-};
+import { simpleClone, wait } from "../../utils";
 
 type Events = {
     "queue-state-updated": (newState: QueueState, changedState: Partial<QueueState>) => void;
@@ -66,7 +50,7 @@ export class EffectQueue extends TypedEmitter<Events> {
     }
 
     get state(): QueueState {
-        return JSON.parse(JSON.stringify(this._state)) as QueueState;
+        return simpleClone(this._state);
     }
 
     get queueLength() {
@@ -176,7 +160,7 @@ export class EffectQueue extends TypedEmitter<Events> {
 
         logger.debug(`Added more effects to queue ${this.id}. Current length=${queue.length}`);
 
-        void eventManager.triggerEvent("firebot", "effect-queue-added", {
+        void EventManager.triggerEvent("firebot", "effect-queue-added", {
             effectQueueId: this.id
         });
 
@@ -199,7 +183,7 @@ export class EffectQueue extends TypedEmitter<Events> {
             this._setState({
                 status: "running"
             });
-            this._runQueue().then(() => {
+            void this._runQueue().then(() => {
                 logger.debug(`Queue ${this.id} is ${this._state.status === "paused" && this._state.queuedItems.length > 0 ? "paused" : "cleared"}... going idle.`);
                 if (this._state.status === "running") {
                     this._setState({
@@ -207,7 +191,7 @@ export class EffectQueue extends TypedEmitter<Events> {
                     });
                 }
                 if (this._state.queuedItems.length === 0) {
-                    eventManager.triggerEvent("firebot", "effect-queue-cleared", {
+                    void EventManager.triggerEvent("firebot", "effect-queue-cleared", {
                         effectQueueId: this.id
                     });
                 }
@@ -247,7 +231,7 @@ export class EffectQueue extends TypedEmitter<Events> {
     pauseQueue() {
         logger.debug(`Pausing queue ${this.id}...`);
 
-        void eventManager.triggerEvent("firebot", "effect-queue-status", {
+        void EventManager.triggerEvent("firebot", "effect-queue-status", {
             effectQueueId: this.id
         });
 
@@ -269,7 +253,7 @@ export class EffectQueue extends TypedEmitter<Events> {
     resumeQueue() {
         logger.debug(`Resuming queue ${this.id}...`);
 
-        void eventManager.triggerEvent("firebot", "effect-queue-status", {
+        void EventManager.triggerEvent("firebot", "effect-queue-status", {
             effectQueueId: this.id
         });
 

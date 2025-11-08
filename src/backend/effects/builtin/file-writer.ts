@@ -1,8 +1,8 @@
 import fs from "fs";
 import fsp from "fs/promises";
 import path from "path";
+import { randomUUID } from "crypto";
 import { EffectType } from "../../../types/effects";
-import { EffectCategory } from '../../../shared/effect-constants';
 import logger from "../../logwrapper";
 
 async function doesTextExistInFile(filepath: string, text: string): Promise<boolean> {
@@ -80,7 +80,7 @@ const fileWriter: EffectType<{
         name: "Write To File",
         description: "Write or delete some text in a file.",
         icon: "fad fa-file-edit",
-        categories: [EffectCategory.ADVANCED],
+        categories: ["advanced"],
         dependencies: []
     },
     optionsTemplate: `
@@ -203,7 +203,7 @@ const fileWriter: EffectType<{
         let text = effect.text || "";
         let escapedNewline = "␚";
         while (text.includes(escapedNewline)) {
-            escapedNewline = `␚${uuid()}␚`;
+            escapedNewline = `␚${randomUUID()}␚`;
         }
         text = text.replace(/\\\\n/g, escapedNewline);
         text = effect.writeMode === "suffix" ? text.replace(/\\n/g, "\n") : text.replace(/\\n/g, "\n").trim();

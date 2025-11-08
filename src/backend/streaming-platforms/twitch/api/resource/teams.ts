@@ -1,16 +1,15 @@
-import { ApiClient, HelixTeam } from "@twurple/api";
+import { HelixTeam } from "@twurple/api";
 import { ApiResourceBase } from "./api-resource-base";
-import logger from "../../../../logwrapper";
-import accountAccess from "../../../../common/account-access";
+import type { TwitchApi } from "../";
 
 export class TwitchTeamsApi extends ApiResourceBase {
-    constructor(streamerClient: ApiClient, botClient: ApiClient) {
-        super(streamerClient, botClient);
+    constructor(apiBase: typeof TwitchApi) {
+        super(apiBase);
     }
 
     async getTeams(broadcasterId: string): Promise<HelixTeam[]> {
         try {
-            const teams = await this._streamerClient.teams.getTeamsForBroadcaster(broadcasterId);
+            const teams = await this.streamerClient.teams.getTeamsForBroadcaster(broadcasterId);
 
             if (teams != null) {
                 return teams;
@@ -18,17 +17,17 @@ export class TwitchTeamsApi extends ApiResourceBase {
 
             return [];
         } catch (error) {
-            logger.error("Failed to get teams for broadcaster", error.message);
+            this.logger.error(`Failed to get teams for broadcaster: ${(error as Error).message}`);
             return [];
         }
     }
 
     async getMatchingTeams(userId: string): Promise<HelixTeam[]> {
-        const streamer = accountAccess.getAccounts().streamer;
+        const streamer = this.accounts.streamer;
         const streamerTeams = await this.getTeams(streamer.userId);
         const userTeams = await this.getTeams(userId);
 
-        const teams = [];
+        const teams: HelixTeam[] = [];
         for (const streamerTeam of streamerTeams) {
             for (const userTeam of userTeams) {
                 if (streamerTeam.id === userTeam.id) {
@@ -42,7 +41,7 @@ export class TwitchTeamsApi extends ApiResourceBase {
 
     async getMatchingTeamsByName(username: string): Promise<HelixTeam[]> {
         try {
-            const user = await this._streamerClient.users.getUserByName(username);
+            const user = await this.streamerClient.users.getUserByName(username);
 
             if (user == null) {
                 return null;
@@ -55,7 +54,7 @@ export class TwitchTeamsApi extends ApiResourceBase {
 
             return [];
         } catch (error) {
-            logger.error("Failed to get teams for broadcaster", error.message);
+            this.logger.error(`Failed to get teams for broadcaster: ${(error as Error).message}`);
             return [];
         }
     }
@@ -71,7 +70,13 @@ export class TwitchTeamsApi extends ApiResourceBase {
     }
 
     async getStreamerTeams(): Promise<HelixTeam[]> {
-        const streamer = accountAccess.getAccounts().streamer;
+        const streamer = this.accounts.streamer;
+
+        if (!streamer?.loggedIn) {
+            this.logger.warn("Cannot get streamer's teams. Streamer is not currently logged in,");
+            return [];
+        }
+
         const streamerTeams = await this.getTeams(streamer.userId);
 
         if (streamerTeams != null) {

@@ -1,19 +1,33 @@
 import { ApiClient } from "@twurple/api";
 import { ListenerSignature, TypedEmitter } from "tiny-typed-emitter";
+import type { TwitchApi } from "../";
 
 export abstract class ApiResourceBase<T extends ListenerSignature<T> = unknown> extends TypedEmitter<T> {
-    protected _streamerClient: ApiClient;
-    protected _botClient: ApiClient;
+    private _apiBase: typeof TwitchApi;
 
-    constructor(streamerClient: ApiClient, botClient: ApiClient) {
+    constructor(apiBase: typeof TwitchApi) {
         super();
 
-        this._streamerClient = streamerClient;
-        this._botClient = botClient;
+        this._apiBase = apiBase;
     }
 
-    updateApiClients(streamerClient: ApiClient, botClient: ApiClient) {
-        this._streamerClient = streamerClient;
-        this._botClient = botClient;
+    protected get streamerClient(): ApiClient {
+        return this._apiBase.streamerClient;
+    }
+
+    protected get botClient(): ApiClient {
+        return this._apiBase.botClient;
+    }
+
+    protected get moderationClient(): ApiClient {
+        return this._apiBase.moderationClient;
+    }
+
+    protected get logger() {
+        return this._apiBase.logger;
+    }
+
+    protected get accounts() {
+        return this._apiBase.accounts;
     }
 }

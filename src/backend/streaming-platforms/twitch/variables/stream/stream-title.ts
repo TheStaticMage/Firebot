@@ -1,7 +1,6 @@
-import { ReplaceVariable } from "../../../../../types/variables";
-import { OutputDataType, VariableCategory } from "../../../../../shared/variable-constants";
+import type { ReplaceVariable } from "../../../../../types/variables";
+import { AccountAccess } from "../../../../common/account-access";
 import { TwitchApi } from "../../api";
-import accountAccess from "../../../../common/account-access";
 
 const model : ReplaceVariable = {
     definition: {
@@ -22,12 +21,12 @@ const model : ReplaceVariable = {
                 description: "Gets the stream title for a specific channel."
             }
         ],
-        categories: [VariableCategory.COMMON, VariableCategory.USER],
-        possibleDataOutput: [OutputDataType.TEXT]
+        categories: ["common", "user based"],
+        possibleDataOutput: ["text"]
     },
     evaluator: async (trigger, username: string) => {
         if (username == null) {
-            username = accountAccess.getAccounts().streamer.username;
+            username = AccountAccess.getAccounts().streamer.username;
         }
 
         const channelInfo = await TwitchApi.channels.getChannelInformationByUsername(username);

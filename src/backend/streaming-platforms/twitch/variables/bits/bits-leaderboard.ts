@@ -1,8 +1,7 @@
-import { HelixBitsLeaderboardPeriod } from "@twurple/api";
+import type { HelixBitsLeaderboardPeriod } from "@twurple/api";
 import moment from "moment";
 
-import { ReplaceVariable, Trigger } from "../../../../../types/variables";
-import { OutputDataType, VariableCategory } from "../../../../../shared/variable-constants";
+import type { ReplaceVariable, Trigger } from "../../../../../types/variables";
 import { TwitchApi } from "../../api";
 
 const expressionish = require('expressionish');
@@ -22,8 +21,8 @@ const model : ReplaceVariable = {
                 description: "Returns an array of the bits leaderboard of the streamer's channel during the specified period that occurred on the specified date, up to the specified count. Each object in the array has a `username` and `amount`. Period can be 'day', 'week', 'month', 'year', or 'all'."
             }
         ],
-        categories: [VariableCategory.COMMON, VariableCategory.ADVANCED],
-        possibleDataOutput: [OutputDataType.ARRAY]
+        categories: ["common", "advanced"],
+        possibleDataOutput: ["array"]
     },
     argsCheck: (
         count: null | number = 1,

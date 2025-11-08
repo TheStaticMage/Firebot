@@ -1,7 +1,6 @@
 import { app } from "electron";
 
-import { ReplaceVariable } from "../../../../types/variables";
-import { OutputDataType, VariableCategory } from "../../../../shared/variable-constants";
+import type { ReplaceVariable } from "../../../../types/variables";
 
 import logger from "../../../logwrapper";
 
@@ -18,7 +17,7 @@ const callUrl = async (url: string): Promise<Response> => {
             return response;
         }
     } catch (error) {
-        logger.warn(`error calling readApi url: ${url}`, error.message);
+        logger.warn(`error calling readApi url: ${url}`, (error as Error).message);
         return null;
     }
 };
@@ -41,8 +40,8 @@ const model : ReplaceVariable = {
                 description: "Returns 'her' pronoun in she/her set if available, otherwise uses them."
             }
         ],
-        categories: [VariableCategory.COMMON],
-        possibleDataOutput: [OutputDataType.TEXT]
+        categories: ["common"],
+        possibleDataOutput: ["text"]
     },
     evaluator: async (
         trigger,

@@ -1,14 +1,15 @@
 import { JsonDB } from "node-json-db";
+
 import { RewardRedemptionMetadata, SavedChannelReward } from "../../types/channel-rewards";
 import { EffectList } from "../../types/effects";
 import { Trigger } from "../../types/triggers";
 import { CustomReward, RewardRedemption, RewardRedemptionsApprovalRequest } from "../streaming-platforms/twitch/api/resource/channel-rewards";
+
+import { AccountAccess } from "../common/account-access";
 import { ActiveUserHandler } from "../chat/active-user-handler";
+import { ProfileManager } from "../common/profile-manager";
 import { RestrictionsManager } from "../restrictions/restriction-manager";
 import { TwitchApi } from "../streaming-platforms/twitch/api";
-import { EffectTrigger } from "../../shared/effect-constants";
-import accountAccess from "../common/account-access";
-import profileManager from "../common/profile-manager";
 import effectRunner from "../common/effect-runner";
 import frontendCommunicator from "../common/frontend-communicator";
 import logger from "../logwrapper";
@@ -57,7 +58,7 @@ class ChannelRewardManager {
                 rewardCost: savedReward.twitchData.cost,
                 rewardImage: savedReward.twitchData.image ? savedReward.twitchData.image.url4x : savedReward.twitchData.defaultImage.url4x,
                 rewardName: savedReward.twitchData.title,
-                username: accountAccess.getAccounts().streamer.displayName,
+                username: AccountAccess.getAccounts().streamer.displayName,
                 userId: "",
                 userDisplayName: ""
             }, true);
@@ -77,8 +78,7 @@ class ChannelRewardManager {
     }
 
     getChannelRewardsDb(): JsonDB {
-        return profileManager
-            .getJsonDbInProfile("channel-rewards");
+        return ProfileManager.getJsonDbInProfile("channel-rewards");
     }
 
     async loadChannelRewards() {
@@ -322,9 +322,9 @@ class ChannelRewardManager {
 
         const processEffectsRequest = {
             trigger: {
-                type: manual ? EffectTrigger.MANUAL : EffectTrigger.CHANNEL_REWARD,
+                type: manual ? "manual" : "channel_reward",
                 metadata: metadata
-            },
+            } as Trigger,
             effects: effectList
         };
 
@@ -432,7 +432,7 @@ class ChannelRewardManager {
     }
 
     async refreshChannelRewardRedemptions(): Promise<void> {
-        if (accountAccess.getAccounts().streamer.broadcasterType === "") {
+        if (AccountAccess.getAccounts().streamer.broadcasterType === "") {
             return;
         }
 

@@ -1,9 +1,9 @@
 import { JsonDB } from "node-json-db";
-import { v4 as uuid } from "uuid";
+import { randomUUID } from "crypto";
 
-import logger from "../logwrapper";
-import profileManager from "../common/profile-manager";
+import { ProfileManager } from "../common/profile-manager";
 import frontendCommunicator from "../common/frontend-communicator";
+import logger from "../logwrapper";
 import { deepClone } from "../utils";
 
 export enum NotificationSource {
@@ -49,7 +49,7 @@ interface NotificationCache {
     knownExternalIds: string[];
 }
 
-const EXTERNAL_NOTIFICATION_SOURCE_URL = "https://raw.githubusercontent.com/crowbartools/Firebot/metadata/notifications/notifications.json";
+const EXTERNAL_NOTIFICATION_SOURCE_URL = "https://api.crowbar.tools/v1/notifications/v5";
 
 class NotificationManager {
     private _externalCheckInterval: NodeJS.Timeout;
@@ -78,7 +78,7 @@ class NotificationManager {
     }
 
     private getNotificationDb(): JsonDB {
-        return profileManager.getJsonDbInProfile("notifications");
+        return ProfileManager.getJsonDbInProfile("notifications");
     }
 
     private checkNotificationDbVersion(): boolean {
@@ -107,7 +107,7 @@ class NotificationManager {
     addNotification(notification: NotificationBase, permanentlySave = false): Notification {
         const newNotification: Notification = {
             ...notification,
-            id: uuid(),
+            id: randomUUID(),
             timestamp: new Date(),
             read: false,
             saved: permanentlySave ?? false,
@@ -212,6 +212,6 @@ class NotificationManager {
     }
 }
 
-const notificationManager = new NotificationManager();
+const manager = new NotificationManager();
 
-export default notificationManager;
+export { manager as NotificationManager };

@@ -2,7 +2,7 @@
 
 (function() {
 
-    const { v4: uuid } = require("uuid");
+    const { randomUUID } = require("crypto");
 
     /** @typedef {import("../../../../../types/overlay-widgets").OverlayWidgetType} OverlayWidgetType */
     /** @typedef {import("../../../../../types/overlay-widgets").OverlayWidgetConfig} OverlayWidgetConfig */
@@ -208,13 +208,15 @@
                     }
 
                     $ctrl.selectedType = foundType;
+
+                    $ctrl.widget.settings = {};
                 };
 
                 /**
                  * @type {OverlayWidgetConfig}
                  */
                 $ctrl.widget = {
-                    id: uuid(),
+                    id: randomUUID(),
                     name: null,
                     type: null,
                     active: true,
@@ -249,12 +251,13 @@
                 $ctrl.$onInit = () => {
                     if ($ctrl.resolve.widget != null) {
                         $ctrl.isNewWidget = false;
-                        $ctrl.widget = JSON.parse(angular.toJson($ctrl.resolve.widget));
 
-                        const foundType = overlayWidgetsService.getOverlayWidgetType($ctrl.widget.type);
+                        const foundType = overlayWidgetsService.getOverlayWidgetType($ctrl.resolve.widget.type);
                         if (foundType != null) {
                             $ctrl.onTypeSelected(foundType);
                         }
+
+                        $ctrl.widget = JSON.parse(angular.toJson($ctrl.resolve.widget));
 
                         // Reset overlay instance to default (or null) if the saved instance doesn't exist anymore
                         if ($ctrl.widget.overlayInstance != null) {
@@ -320,13 +323,13 @@
                         delete $ctrl.widget.exitAnimation;
                     }
 
-                    overlayWidgetsService.saveOverlayWidgetConfig($ctrl.widget, $ctrl.isNewWidget).then((successful) => {
-                        if (successful) {
-                            $ctrl.dismiss();
-                        } else {
-                            ngToast.create("Failed to save overlay widget. Please try again or view logs for details.");
-                        }
-                    });
+                    const successful = overlayWidgetsService.saveOverlayWidgetConfig($ctrl.widget, $ctrl.isNewWidget);
+
+                    if (successful) {
+                        $ctrl.dismiss();
+                    } else {
+                        ngToast.create("Failed to save overlay widget. Please try again or view logs for details.");
+                    }
                 };
 
                 $ctrl.delete = function() {

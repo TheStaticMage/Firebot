@@ -1,7 +1,6 @@
-import { ReplaceVariable } from "../../../../types/variables";
-import { OutputDataType, VariableCategory } from "../../../../shared/variable-constants";
+import type { ReplaceVariable } from "../../../../types/variables";
+import { AccountAccess } from "../../../common/account-access";
 import { TwitchApi } from "../api";
-import accountAccess from "../../../common/account-access";
 
 const model: ReplaceVariable = {
     definition: {
@@ -21,13 +20,13 @@ const model: ReplaceVariable = {
                 description: "Gets the follow count for a specific channel."
             }
         ],
-        categories: [VariableCategory.NUMBERS, VariableCategory.USER],
-        possibleDataOutput: [OutputDataType.NUMBER]
+        categories: ["numbers", "user based"],
+        possibleDataOutput: ["number"]
     },
     evaluator: async (trigger, username: string) => {
         let count = 0;
 
-        const streamer = accountAccess.getAccounts().streamer;
+        const streamer = AccountAccess.getAccounts().streamer;
 
         if (username == null) {
             username = streamer.username;

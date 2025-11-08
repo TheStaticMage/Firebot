@@ -1,22 +1,25 @@
 'use strict';
-const { v4: uuid } = require("uuid");
-const logger = require('../logwrapper');
-const effectManager = require("../effects/effectManager");
+
+const { randomUUID } = require("crypto");
+
 const { EffectTrigger } = require("../../shared/effect-constants");
-const accountAccess = require('./account-access');
+const { AccountAccess } = require('./account-access');
 const { ReplaceVariableManager } = require("../variables/replace-variable-manager");
+const { EffectManager } = require("../effects/effect-manager");
 const webServer = require("../../server/http-server-manager");
 const {
     addEffectAbortController,
     removeEffectAbortController
 } = require("./effect-abort-helpers");
+const { checkEffectDependencies } = require("../effects/effect-helpers");
 const frontendCommunicator = require('./frontend-communicator');
+const logger = require('../logwrapper');
 const { getEventIdFromTriggerData } = require("../utils");
 
 const SKIP_VARIABLE_PROPERTIES = ["list", "leftSideValue", "rightSideValue", "effectLabel", 'effectListLabel'];
 
 const findAndReplaceVariables = async (data, trigger, effectOutputs) => {
-    const effectDef = effectManager.getEffectById(data.type);
+    const effectDef = EffectManager.getEffectById(data.type);
 
     const effectKeysExemptFromAutoVariableReplacement = effectDef?.definition?.keysExemptFromAutoVariableReplacement ?? [];
 
@@ -58,7 +61,7 @@ const findAndReplaceVariables = async (data, trigger, effectOutputs) => {
 };
 
 function validateEffectCanRun(effectId, triggerType) {
-    const effectDefinition = effectManager.getEffectById(effectId)?.definition;
+    const effectDefinition = EffectManager.getEffectById(effectId)?.definition;
 
     if (!effectDefinition) {
         logger.warn(`Effect definition not found for effect id: ${effectId}`);
@@ -76,8 +79,6 @@ function validateEffectCanRun(effectId, triggerType) {
     }
 
     if (effectDefinition.dependencies) {
-        // require here to avoid circular dependency issues :(
-        const { checkEffectDependencies } = require("../effects/effect-helpers");
         const depsMet = checkEffectDependencies(effectDefinition.dependencies, "execution", true);
         if (!depsMet) {
             return false;
@@ -89,7 +90,7 @@ function validateEffectCanRun(effectId, triggerType) {
 
 function triggerEffect(effect, trigger, outputs, manualAbortSignal, listAbortSignal) {
     return new Promise(async (resolve, reject) => {
-        const effectDef = effectManager.getEffectById(effect.type);
+        const effectDef = EffectManager.getEffectById(effect.type);
 
         const allSignals = [manualAbortSignal];
 
@@ -142,7 +143,7 @@ function runEffects(runEffectsContext) {
     return new Promise(async (resolve) => {
         runEffectsContext = structuredClone(runEffectsContext);
 
-        runEffectsContext.executionId = uuid();
+        runEffectsContext.executionId = randomUUID();
 
         const trigger = runEffectsContext.trigger,
             effects = runEffectsContext.effects.list;
@@ -197,7 +198,7 @@ function runEffects(runEffectsContext) {
             }));
 
             try {
-                const effectExecutionId = uuid();
+                const effectExecutionId = randomUUID();
                 const effectAbortController = new AbortController();
 
                 addEffectAbortController("effect", effect.id, {
@@ -292,10 +293,10 @@ async function processEffects(processEffectsRequest) {
 
     const queueId = processEffectsRequest.effects.queue;
 
-    const effectQueueManager = require("../effects/queues/effect-queue-config-manager");
+    const { EffectQueueConfigManager } = require("../effects/queues/effect-queue-config-manager");
     const effectQueueRunner = require("../effects/queues/effect-queue-runner").default;
 
-    const queue = effectQueueManager.getItem(queueId);
+    const queue = EffectQueueConfigManager.getItem(queueId);
     if (queue != null) {
         logger.debug(`Sending effects for list ${processEffectsRequest.effects.id} to queue ${queueId}...`);
         effectQueueRunner.addEffectsToQueue(queue, runEffectsContext,
@@ -311,7 +312,7 @@ function runEffectsManually(effects, metadata = {}, triggerType = EffectTrigger.
         return;
     }
 
-    const streamerName = accountAccess.getAccounts().streamer.username || "";
+    const streamerName = AccountAccess.getAccounts().streamer.username || "";
 
     const processEffectsRequest = {
         trigger: {

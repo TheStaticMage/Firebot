@@ -11,6 +11,12 @@ export type FirebotAudioDevice = {
     deviceId: string;
 };
 
+export type FirebotGlobalValue = {
+    name: string;
+    secret?: boolean;
+    value: string;
+};
+
 export type FirebotSettingsTypes = {
     ActiveChatUserListTimeout: number;
     ActiveProfiles: string[];
@@ -41,6 +47,7 @@ export type FirebotSettingsTypes = {
     ChatHideRewardRedemptions: boolean;
     ChatHideWhispers: boolean;
     ChatPronouns: boolean;
+    ChatReverseOrder: boolean;
     ChatShowBttvEmotes: boolean;
     ChatShowFfzEmotes: boolean;
     ChatShowSevenTvEmotes: boolean;
@@ -57,13 +64,14 @@ export type FirebotSettingsTypes = {
     };
     DebugMode: boolean;
     DefaultEffectLabelsEnabled: boolean;
+    DefaultModerationUser: "streamer" | "bot";
     DefaultToAdvancedCommandMode: boolean;
     DefaultTtsVoiceId: string;
     DeleteProfile: string;
-    EventSettings: object; //TODO
+    EventSettings: object; // Pretty sure this is no longer used
     FirstTimeUse: boolean;
     ForceOverlayEffectsToContinueOnRefresh: boolean;
-    GlobalValues: Array<{ name: string; secret?: boolean, value: string; }>;
+    GlobalValues: Array<FirebotGlobalValue>;
     IgnoreSubsequentSubEventsAfterCommunitySub: boolean;
     JustUpdated: boolean;
     LastBackupDate: Date;
@@ -77,7 +85,7 @@ export type FirebotSettingsTypes = {
     OverlayResolution: {
         width: number;
         height: number;
-    },
+    };
     OverlayInstances: string[];
     PersistCustomVariables: boolean;
     QuickActions: Record<string, {
@@ -170,6 +178,7 @@ export const FirebotSettingsDefaults: FirebotSettingsTypes = {
     ChatHideRewardRedemptions: false,
     ChatHideWhispers: false,
     ChatPronouns: true,
+    ChatReverseOrder: false,
     ChatShowBttvEmotes: true,
     ChatShowFfzEmotes: true,
     ChatShowSevenTvEmotes: true,
@@ -186,6 +195,7 @@ export const FirebotSettingsDefaults: FirebotSettingsTypes = {
     },
     DebugMode: false,
     DefaultEffectLabelsEnabled: true,
+    DefaultModerationUser: "streamer",
     DefaultToAdvancedCommandMode: false,
     DefaultTtsVoiceId: undefined,
     DeleteProfile: undefined,

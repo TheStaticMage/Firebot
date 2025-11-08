@@ -1,6 +1,5 @@
-import { EffectType } from "../../../../types/effects";
-import { EffectCategory } from "../../../../shared/effect-constants";
-import accountAccess from "../../../common/account-access";
+import type { EffectType } from "../../../../types/effects";
+import { AccountAccess } from "../../../common/account-access";
 import { TwitchApi } from "../api";
 
 const model: EffectType<{
@@ -11,7 +10,7 @@ const model: EffectType<{
         name: "Enable/Disable Shield Mode",
         description: "Enable or disable Shield Mode on your Twitch channel",
         icon: "fad fa-shield",
-        categories: [EffectCategory.COMMON, EffectCategory.TWITCH],
+        categories: ["common", "twitch"],
         dependencies: {
             twitch: true
         }
@@ -48,9 +47,9 @@ const model: EffectType<{
     },
     onTriggerEvent: async ({ effect }) => {
         const activate = effect.action === "Enable Shield Mode";
-        const streamerUserId: string = accountAccess.getAccounts().streamer.userId;
-        await TwitchApi.streamerClient.moderation.updateShieldModeStatus(streamerUserId, activate);
+        const streamerUserId: string = AccountAccess.getAccounts().streamer.userId;
+        await TwitchApi.moderationClient.moderation.updateShieldModeStatus(streamerUserId, activate);
     }
 };
 
-module.exports = model;
+export = model;

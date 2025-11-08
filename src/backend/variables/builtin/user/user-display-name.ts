@@ -1,17 +1,16 @@
-import { ReplaceVariable } from "../../../../types/variables";
-import { OutputDataType, VariableCategory } from "../../../../shared/variable-constants";
+import type { ReplaceVariable } from "../../../../types/variables";
 
-import logger from "../../../logwrapper";
-import viewerDatabase from "../../../viewers/viewer-database";
 import { TwitchApi } from "../../../streaming-platforms/twitch/api";
+import viewerDatabase from "../../../viewers/viewer-database";
+import logger from "../../../logwrapper";
 
 const model : ReplaceVariable = {
     definition: {
         handle: "userDisplayName",
         usage: "userDisplayName",
         description: "Gets the formatted display name of the associated user (if there is one) for the given trigger.",
-        categories: [VariableCategory.USER],
-        possibleDataOutput: [OutputDataType.TEXT],
+        categories: ["user based"],
+        possibleDataOutput: ["text"],
         examples: [
             {
                 usage: "userDisplayName[username]",

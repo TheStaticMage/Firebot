@@ -246,7 +246,14 @@
                     <div ng-if="$ctrl.message.isAnnouncement || $ctrl.message.isFirstChat || $ctrl.message.isReturningChatter || $ctrl.message.isRaider || $ctrl.message.isSuspiciousUser || $ctrl.message.customBannerText || $ctrl.message.customBannerIcon" style="margin-bottom:5px">
                 </div>
             `,
-            controller: function(chatMessagesService, utilityService, connectionService, pronounsService, backendCommunicator) {
+            controller: function(
+                chatMessagesService,
+                viewerRolesService,
+                utilityService,
+                connectionService,
+                pronounsService,
+                backendCommunicator
+            ) {
 
                 const $ctrl = this;
 
@@ -446,7 +453,7 @@
                                 });
                             break;
                         case "mod":
-                            chatMessagesService.changeModStatus(username, true);
+                            viewerRolesService.updateModRoleForUser(username, true);
                             break;
                         case "unmod":
                             utilityService
@@ -458,15 +465,15 @@
                                 })
                                 .then((confirmed) => {
                                     if (confirmed) {
-                                        chatMessagesService.changeModStatus(username, false);
+                                        viewerRolesService.updateModRoleForUser(username, false);
                                     }
                                 });
                             break;
                         case "add as vip":
-                            backendCommunicator.fireEvent("update-user-vip-status", { username: username, shouldBeVip: true });
+                            viewerRolesService.updateVipRoleForUser(username, true);
                             break;
                         case "remove vip":
-                            backendCommunicator.fireEvent("update-user-vip-status", { username: username, shouldBeVip: false });
+                            viewerRolesService.updateVipRoleForUser(username, false);
                             break;
                         case "whisper":
                             updateChatField(`/w @${username} `);

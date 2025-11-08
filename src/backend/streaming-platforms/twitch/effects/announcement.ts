@@ -1,6 +1,5 @@
-import { EffectType } from "../../../../types/effects";
-import { EffectCategory } from "../../../../shared/effect-constants";
-import { HelixChatAnnouncementColor } from "@twurple/api";
+import type { HelixChatAnnouncementColor } from "@twurple/api";
+import type { EffectType } from "../../../../types/effects";
 import { TwitchApi } from "../api";
 
 const model: EffectType<{
@@ -13,7 +12,7 @@ const model: EffectType<{
         name: "Announce",
         description: "Send an announcement to your chat",
         icon: "fad fa-bullhorn",
-        categories: [EffectCategory.COMMON, EffectCategory.CHAT_BASED, EffectCategory.TWITCH],
+        categories: ["common", "chat based", "twitch"],
         dependencies: {
             twitch: true
         }
@@ -45,7 +44,7 @@ const model: EffectType<{
         }
     },
     optionsValidator: ({ message }) => {
-        const errors = [];
+        const errors: string[] = [];
         if (message?.length < 1) {
             errors.push("Announcement message can't be blank.");
         }
@@ -61,4 +60,4 @@ const model: EffectType<{
     }
 };
 
-module.exports = model;
+export = model;

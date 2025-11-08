@@ -1,22 +1,20 @@
-import { ReplaceVariable } from "../../../../../types/variables";
-import { EffectTrigger } from "../../../../../shared/effect-constants";
-import { OutputDataType, VariableCategory } from "../../../../../shared/variable-constants";
+import type { ReplaceVariable, TriggersObject } from "../../../../../types/variables";
 import logger from "../../../../logwrapper";
 
-const triggers = {};
-triggers[EffectTrigger.EVENT] = [
+const triggers: TriggersObject = {};
+triggers["event"] = [
     "twitch:channel-poll-begin",
     "twitch:channel-poll-end",
     "twitch:channel-poll-progress"
 ];
-triggers[EffectTrigger.MANUAL] = true;
+triggers["manual"] = true;
 
 // From ../../../../events/twitch-events/poll.ts mapChoices(...)
 type PollChoice = {
-    channelPointsVotes?: number,
-    id: string,
-    title: string,
-    totalVotes?: number
+    channelPointsVotes?: number;
+    id: string;
+    title: string;
+    totalVotes?: number;
 };
 
 const model: ReplaceVariable = {
@@ -24,8 +22,8 @@ const model: ReplaceVariable = {
         handle: "pollChoices",
         description: 'Returns an array of objects representing the choices in the poll that triggered the event, or an empty array if the trigger lacks poll info. Properties will include `index` and `title`, and *may* include `points` and `votes`.',
         triggers: triggers,
-        categories: [VariableCategory.TRIGGER],
-        possibleDataOutput: [OutputDataType.ARRAY, OutputDataType.NUMBER, OutputDataType.OBJECT, OutputDataType.TEXT],
+        categories: ["trigger based"],
+        possibleDataOutput: ["array", "number", "object", "text"],
         examples: [
             {
                 usage: "pollChoices[count]",

@@ -55,7 +55,7 @@
         style="{{customFontSizeStyle}}"
       >
         <div
-          ng-repeat="chatItem in cms.chatQueue | hideBotMessages | hideHiddenMessages | hideRewardRedemptions | hideWhispers | limitTo:messageDisplayLimit track by chatItem.id"
+          ng-repeat="chatItem in cms.chatQueue | hideBotMessages | hideHiddenMessages | hideRewardRedemptions | hideWhispers | limitTo:messageDisplayLimit | reverseChat:reverseChatOrder track by chatItem.id"
           class="chat-item"
           ng-class="{ alternate: alternateBackgrounds}"
           scroll-glue-anchor
@@ -161,15 +161,6 @@
           ng-disabled="!chatFeedIsEnabled()"
         />
       </div>
-      <div class="settings-btn-wrapper">
-        <button
-          class="settings-btn"
-          ng-click="showChatSettingsModal()"
-          aria-label="Chat Settings"
-        >
-          <i class="fas fa-cog"></i>
-        </button>
-      </div>
     </div>
   </div>
 
@@ -210,7 +201,7 @@
           uib-dropdown-toggle
           class="clickable"
           style="color: white; font-size: 20px; line-height: 1"
-          aria-label="Activity feed options"
+          aria-label="Activity Feed options"
         >
           <i class="far fa-ellipsis-v"></i>
         </a>
@@ -270,9 +261,7 @@
           >
         </div>
         <div
-          style="width: 100%"
           class="activity-message"
-          ng-hide="hideEventLabel()"
           ng-bind-html="activity.message"
         ></div>
         <div
@@ -301,5 +290,16 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="dashboard-settings-button-container">
+    <firebot-button
+      type="primary"
+      icon="fas fa-cog"
+      ng-click="showChatSettingsModal()"
+      tooltip="Dashboard Settings"
+      tooltip-placement="left"
+      aria-label="Dashboard Settings"
+    />
   </div>
 </div>

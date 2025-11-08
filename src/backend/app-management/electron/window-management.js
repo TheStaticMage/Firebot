@@ -1,20 +1,27 @@
 "use strict";
-
-const electron = require("electron");
-const { BrowserWindow, BrowserView, Menu, shell, dialog, nativeImage } = electron;
+const { BrowserWindow, BrowserView, Menu, shell, dialog, nativeImage } = require("electron");
 const path = require("path");
 const url = require("url");
-const windowStateKeeper = require("electron-window-state");
-const fileOpenHelpers = require("../file-open-helpers");
-const createTray = require('./tray-creation.js');
-const logger = require("../../logwrapper");
 const { setupTitlebar, attachTitlebarToWindow } = require("custom-electron-titlebar/main");
+const windowStateKeeper = require("electron-window-state");
+
+const { BackupManager } = require("../../backup-manager");
+const { SettingsManager } = require("../../common/settings-manager");
+const { createTray } = require('./tray-creation.js');
+const fileOpenHelpers = require("../file-open-helpers");
 const screenHelpers = require("./screen-helpers");
 const frontendCommunicator = require("../../common/frontend-communicator");
-const { SettingsManager } = require("../../common/settings-manager");
-const { BackupManager } = require("../../backup-manager");
+const logger = require("../../logwrapper");
 
 const EventEmitter = require("events");
+
+/**
+ * Firebot's main window
+ * Keeps a global reference of the window object, if you don't, the window will
+ * be closed automatically when the JavaScript object is garbage collected.
+ *@type {Electron.BrowserWindow}
+ */
+let mainWindow = null;
 
 /**
  * @type {import("tiny-typed-emitter").TypedEmitter<{
@@ -35,6 +42,59 @@ setupTitlebar();
  */
 let variableInspectorWindow = null;
 
+async function createVariableInspectorWindow() {
+    if (variableInspectorWindow != null && !variableInspectorWindow.isDestroyed()) {
+        if (variableInspectorWindow.isMinimized()) {
+            variableInspectorWindow.restore();
+        }
+        variableInspectorWindow.focus();
+        return;
+    }
+
+    const variableInspectorWindowState = windowStateKeeper({
+        defaultWidth: 720,
+        defaultHeight: 1280,
+        file: "variable-inspector-window-state.json"
+    });
+
+    variableInspectorWindow = new BrowserWindow({
+        frame: true,
+        alwaysOnTop: true,
+        backgroundColor: "#2F3137",
+        title: "Custom Variable Inspector",
+        parent: mainWindow,
+        width: variableInspectorWindowState.width,
+        height: variableInspectorWindowState.height,
+        x: variableInspectorWindowState.x,
+        y: variableInspectorWindowState.y,
+        webPreferences: {
+            preload: path.join(__dirname, "../../../gui/variable-inspector/preload.js")
+        },
+        icon: path.join(__dirname, "../../../gui/images/logo_transparent_2.png")
+    });
+    variableInspectorWindow.setMenu(null);
+
+    variableInspectorWindowState.manage(variableInspectorWindow);
+
+    variableInspectorWindow.on("close", () => {
+        variableInspectorWindow = null;
+    });
+
+    global.variableInspectorWindow = variableInspectorWindow;
+
+    await variableInspectorWindow.loadURL(
+        url.format({
+            pathname: path.join(__dirname, "../../../gui/variable-inspector/index.html"),
+            protocol: "file:",
+            slashes: true
+        }));
+
+    await variableInspectorWindow.on("close", () => {
+        variableInspectorWindow.destroy();
+        global.variableInspectorWindow = null;
+    });
+}
+
 
 /**
  * The stream preview popout window.
@@ -54,8 +114,8 @@ function createStreamPreviewWindow() {
         return;
     }
 
-    const accountAccess = require("../../common/account-access");
-    const streamer = accountAccess.getAccounts().streamer;
+    const { AccountAccess } = require("../../common/account-access");
+    const streamer = AccountAccess.getAccounts().streamer;
 
     if (!streamer.loggedIn) {
         return;
@@ -72,7 +132,7 @@ function createStreamPreviewWindow() {
         alwaysOnTop: true,
         backgroundColor: "#1E2023",
         title: "Stream Preview",
-        parent: exports.mainWindow,
+        parent: mainWindow,
         width: streamPreviewWindowState.width,
         height: streamPreviewWindowState.height,
         x: streamPreviewWindowState.x,
@@ -131,7 +191,7 @@ async function createIconImage(relativeIconPath) {
 }
 
 async function createAppMenu() {
-    const profileManager = require("../../common/profile-manager");
+    const { ProfileManager } = require("../../common/profile-manager");
     const dataAccess = require("../../common/data-access");
 
     const overlayInstances = SettingsManager.getSetting("OverlayInstances");
@@ -144,13 +204,45 @@ async function createAppMenu() {
             label: 'File',
             submenu: [
                 {
-                    label: 'Import Firebot Setup...',
-                    click: () => {
-                        frontendCommunicator.send("open-modal", {
-                            component: "importSetupModal"
-                        });
-                    },
-                    icon: await createIconImage("../../../gui/images/icons/mdi/import.png")
+                    label: "Firebot Setups",
+                    toolTip: "Create, import, or remove custom components via Firebot Setups",
+                    sublabel: "Create, import, or remove custom components via Firebot Setups",
+                    icon: await createIconImage("../../../gui/images/icons/mdi/file-document-multiple-outline.png"),
+                    submenu: [
+                        {
+                            label: 'Create Firebot Setup...',
+                            toolTip: "Create a new Firebot Setup (a collection of commands, events, currencies, etc) and share it with others!",
+                            sublabel: "Create a new Firebot Setup (a collection of commands, events, currencies, etc) and share it with others!",
+                            click: () => {
+                                frontendCommunicator.send("open-modal", {
+                                    component: "createSetupModal"
+                                });
+                            },
+                            icon: await createIconImage("../../../gui/images/icons/mdi/export.png")
+                        },
+                        {
+                            label: 'Import Firebot Setup...',
+                            toolTip: "Import a Firebot Setup (.firebotsetup file) made by someone else!",
+                            sublabel: "Import a Firebot Setup (.firebotsetup file) made by someone else!",
+                            click: () => {
+                                frontendCommunicator.send("open-modal", {
+                                    component: "importSetupModal"
+                                });
+                            },
+                            icon: await createIconImage("../../../gui/images/icons/mdi/import.png")
+                        },
+                        {
+                            label: 'Remove Firebot Setup...',
+                            toolTip: "Select a Setup file to have Firebot find and remove all matching components (commands, events, etc) currently saved for you.",
+                            sublabel: "Select a Setup file to have Firebot find and remove all matching components (commands, events, etc) currently saved for you.",
+                            click: () => {
+                                frontendCommunicator.send("open-modal", {
+                                    component: "removeSetupModal"
+                                });
+                            },
+                            icon: await createIconImage("../../../gui/images/icons/mdi/file-remove-outline.png")
+                        }
+                    ]
                 },
                 {
                     type: 'separator'
@@ -161,7 +253,7 @@ async function createAppMenu() {
                     sublabel: "Open the folder where Firebot data is stored",
                     click: () => {
                         const rootFolder = path.resolve(
-                            profileManager.getPathInProfile("/")
+                            ProfileManager.getPathInProfile("/")
                         );
                         shell.openPath(rootFolder);
                     },
@@ -268,7 +360,6 @@ async function createAppMenu() {
                     toolTip: "Open the custom variable inspector",
                     sublabel: "Open the custom variable inspector",
                     click: () => {
-
                         createVariableInspectorWindow();
                     },
                     icon: await createIconImage("../../../gui/images/icons/mdi/text-search.png")
@@ -389,6 +480,15 @@ async function createAppMenu() {
                         frontendCommunicator.send("open-about-modal");
                     },
                     icon: await createIconImage("../../../gui/images/icons/mdi/information-outline.png")
+                },
+                {
+                    label: 'Release Notes...',
+                    click: () => {
+                        frontendCommunicator.send("open-modal", {
+                            component: "updateModal"
+                        });
+                    },
+                    icon: await createIconImage("../../../gui/images/icons/mdi/list-box-outline.png")
                 }
             ]
         }
@@ -396,14 +496,6 @@ async function createAppMenu() {
 
     Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 }
-
-/**
- * Firebot's main window
- * Keeps a global reference of the window object, if you don't, the window will
- * be closed automatically when the JavaScript object is garbage collected.
- *@type {Electron.BrowserWindow}
- */
-exports.mainWindow = null;
 
 /**
  * The splashscreen window.
@@ -424,7 +516,7 @@ async function createMainWindow() {
     }
 
     // Create the browser window.
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         x: mainWindowState.x,
         y: mainWindowState.y,
         width: mainWindowState.width,
@@ -474,7 +566,6 @@ async function createMainWindow() {
     });
 
     //set a global reference, lots of backend files depend on this being available globally
-    exports.mainWindow = mainWindow;
     global.renderWindow = mainWindow;
 
     await createAppMenu();
@@ -497,8 +588,6 @@ async function createMainWindow() {
 
     // wait for the main window's content to load, then show it
     mainWindow.webContents.on("did-finish-load", async () => {
-
-
         createTray(mainWindow);
 
         mainWindow.show();
@@ -511,8 +600,8 @@ async function createMainWindow() {
         const startupScriptsManager = require("../../common/handlers/custom-scripts/startup-scripts-manager");
         await startupScriptsManager.runStartupScripts();
 
-        const eventManager = require("../../events/EventManager");
-        eventManager.triggerEvent("firebot", "firebot-started", {
+        const { EventManager } = require("../../events/event-manager");
+        EventManager.triggerEvent("firebot", "firebot-started", {
             username: "Firebot"
         });
 
@@ -556,6 +645,7 @@ async function createMainWindow() {
         if (variableInspectorWindow?.isDestroyed() === false) {
             logger.debug("Closing variable inspector window");
             variableInspectorWindow.destroy();
+            global.variableInspectorWindow = null;
         }
 
         const effectQueueMonitorWindow = getEffectQueueMonitorWindow();
@@ -620,89 +710,6 @@ function updateSplashScreenStatus(newStatus) {
     splashscreenWindow.webContents.send("update-splash-screen-status", newStatus);
 }
 
-async function createVariableInspectorWindow() {
-
-    if (variableInspectorWindow != null && !variableInspectorWindow.isDestroyed()) {
-        if (variableInspectorWindow.isMinimized()) {
-            variableInspectorWindow.restore();
-        }
-        variableInspectorWindow.focus();
-        return;
-    }
-
-    const variableInspectorWindowState = windowStateKeeper({
-        defaultWidth: 720,
-        defaultHeight: 1280,
-        file: "variable-inspector-window-state.json"
-    });
-
-    variableInspectorWindow = new BrowserWindow({
-        frame: true,
-        alwaysOnTop: true,
-        backgroundColor: "#2F3137",
-        title: "Custom Variable Inspector",
-        parent: exports.mainWindow,
-        width: variableInspectorWindowState.width,
-        height: variableInspectorWindowState.height,
-        x: variableInspectorWindowState.x,
-        y: variableInspectorWindowState.y,
-        webPreferences: {
-            preload: path.join(__dirname, "../../../gui/variable-inspector/preload.js")
-        },
-        icon: path.join(__dirname, "../../../gui/images/logo_transparent_2.png")
-    });
-    variableInspectorWindow.setMenu(null);
-
-    variableInspectorWindowState.manage(variableInspectorWindow);
-
-    variableInspectorWindow.on("close", () => {
-        variableInspectorWindow = null;
-    });
-
-    await variableInspectorWindow.loadURL(
-        url.format({
-            pathname: path.join(__dirname, "../../../gui/variable-inspector/index.html"),
-            protocol: "file:",
-            slashes: true
-        }));
-
-    const customVariableManager = require("../../common/custom-variable-manager");
-    variableInspectorWindow.webContents.send("all-variables", customVariableManager.getInitialInspectorVariables());
-}
-
-function sendVariableCreateToInspector(key, value, ttl) {
-    if (variableInspectorWindow == null || variableInspectorWindow.isDestroyed()) {
-        return;
-    }
-
-    variableInspectorWindow.webContents.send("variable-set", {
-        key,
-        value,
-        ttl
-    });
-}
-
-function sendVariableExpireToInspector(key, value) {
-    if (variableInspectorWindow == null || variableInspectorWindow.isDestroyed()) {
-        return;
-    }
-
-    variableInspectorWindow.webContents.send("variable-expire", {
-        key,
-        value
-    });
-}
-
-function sendVariableDeleteToInspector(key) {
-    if (variableInspectorWindow == null || variableInspectorWindow.isDestroyed()) {
-        return;
-    }
-
-    variableInspectorWindow.webContents.send("variable-deleted", {
-        key
-    });
-}
-
 SettingsManager.on("settings:setting-updated:OverlayInstances", createAppMenu);
 
 frontendCommunicator.on("getAllDisplays", () => {
@@ -719,9 +726,7 @@ frontendCommunicator.on("takeScreenshot", (displayId) => {
 
 exports.updateSplashScreenStatus = updateSplashScreenStatus;
 exports.createVariableInspectorWindow = createVariableInspectorWindow;
-exports.sendVariableCreateToInspector = sendVariableCreateToInspector;
-exports.sendVariableExpireToInspector = sendVariableExpireToInspector;
-exports.sendVariableDeleteToInspector = sendVariableDeleteToInspector;
 exports.createStreamPreviewWindow = createStreamPreviewWindow;
 exports.createMainWindow = createMainWindow;
 exports.createSplashScreen = createSplashScreen;
+exports.mainWindow = mainWindow;

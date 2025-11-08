@@ -6,7 +6,6 @@ const { restartApp } = require("../app-management/electron/app-helpers");
 
 exports.setupCommonListeners = () => {
     const frontendCommunicator = require("./frontend-communicator");
-    const profileManager = require("./profile-manager");
     const { SettingsManager } = require("./settings-manager");
     const { BackupManager } = require("../backup-manager");
     const webServer = require("../../server/http-server-manager");
@@ -61,40 +60,19 @@ exports.setupCommonListeners = () => {
     });
 
     frontendCommunicator.on("highlight-message", (data) => {
-        const eventsManager = require("../events/EventManager");
-        eventsManager.triggerEvent("firebot", "highlight-message", data);
+        const { EventManager } = require("../events/event-manager");
+        EventManager.triggerEvent("firebot", "highlight-message", data);
     });
 
     frontendCommunicator.on("category-changed", (category) => {
-        const eventsManager = require("../events/EventManager");
-        eventsManager.triggerEvent("firebot", "category-changed", { category: category });
+        const { EventManager } = require("../events/event-manager");
+        EventManager.triggerEvent("firebot", "category-changed", { category: category });
     });
 
     frontendCommunicator.on("restartApp", () => restartApp());
 
     frontendCommunicator.on("open-backup-folder", () => {
         shell.openPath(BackupManager.backupFolderPath);
-    });
-
-    // Front old main
-
-    // When we get an event from the renderer to create a new profile.
-    frontendCommunicator.on("createProfile", (profileName) => {
-        profileManager.createNewProfile(profileName);
-    });
-
-    // When we get an event from the renderer to delete a particular profile.
-    frontendCommunicator.on("deleteProfile", () => {
-        profileManager.deleteProfile();
-    });
-
-    // Change profile when we get event from renderer
-    frontendCommunicator.on("switchProfile", (profileId) => {
-        profileManager.logInProfile(profileId);
-    });
-
-    frontendCommunicator.on("renameProfile", (newProfileId) => {
-        profileManager.renameProfile(newProfileId);
     });
 
     // Change profile when we get event from renderer
@@ -104,11 +82,6 @@ exports.setupCommonListeners = () => {
         }
         webServer.sendToOverlay(data.event, data.meta);
     });
-
-    const updaterOptions = {
-        repo: "crowbartools/firebot",
-        currentVersion: app.getVersion()
-    };
 
     const updateFeedUrl = `https://update.electronjs.org/crowbartools/Firebot/win32/${app.getVersion()}`;
 

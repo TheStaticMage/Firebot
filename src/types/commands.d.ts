@@ -1,8 +1,8 @@
-import { FirebotChatMessage } from "./chat";
-import { EffectList } from "./effects";
-import { RestrictionData } from "./restrictions";
-import { ParametersConfig } from "./parameters";
-import { Awaitable } from "./util-types";
+import type { FirebotChatMessage } from "./chat";
+import type { EffectList } from "./effects";
+import type { RestrictionData } from "./restrictions";
+import type { ParametersConfig } from "./parameters";
+import type { Awaitable } from "./util-types";
 
 export type CommandType = "system" | "custom";
 
@@ -29,6 +29,7 @@ export type SubCommand = {
     fallback?: boolean;
     restrictionData?: RestrictionData;
     cooldown?: Cooldown | undefined;
+    hideCooldowns?: boolean;
     inheritBaseCommandCooldown?: boolean;
     effects?: EffectList;
     hidden?: boolean;

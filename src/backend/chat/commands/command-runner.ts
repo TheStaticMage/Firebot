@@ -1,15 +1,14 @@
 import { FirebotChatMessage } from "../../../types/chat";
 import { CommandDefinition, UserCommand } from "../../../types/commands";
 import { Trigger } from "../../../types/triggers";
-import { TriggerType } from "../../common/EffectType";
 
-import accountAccess from "../../common/account-access";
+import { AccountAccess } from "../../common/account-access";
 import effectRunner from "../../common/effect-runner";
-import frontendCommunicator from "../../common/frontend-communicator";
-import logger from "../../logwrapper";
-import twitchStreamInfoManager from "../../streaming-platforms/twitch/stream-info-manager";
 import chatHelpers from "../chat-helpers";
 import commandManager from "./command-manager";
+import twitchStreamInfoManager from "../../streaming-platforms/twitch/stream-info-manager";
+import frontendCommunicator from "../../common/frontend-communicator";
+import logger from "../../logwrapper";
 
 interface TriggerWithArgs {
     trigger: string;
@@ -18,10 +17,10 @@ interface TriggerWithArgs {
 
 class CommandRunner {
     private parseCommandTriggerAndArgs(trigger: string, rawMessage: string, scanWholeMessage = false, treatQuotedTextAsSingleArg = false): TriggerWithArgs {
-        let args = [];
+        let args: string[] = [];
 
         if (rawMessage != null) {
-            let rawArgs = [];
+            let rawArgs: string[] = [];
 
             if (treatQuotedTextAsSingleArg) {
                 // Get args
@@ -118,7 +117,7 @@ class CommandRunner {
 
         const processEffectsRequest = {
             trigger: {
-                type: manual ? TriggerType.MANUAL : TriggerType.COMMAND,
+                type: manual ? "manual" : "command",
                 metadata: {
                     username: userCommand.commandSender,
                     userId: undefined,
@@ -127,7 +126,7 @@ class CommandRunner {
                     userCommand: userCommand,
                     chatMessage: firebotChatMessage
                 }
-            },
+            } as Trigger,
             effects: effects
         };
 
@@ -152,7 +151,7 @@ class CommandRunner {
             return;
         }
         if (commandSender == null) {
-            commandSender = accountAccess.getAccounts().streamer.username;
+            commandSender = AccountAccess.getAccounts().streamer.username;
         }
 
         logger.info(`Checking command type... ${command.type}`);
@@ -167,7 +166,7 @@ class CommandRunner {
                 for (const optionName of Object.keys(command.options)) {
                     const option = command.options[optionName];
                     if (option) {
-                        commandOptions[optionName] = option.value ?? option.default;
+                        commandOptions[optionName] = (option.value ?? option.default) as unknown;
                     }
                 }
             }
@@ -182,7 +181,7 @@ class CommandRunner {
         }
         if (command.effects) {
             logger.info("Executing command effects");
-            this.execute(command, userCmd, firebotChatMessage, isManual);
+            void this.execute(command, userCmd, firebotChatMessage, isManual);
         }
     }
 
@@ -190,13 +189,13 @@ class CommandRunner {
         const command = commandManager.getCustomCommandById(id);
         if (command != null) {
             logger.debug("firing command manually", command);
-            const commandSender = accountAccess.getAccounts().streamer.username,
+            const commandSender = AccountAccess.getAccounts().streamer.username,
                 userCmd = this.buildUserCommand(command, null, commandSender);
             this.fireCommand(command, userCmd, null, commandSender, isManual);
         }
     }
 
-    private runCommandFromEffect(command: CommandDefinition, trigger: Trigger, args: string[]): void {
+    private runCommandFromEffect(command: CommandDefinition, trigger: Trigger, args: string): void {
         const message = `${command.trigger} ${args}`;
         const firebotChatMessage = chatHelpers.buildBasicFirebotChatMessage(message, trigger.metadata.username);
 
@@ -206,12 +205,12 @@ class CommandRunner {
         }
     }
 
-    runSystemCommandFromEffect(id: string, trigger: Trigger, args: string[]): void {
+    runSystemCommandFromEffect(id: string, trigger: Trigger, args: string): void {
         const command = commandManager.getSystemCommandById(id).definition;
         this.runCommandFromEffect(command, trigger, args);
     }
 
-    runCustomCommandFromEffect(id: string, trigger: Trigger, args: string[]): void {
+    runCustomCommandFromEffect(id: string, trigger: Trigger, args: string): void {
         const command = commandManager.getCustomCommandById(id);
         this.runCommandFromEffect(command, trigger, args);
     }

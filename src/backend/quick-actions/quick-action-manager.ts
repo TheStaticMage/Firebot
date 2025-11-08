@@ -1,12 +1,13 @@
 import { QuickActionDefinition, SystemQuickAction } from "../../types/quick-actions";
 import { EffectList } from "../../types/effects";
-import { EffectTrigger } from "../../shared/effect-constants";
+import { Trigger } from "../../types/triggers";
+
 import JsonDbManager from "../database/json-db-manager";
-import frontendCommunicator from "../common/frontend-communicator";
-import effectRunner from "../common/effect-runner";
-import presetEffectListManager from "../effects/preset-lists/preset-effect-list-manager";
-import accountAccess from "../common/account-access";
+import { AccountAccess } from "../common/account-access";
+import { PresetEffectListManager } from "../effects/preset-lists/preset-effect-list-manager";
 import { SettingsManager } from "../common/settings-manager";
+import effectRunner from "../common/effect-runner";
+import frontendCommunicator from "../common/frontend-communicator";
 
 import { GiveCurrencyQuickAction } from "./builtin/give-currency";
 import { OpenRewardQueueQuickAction } from "./builtin/open-reward-request-queue";
@@ -51,6 +52,7 @@ class QuickActionManager extends JsonDbManager<QuickActionDefinition> {
 
     loadItems(): void {
         super.loadItems();
+        this.rebuildSettings();
     }
 
     getAllItems(): QuickActionDefinition[] {
@@ -60,27 +62,62 @@ class QuickActionManager extends JsonDbManager<QuickActionDefinition> {
         ];
     }
 
+    rebuildSettings(): void {
+        const settings = SettingsManager.getSetting("QuickActions");
+        const allItems = this.getAllItems();
+
+        // Remove stale items
+        const settingsKeys = Object.keys(settings);
+        for (const action of settingsKeys) {
+            if (!allItems.some(i => i.id === action)) {
+                delete settings[action];
+            }
+        }
+
+        // Renumber
+        const totalSettings = Object.keys(settings).length;
+        const sortedSettings = Object.keys(settings)
+            .map(key => ({
+                id: key,
+                position: settings[key].position
+            }))
+            .sort((a, b) => a.position - b.position);
+        for (let i = 0; i < totalSettings; i++) {
+            settings[sortedSettings[i].id].position = i;
+        }
+
+        // Add missing items
+        for (const item of allItems) {
+            if (!settings[item.id]) {
+                settings[item.id] = {
+                    enabled: true,
+                    position: Object.keys(settings).length
+                };
+            }
+        }
+
+        SettingsManager.saveSetting("QuickActions", settings);
+    }
+
     saveQuickAction(quickAction: QuickActionDefinition, notify = true): QuickActionDefinition {
         const savedQuickAction = super.saveItem(quickAction);
         if (!savedQuickAction) {
             return;
         }
-        const quickActionSettings = SettingsManager.getSetting("QuickActions");
-        if (!Object.keys(quickActionSettings).includes(quickAction.id)) {
-            quickActionSettings[quickAction.id] = { enabled: true, position: Object.keys(quickActionSettings).length };
-            SettingsManager.saveSetting("QuickActions", quickActionSettings);
-        }
+
+        this.rebuildSettings();
+
         if (notify) {
             this.triggerUiRefresh();
         }
+
         return savedQuickAction;
     }
 
     deleteQuickAction(customQuickActionId: string): void {
         if (super.deleteItem(customQuickActionId)) {
-            const quickActionSettings = SettingsManager.getSetting("QuickActions");
-            delete quickActionSettings[customQuickActionId];
-            SettingsManager.saveSetting("QuickActions", quickActionSettings);
+            this.rebuildSettings();
+            this.triggerUiRefresh();
         }
     }
 
@@ -99,7 +136,7 @@ class QuickActionManager extends JsonDbManager<QuickActionDefinition> {
             let presetArgValues: Record<string, unknown> = null;
 
             if (triggeredQuickAction.presetListId != null) {
-                const presetList = presetEffectListManager.getItem(triggeredQuickAction.presetListId);
+                const presetList = PresetEffectListManager.getItem(triggeredQuickAction.presetListId);
                 if (triggeredQuickAction.promptForArgs && presetList?.args?.length > 0) {
                     frontendCommunicator.send("show-run-preset-list-modal", triggeredQuickAction.presetListId);
                     return;
@@ -112,12 +149,12 @@ class QuickActionManager extends JsonDbManager<QuickActionDefinition> {
 
             const request = {
                 trigger: {
-                    type: EffectTrigger.QUICK_ACTION,
+                    type: "quick_action",
                     metadata: {
-                        username: accountAccess.getAccounts().streamer.username,
+                        username: AccountAccess.getAccounts().streamer.username,
                         presetListArgs: presetArgValues
                     }
-                },
+                } as Trigger,
                 effects: effects
             };
 
@@ -130,7 +167,7 @@ class QuickActionManager extends JsonDbManager<QuickActionDefinition> {
     }
 
     triggerUiRefresh(): void {
-        frontendCommunicator.send("all-quick-actions", this.getAllItems());
+        frontendCommunicator.send("quick-actions:all-quick-actions-updated", this.getAllItems());
     }
 }
 

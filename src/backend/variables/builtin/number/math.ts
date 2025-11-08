@@ -1,6 +1,5 @@
-import { ReplaceVariable, Trigger } from "../../../../types/variables";
-import { OutputDataType, VariableCategory } from "../../../../shared/variable-constants";
 import { evaluate } from 'mathjs';
+import type { ReplaceVariable, Trigger } from "../../../../types/variables";
 import logger from "../../../logwrapper";
 
 const model : ReplaceVariable = {
@@ -18,8 +17,8 @@ const model : ReplaceVariable = {
                 description: `Returns 25`
             }
         ],
-        categories: [VariableCategory.COMMON, VariableCategory.NUMBERS],
-        possibleDataOutput: [OutputDataType.NUMBER]
+        categories: ["common", "numbers"],
+        possibleDataOutput: ["number"]
     },
     evaluator: (
         trigger: Trigger,
@@ -32,7 +31,7 @@ const model : ReplaceVariable = {
         try {
             evaluation = evaluate(subject);
         } catch (err) {
-            logger.warn("error parsing math expression", err.message);
+            logger.warn("error parsing math expression", (err as Error).message);
             evaluation = -1;
         }
         if (evaluation != null && typeof evaluation === "object") {

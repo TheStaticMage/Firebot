@@ -1,5 +1,4 @@
-import { ReplaceVariable } from "../../../../types/variables";
-import { OutputDataType, VariableCategory } from "../../../../shared/variable-constants";
+import type { ReplaceVariable } from "../../../../types/variables";
 import { TwitchApi } from "../../../streaming-platforms/twitch/api";
 
 const model : ReplaceVariable = {
@@ -18,8 +17,8 @@ const model : ReplaceVariable = {
                 description: "Gets the url for the avatar of a specific user."
             }
         ],
-        categories: [VariableCategory.USER],
-        possibleDataOutput: [OutputDataType.TEXT]
+        categories: ["user based"],
+        possibleDataOutput: ["text"]
     },
     evaluator: async (trigger, username: string) => {
         if (username == null) {
@@ -29,7 +28,7 @@ const model : ReplaceVariable = {
         try {
             const userInfo = await TwitchApi.users.getUserByName(username);
             return userInfo.profilePictureUrl ? userInfo.profilePictureUrl : "[No Avatar Found]";
-        } catch (err) {
+        } catch {
             return "[No Avatar Found]";
         }
     }

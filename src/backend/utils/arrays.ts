@@ -1,3 +1,5 @@
+import { getRandomInt } from "./get-random-int";
+
 /**
  * This will turn an array into an array of "chunked" arrays given a max chunk size
  *
@@ -16,6 +18,16 @@ export const chunkArray = <E>(array: E[], maxSize: number): E[][] => {
         chunked.push(array.slice(i, i + maxSize));
     }
     return chunked;
+};
+
+/**
+ * Checks if the first array includes all the elements in the second array
+ * @param arr1 The first array
+ * @param arr2 The second array
+ * @returns `true` if the first array includes every element of the second array, or `false` otherwise
+ */
+export const containsAll = <T>(arr1: T[], arr2: T[]): boolean => {
+    return arr2.every(i => arr1.includes(i));
 };
 
 /**
@@ -45,6 +57,17 @@ export const flattenArray = <T = unknown>(array: T[][]): T[] => {
     return array.reduce((flat, next) => flat.concat(next), []);
 };
 
+/**
+ * Returns a random item from the specified array
+ * @param array Array of items
+ */
+export const getRandomItem = <T = unknown>(array: T[]): T => {
+    if (array == null || !array.length) {
+        return null;
+    }
+    const randomIndex = getRandomInt(0, array.length - 1);
+    return array[randomIndex];
+};
 
 /**
  * Shuffles an array

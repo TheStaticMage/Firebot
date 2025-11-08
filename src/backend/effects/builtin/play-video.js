@@ -6,13 +6,13 @@ const webServer = require("../../../server/http-server-manager");
 const mediaProcessor = require("../../common/handlers/mediaProcessor");
 const { EffectCategory } = require('../../../shared/effect-constants');
 const logger = require("../../logwrapper");
-const accountAccess = require("../../common/account-access");
+const { AccountAccess } = require("../../common/account-access");
 const fs = require('fs/promises');
 const path = require("path");
 const frontendCommunicator = require('../../common/frontend-communicator');
 const { wait } = require("../../utils");
 const { parseYoutubeId } = require("../../../shared/youtube-url-parser");
-const { v4: uuid } = require("uuid");
+const { randomUUID } = require("crypto");
 const { resolveTwitchClipVideoUrl } = require("../../common/handlers/twitch-clip-url-resolver");
 
 /**
@@ -453,7 +453,7 @@ const playVideo = {
             if (effect.videoType === "Twitch Clip") {
                 clip = await TwitchApi.clips.getClipFromClipUrl(effect.twitchClipUrl);
             } else if (effect.videoType === "Random Twitch Clip") {
-                const username = effect.twitchClipUsername || accountAccess.getAccounts().streamer.username;
+                const username = effect.twitchClipUsername || AccountAccess.getAccounts().streamer.username;
                 const dateNow = new Date();
 
                 clip = await TwitchApi.clips.getRandomClipForUserByName(
@@ -522,7 +522,7 @@ const playVideo = {
                 data.videoStarttime = youtubeData.startTime;
             }
 
-            resourceToken = uuid();
+            resourceToken = randomUUID();
 
         } else if (effect.videoType === "Local Video" || effect.videoType === "Random From Folder") {
             const result = await frontendCommunicator.fireEventAsync("getVideoDuration", data.filepath);
@@ -574,7 +574,7 @@ const playVideo = {
         if (effect.wait) {
             try {
                 await waitPromise;
-            } catch (error) {
+            } catch {
                 return false;
             }
         }
@@ -663,6 +663,7 @@ const playVideo = {
 
                 // Generate UUID to use as id
 
+                // eslint-disable-next-line no-undef
                 const elementId = uuid();
                 const videoPlayerId = `${elementId}-video`;
 
@@ -697,7 +698,7 @@ const playVideo = {
                         </video>
                     `;
 
-
+                    // eslint-disable-next-line no-undef
                     const wrapperId = uuid();
                     const wrappedHtml = getPositionWrappedHTML(wrapperId, positionData, videoElement); // eslint-disable-line no-undef
 
@@ -758,12 +759,12 @@ const playVideo = {
                         }
                     };
                 } else {
-
+                    // eslint-disable-next-line no-undef
                     const ytPlayerId = `yt-${uuid()}`;
 
                     const youtubeElement = `<div id="${ytPlayerId}" style="display:none;${sizeStyles}"></div>`;
 
-
+                    // eslint-disable-next-line no-undef
                     const wrapperId = uuid();
                     const wrappedHtml = getPositionWrappedHTML(wrapperId, positionData, youtubeElement); // eslint-disable-line no-undef
 

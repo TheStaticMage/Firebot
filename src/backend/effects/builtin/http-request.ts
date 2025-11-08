@@ -1,11 +1,11 @@
 import { EffectType, EffectList } from "../../../types/effects";
 import { KeyValuePair } from "../../../types/util-types";
-import { EffectCategory } from "../../../shared/effect-constants";
-import logger from "../../logwrapper";
-import twitchAuth from "../../streaming-platforms/twitch/auth/twitch-auth";
-import accountAccess from "../../common/account-access";
-import customVariableManager from "../../common/custom-variable-manager";
+
+import { AccountAccess } from "../../common/account-access";
+import { CustomVariableManager } from "../../common/custom-variable-manager";
+import { TwitchAuthProviders } from "../../streaming-platforms/twitch/auth/twitch-auth";
 import effectRunner from "../../common/effect-runner";
+import logger from "../../logwrapper";
 
 type ErrorWithResponseData = Error & {
     responseData: string;
@@ -37,7 +37,7 @@ const effect: EffectType<{
         name: "HTTP Request",
         description: "Send an HTTP request to a given url",
         icon: "fad fa-terminal",
-        categories: [EffectCategory.ADVANCED, EffectCategory.SCRIPTING],
+        categories: ["advanced", "scripting"],
         dependencies: [],
         outputs: [
             {
@@ -246,11 +246,11 @@ const effect: EffectType<{
         };
 
         if (effect.options.useTwitchAuth && effect.url.startsWith("https://api.twitch.tv")) {
-            const accessToken = accountAccess.getAccounts().streamer.auth.access_token;
+            const accessToken = AccountAccess.getAccounts().streamer.auth.access_token;
             headers = {
                 ...headers,
                 "Authorization": `Bearer ${accessToken}`,
-                "Client-ID": twitchAuth.twitchClientId
+                "Client-ID": TwitchAuthProviders.twitchClientId
             };
         }
 
@@ -309,7 +309,7 @@ const effect: EffectType<{
              * Deprecated
              */
             if (effect.options.putResponseInVariable) {
-                customVariableManager.addCustomVariable(
+                CustomVariableManager.addCustomVariable(
                     effect.options.variableName,
                     responseData,
                     effect.options.variableTtl || 0,

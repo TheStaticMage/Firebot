@@ -1,11 +1,11 @@
 import { DateTime } from "luxon";
 
-import logger from "../../logwrapper";
-import accountAccess from "../../common/account-access";
+import { AccountAccess } from "../../common/account-access";
+import { EventManager } from "../../events/event-manager";
+import { SettingsManager } from "../../common/settings-manager";
 import { TwitchApi } from "./api";
 import frontendCommunicator from "../../common/frontend-communicator";
-import { SettingsManager } from "../../common/settings-manager";
-import eventManager from "../../events/EventManager";
+import logger from "../../logwrapper";
 
 class AdManager {
     private _adCheckIntervalId: NodeJS.Timeout;
@@ -40,7 +40,7 @@ class AdManager {
             return;
         }
 
-        const streamer = accountAccess.getAccounts().streamer;
+        const streamer = AccountAccess.getAccounts().streamer;
         if (streamer.broadcasterType === "") {
             logger.debug("Streamer is not affiliate/partner. Skipping ad timer check.");
             return;
@@ -79,7 +79,7 @@ class AdManager {
                 }
 
                 setTimeout(() => {
-                    eventManager.triggerEvent("twitch", "ad-break-upcoming", {
+                    void EventManager.triggerEvent("twitch", "ad-break-upcoming", {
                         secondsUntilNextAdBreak: this.secondsUntilNextAdBreak,
                         adBreakDuration: adSchedule.duration
                     });
@@ -105,7 +105,7 @@ class AdManager {
     triggerAdBreakComplete(): void {
         this._upcomingEventTriggered = false;
         this._isAdRunning = false;
-        this.runAdCheck();
+        void this.runAdCheck();
     }
 
     async startAdCheck(): Promise<void> {

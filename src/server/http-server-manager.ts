@@ -7,14 +7,14 @@ import path from 'path';
 
 import { Awaitable } from "../types/util-types";
 import { SettingsManager } from "../backend/common/settings-manager";
-import effectManager from "../backend/effects/effectManager";
+import { EffectManager } from "../backend/effects/effect-manager";
 import { ResourceTokenManager } from "../backend/resource-token-manager";
 import websocketServerManager from "./websocket-server-manager";
 import { CustomWebSocketHandler } from "../types/websocket";
 import overlayWidgetManager from "../backend/overlay-widgets/overlay-widgets-manager";
 import logger from "../backend/logwrapper";
 
-import dataAccess from "../backend/common/data-access";
+import * as dataAccess from "../backend/common/data-access";
 import frontendCommunicator from "../backend/common/frontend-communicator";
 
 const cwd = dataAccess.getWorkingDirectoryPath();
@@ -114,7 +114,7 @@ class HttpServerManager extends EventEmitter {
         // Set up route to serve overlay
         app.use("/overlay/", express.static(path.join(cwd, './resources/overlay/')));
         app.get("/overlay/", (req, res) => {
-            const effectDefs = effectManager.getEffectOverlayExtensions();
+            const effectDefs = EffectManager.getEffectOverlayExtensions();
 
             const widgetExtensions = overlayWidgetManager.getOverlayExtensions();
 
@@ -176,7 +176,7 @@ class HttpServerManager extends EventEmitter {
                 let resourcePath = ResourceTokenManager.getResourcePath(token) || null;
                 if (resourcePath !== null) {
                     resourcePath = resourcePath.replace(/\\/g, "/");
-                    res.sendFile(resourcePath);
+                    res.sendFile(resourcePath, { dotfiles: "allow" });
                     return;
                 }
             }
@@ -248,6 +248,18 @@ class HttpServerManager extends EventEmitter {
 
     sendToOverlay(eventName: string, meta: Record<string, unknown> = {}, overlayInstance: string = null) {
         websocketServerManager.sendToOverlay(eventName, meta, overlayInstance);
+    }
+
+    refreshAllOverlays() {
+        websocketServerManager.refreshAllOverlays();
+    }
+
+    /**
+     * Refresh a specific overlay instance
+     * @param overlayInstance the instance to refresh, leave undefined to refresh default
+     */
+    refreshOverlayInstance(overlayInstance?: string) {
+        websocketServerManager.sendToOverlay("OVERLAY:REFRESH", undefined, overlayInstance);
     }
 
     triggerCustomWebSocketEvent(eventType: string, payload: object) {

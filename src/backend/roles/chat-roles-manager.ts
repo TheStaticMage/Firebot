@@ -1,8 +1,10 @@
 import { TypedEmitter } from "tiny-typed-emitter";
-import logger from "../logwrapper";
+
+import type { BasicViewer } from "../../types/viewers";
+import frontendCommunicator from "../common/frontend-communicator";
+import { AccountAccess } from "../common/account-access";
 import { TwitchApi } from "../streaming-platforms/twitch/api";
-import accountAccess from "../common/account-access";
-import { BasicViewer } from "../../types/viewers";
+import logger from "../logwrapper";
 
 const VIEWLIST_BOTS_URL = "https://api.twitchinsights.net/v1/bots/all";
 
@@ -10,6 +12,13 @@ interface KnownBot {
     id?: string;
     username: string;
     channels: number;
+}
+
+interface Subscriber {
+    id?: string;
+    username: string;
+    displayName?: string;
+    subTier: string;
 }
 
 interface KnownBotServiceResponse {
@@ -24,6 +33,7 @@ class ChatRolesManager extends TypedEmitter<Events> {
     private _knownBots: KnownBot[] = [];
     private _vips: BasicViewer[] = [];
     private _moderators: BasicViewer[] = [];
+    private _subscribers: Subscriber[] = [];
 
     constructor() {
         super();
@@ -34,6 +44,11 @@ class ChatRolesManager extends TypedEmitter<Events> {
         TwitchApi.moderation.on("vip:removed", userId => this.removeVipFromVipList(userId));
         TwitchApi.moderation.on("moderator:added", user => this.addModeratorToModeratorsList(user));
         TwitchApi.moderation.on("moderator:removed", userId => this.removeModeratorFromModeratorsList(userId));
+
+        frontendCommunicator.on("get-moderators", () => this._moderators);
+        frontendCommunicator.on("get-vips", () => this._vips);
+        frontendCommunicator.on("get-subscribers", () => this._subscribers);
+        frontendCommunicator.on("get-known-bots", () => this._knownBots);
     }
 
     async cacheViewerListBots(): Promise<void> {
@@ -117,6 +132,10 @@ class ChatRolesManager extends TypedEmitter<Events> {
             }));
     }
 
+    getModerators(): BasicViewer[] {
+        return this._moderators;
+    }
+
     addModeratorToModeratorsList(viewer: BasicViewer): void {
         if (!this._moderators.some(v => v.id === viewer.id)) {
             this._moderators.push(viewer);
@@ -129,27 +148,24 @@ class ChatRolesManager extends TypedEmitter<Events> {
         this.emit("viewer-role-updated", userId, "mod", "removed");
     }
 
-    private async getUserSubscriberRole(userIdOrName: string): Promise<string> {
-        if (userIdOrName == null || userIdOrName === "") {
-            return "";
+    async loadSubscribers(): Promise<void> {
+        const streamer = AccountAccess.getAccounts().streamer;
+        if (!streamer || !streamer.loggedIn || streamer.broadcasterType === "") {
+            return;
         }
 
-        const isName = !new RegExp(/^\d+$/).test(userIdOrName);
+        this._subscribers = (await TwitchApi.subscriptions.getSubscriptions())
+            .map(m => ({
+                id: m.userId,
+                username: m.userName,
+                displayName: m.userDisplayName,
+                subTier: this.getRoleForSubTier(m.tier)
+            }));
+    }
 
-        const client = TwitchApi.streamerClient;
-        const userId = isName
-            ? (await TwitchApi.users.getUserByName(userIdOrName)).id
-            : userIdOrName;
-
-        const streamer = accountAccess.getAccounts().streamer;
-        const subInfo = await client.subscriptions.getSubscriptionForUser(streamer.userId, userId);
-
-        if (subInfo == null || subInfo.tier == null) {
-            return null;
-        }
-
+    private getRoleForSubTier(tier: string): string {
         let role = "";
-        switch (subInfo.tier) {
+        switch (tier) {
             case "1000":
                 role = "tier1";
                 break;
@@ -176,17 +192,14 @@ class ChatRolesManager extends TypedEmitter<Events> {
                 roles.push("viewerlistbot");
             }
 
-            const streamer = accountAccess.getAccounts().streamer;
+            const streamer = AccountAccess.getAccounts().streamer;
             if (userId === streamer.userId) {
                 roles.push("broadcaster");
             }
 
-            if (streamer.broadcasterType !== "") {
-                const subscriberRole = await this.getUserSubscriberRole(userId);
-                if (subscriberRole != null) {
-                    roles.push("sub");
-                    roles.push(subscriberRole);
-                }
+            if (this._subscribers.some(m => m.id === userId)) {
+                roles.push("sub");
+                roles.push(this._subscribers.find(m => m.id === userId).subTier);
             }
 
             if (this._vips.some(v => v.id === userId)) {

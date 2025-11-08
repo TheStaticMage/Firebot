@@ -1,16 +1,16 @@
 import { EventEmitter } from "events";
 import { ChatClient } from "@twurple/chat";
 
-import logger from "../logwrapper";
-import chatHelpers from "./chat-helpers";
+import { AccountAccess } from "../common/account-access";
 import { ActiveUserHandler } from "./active-user-handler";
-import twitchChatListeners from "./chat-listeners/twitch-chat-listeners";
-import firebotDeviceAuthProvider from "../auth/firebot-device-auth-provider";
-import accountAccess from "../common/account-access";
-import frontendCommunicator from "../common/frontend-communicator";
-import chatRolesManager from "../roles/chat-roles-manager";
+import { FirebotDeviceAuthProvider } from "../auth/firebot-device-auth-provider";
 import { TwitchApi } from "../streaming-platforms/twitch/api";
+import chatHelpers from "./chat-helpers";
+import chatRolesManager from "../roles/chat-roles-manager";
 import chatterPoll from "../streaming-platforms/twitch/chatter-poll";
+import twitchChatListeners from "./chat-listeners/twitch-chat-listeners";
+import frontendCommunicator from "../common/frontend-communicator";
+import logger from "../logwrapper";
 
 class TwitchChat extends EventEmitter {
     private _streamerChatClient: ChatClient;
@@ -56,13 +56,13 @@ class TwitchChat extends EventEmitter {
      * Connects the streamer and bot to chat
      */
     async connect(): Promise<void> {
-        const streamer = accountAccess.getAccounts().streamer;
+        const streamer = AccountAccess.getAccounts().streamer;
         if (!streamer.loggedIn) {
             return;
         }
 
-        const streamerAuthProvider = firebotDeviceAuthProvider.streamerProvider;
-        if (streamerAuthProvider == null && firebotDeviceAuthProvider.botProvider == null) {
+        const streamerAuthProvider = FirebotDeviceAuthProvider.streamerProvider;
+        if (streamerAuthProvider == null && FirebotDeviceAuthProvider.botProvider == null) {
             return;
         }
 
@@ -121,6 +121,7 @@ class TwitchChat extends EventEmitter {
             // While connected, we can just react to changes via chat messages/EventSub events
             await chatRolesManager.loadVips();
             await chatRolesManager.loadModerators();
+            await chatRolesManager.loadSubscribers();
         } catch (error) {
             logger.error("Chat connect error", error);
             this.disconnect();
@@ -143,12 +144,12 @@ class TwitchChat extends EventEmitter {
                 }
             };
             try {
-                const { streamer, bot } = accountAccess.getAccounts();
+                const { streamer, bot } = AccountAccess.getAccounts();
 
                 if (bot.loggedIn) {
 
                     this._botChatClient = new ChatClient({
-                        authProvider: firebotDeviceAuthProvider.botProvider,
+                        authProvider: FirebotDeviceAuthProvider.botProvider,
                         requestMembershipEvents: true
                     });
 
@@ -197,7 +198,7 @@ class TwitchChat extends EventEmitter {
         const shouldWhisper = username != null && username.trim() !== "";
         let sendAsBot = true;
 
-        const botAvailable = accountAccess.getAccounts().bot.loggedIn
+        const botAvailable = AccountAccess.getAccounts().bot.loggedIn
             && this._botChatClient?.irc?.isConnected === true;
 
         if (accountType == null) {

@@ -1,6 +1,6 @@
 import ng from "angular";
-import { TriggerType, TriggersObject, Trigger } from "./triggers";
-import { Awaitable } from "./util-types";
+import type { TriggerType, TriggersObject, Trigger } from "./triggers";
+import type { Awaitable } from "./util-types";
 
 type Func<T> = (...args: unknown[]) => T;
 
@@ -39,7 +39,7 @@ export type EffectDependencies = {
     integrations?: Record<string, boolean>;
 };
 
-export type OverlayExtension = {
+export type OverlayExtension<OverlayData = unknown> = {
     dependencies?: {
         globalStyles?: string;
         css?: string[];
@@ -76,6 +76,7 @@ export type EffectDefinition<EffectModel = unknown> = {
 export type EffectType<EffectModel = unknown, OverlayData = unknown> = {
     definition: EffectDefinition<EffectModel>;
     optionsTemplate: string;
+    optionsTemplateUrl?: string;
     optionsController?: ($scope: EffectScope<EffectModel>, ...args: any[]) => void;
     optionsValidator?: (effect: EffectModel, $scope: EffectScope<EffectModel>) => string[];
     getDefaultLabel?: (effect: EffectModel, ...args: any[]) => Awaitable<string | undefined>;
@@ -86,7 +87,7 @@ export type EffectType<EffectModel = unknown, OverlayData = unknown> = {
         outputs: Record<string, unknown>;
         abortSignal: AbortSignal;
     }) => Awaitable<void | boolean | EffectTriggerResponse>;
-    overlayExtension?: OverlayExtension;
+    overlayExtension?: OverlayExtension<OverlayData>;
 };
 
 export interface EffectInstance {
@@ -98,4 +99,51 @@ export interface EffectInstance {
 export interface EffectList {
     id: string;
     list: EffectInstance[];
+    queue?: string;
 }
+
+export type PresetEffectList = {
+    id: string;
+    name: string;
+    args: Array<{
+        name: string;
+    }>;
+    effects: EffectList;
+    sortTags: string[];
+};
+
+type QueueMode = "auto" | "interval" | "custom" | "manual";
+
+export type EffectQueueConfig = {
+    id: string;
+    name: string;
+    mode: QueueMode;
+    interval?: number;
+    sortTags: string[];
+    active: boolean;
+    runEffectsImmediatelyWhenPaused: boolean;
+    length: number;
+    queue: any[];
+};
+
+export type QueueStatus = "running" | "paused" | "idle" | "canceled";
+
+export type RunEffectsContext = {
+    effects?: EffectList;
+    [key: string]: unknown;
+};
+
+type QueueItem = {
+    runEffectsContext: RunEffectsContext;
+    duration?: number;
+    priority?: "none" | "high";
+};
+
+export type QueueState = {
+    status: QueueStatus;
+    queuedItems: QueueItem[];
+    activeItems: QueueItem[];
+    interval: number;
+    mode: QueueMode;
+    runEffectsImmediatelyWhenPaused?: boolean;
+};

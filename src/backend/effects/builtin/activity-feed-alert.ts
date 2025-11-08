@@ -1,6 +1,5 @@
-import { EffectType } from "../../../types/effects";
-import { EffectCategory } from "../../../shared/effect-constants";
-import { handleTriggeredEvent } from "../../events/activity-feed-manager";
+import type { EffectType } from "../../../types/effects";
+import { ActivityFeedManager } from "../../events/activity-feed-manager";
 
 const effect: EffectType<{
     message: string;
@@ -9,14 +8,14 @@ const effect: EffectType<{
     definition: {
         id: "firebot:activity-feed-alert",
         name: "Activity Feed Alert",
-        description: "Display an alert in Firebot's activity feed",
+        description: "Display an alert in Firebot's Activity Feed",
         icon: "fad fa-comment-exclamation",
-        categories: [EffectCategory.FUN],
+        categories: ["fun"],
         dependencies: []
     },
     optionsTemplate: `
     <eos-container>
-        <p>Use this effect to send yourself alerts in Firebot's activity feed.</p>
+        <p>Use this effect to send yourself alerts in Firebot's Activity Feed.</p>
     </eos-container>
     <eos-container header="Message" pad-top="true">
         <firebot-input
@@ -47,7 +46,7 @@ const effect: EffectType<{
         return errors;
     },
     onTriggerEvent: ({ effect }) => {
-        handleTriggeredEvent(
+        ActivityFeedManager.handleTriggeredEvent(
             {
                 id: "firebot",
                 name: "Firebot"

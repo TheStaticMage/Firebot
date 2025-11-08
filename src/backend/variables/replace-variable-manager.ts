@@ -1,6 +1,6 @@
 import EventEmitter from "events";
 import expressionish, * as expressionishErrs from "expressionish";
-import {
+import type {
     ReplaceVariable,
     RegisteredVariable,
     VariableUsage,
@@ -8,13 +8,13 @@ import {
     TriggerType,
     Trigger
 } from "../../types/variables";
-import { Awaitable } from "../../types/util-types";
-import macroManager from "./macro-manager";
+import type { Awaitable } from "../../types/util-types";
 import { SettingsManager } from "../common/settings-manager";
-import { getCustomVariable } from "../common/custom-variable-manager";
+import macroManager from "./macro-manager";
+import { CustomVariableManager } from "../common/custom-variable-manager";
 import frontendCommunicator from "../common/frontend-communicator";
-import { getEventIdFromTriggerData } from "../utils";
 import logger from "../logwrapper";
+import { getEventIdFromTriggerData } from "../utils";
 
 type Evaluator = {
     evaluator(trigger: Trigger, ...args: unknown[]): Awaitable<unknown>;
@@ -390,7 +390,7 @@ const manager = new ReplaceVariableManager();
 // custom variable shorthand
 manager.registerLookupHandler("$", name => ({
     evaluator: (_, ...path: string[]) => {
-        let result = getCustomVariable(name) as Record<string, unknown>;
+        let result = CustomVariableManager.getCustomVariable(name);
         for (const item of path) {
             if (result == null) {
                 return null;

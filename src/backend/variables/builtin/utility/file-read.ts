@@ -1,9 +1,9 @@
-import { ReplaceVariable, Trigger } from "../../../../types/variables";
-import { OutputDataType, VariableCategory } from "../../../../shared/variable-constants";
-
 import fs from "fs/promises";
-import { getRandomInt } from "../../../utils";
+
+import type { ReplaceVariable, Trigger } from "../../../../types/variables";
+
 import logger from "../../../logwrapper";
+import { getRandomInt } from "../../../utils";
 
 const model : ReplaceVariable = {
     definition: {
@@ -52,8 +52,8 @@ const model : ReplaceVariable = {
                 description: "Reads the content of a file and returns a byte array."
             }
         ],
-        categories: [VariableCategory.ADVANCED],
-        possibleDataOutput: [OutputDataType.TEXT, OutputDataType.ARRAY]
+        categories: ["advanced"],
+        possibleDataOutput: ["text", "array"]
     },
     evaluator: async (
         trigger: Trigger,

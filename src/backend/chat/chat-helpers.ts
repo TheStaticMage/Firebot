@@ -1,20 +1,28 @@
 import { HelixChatBadgeSet, HelixCheermoteList } from "@twurple/api";
 import { ChatMessage, ParsedMessageCheerPart, ParsedMessagePart, findCheermotePositions, parseChatMessage } from "@twurple/chat";
 import { EventSubAutoModMessageHoldV2Event } from "@twurple/eventsub-base";
+
+import {
+    FirebotChatMessage,
+    FirebotCheermoteInstance,
+    FirebotParsedMessagePart
+} from "../../types/chat";
+import { FirebotAccount } from "../../types/accounts";
+
+import { AccountAccess } from "../common/account-access";
+import { SettingsManager } from "../common/settings-manager";
+import { TwitchApi } from "../streaming-platforms/twitch/api";
+import rankManager from "../ranks/rank-manager";
+import roleManager from "../roles/custom-roles-manager";
+import viewerDatabase from "../viewers/viewer-database";
+import frontendCommunicator from "../common/frontend-communicator";
+import logger from "../logwrapper";
+import { getUrlRegex } from "../utils";
+
 import { ThirdPartyEmote, ThirdPartyEmoteProvider } from "./third-party/third-party-emote-provider";
 import { BTTVEmoteProvider } from "./third-party/bttv";
 import { FFZEmoteProvider } from "./third-party/ffz";
 import { SevenTVEmoteProvider } from "./third-party/7tv";
-import { FirebotChatMessage, FirebotCheermoteInstance, FirebotParsedMessagePart } from "../../types/chat";
-import logger from "../logwrapper";
-import { SettingsManager } from "../common/settings-manager";
-import accountAccess, { FirebotAccount } from "../common/account-access";
-import { TwitchApi } from "../streaming-platforms/twitch/api";
-import frontendCommunicator from "../common/frontend-communicator";
-import { getUrlRegex } from "../utils";
-import viewerDatabase from "../viewers/viewer-database";
-import rankManager from "../ranks/rank-manager";
-import roleManager from "../roles/custom-roles-manager";
 
 interface ExtensionBadge {
     id: string;
@@ -51,9 +59,37 @@ class FirebotChatHelpers {
 
     private readonly URL_REGEX = getUrlRegex(false);
 
+    constructor() {
+        AccountAccess.on("account-update",
+            (cache) => {
+                if (cache.streamer?.loggedIn) {
+                    this.setUserProfilePicUrl(
+                        cache.streamer.userId,
+                        cache.streamer.avatar,
+                        false
+                    );
+                }
+
+                if (cache.bot?.loggedIn) {
+                    this.setUserProfilePicUrl(
+                        cache.bot.userId,
+                        cache.bot.avatar,
+                        false
+                    );
+                }
+            }
+        );
+
+        viewerDatabase.on("updated-viewer-avatar",
+            ({ userId, url }) => {
+                this.setUserProfilePicUrl(userId, url);
+            }
+        );
+    }
+
     async cacheBadges(): Promise<void> {
         logger.debug("Caching Twitch badges");
-        const streamer = accountAccess.getAccounts().streamer;
+        const streamer = AccountAccess.getAccounts().streamer;
         const client = TwitchApi.streamerClient;
         if (streamer.loggedIn && client) {
             try {
@@ -77,7 +113,7 @@ class FirebotChatHelpers {
         this._getAllTwitchEmotes = SettingsManager.getSetting("ChatGetAllEmotes") === true;
         const client = TwitchApi.streamerClient;
 
-        const { streamer, bot } = accountAccess.getAccounts();
+        const { streamer, bot } = AccountAccess.getAccounts();
 
         if (client == null || !streamer.loggedIn) {
             return;
@@ -200,9 +236,13 @@ class FirebotChatHelpers {
         }));
     }
 
-    private _updateAccountAvatar(accountType: "streamer" | "bot", account: FirebotAccount, url: string) {
+    private _updateAccountAvatar(
+        accountType: "streamer" | "bot",
+        account: FirebotAccount,
+        url: string
+    ): void {
         account.avatar = url;
-        accountAccess.updateAccount(accountType, account, true);
+        AccountAccess.updateAccount(accountType, account, false);
     }
 
     async getUserProfilePicUrl(userId: string): Promise<string> {
@@ -214,7 +254,7 @@ class FirebotChatHelpers {
             return this._profilePicUrlCache[userId];
         }
 
-        const streamer = accountAccess.getAccounts().streamer;
+        const streamer = AccountAccess.getAccounts().streamer;
         const client = TwitchApi.streamerClient;
         if (streamer.loggedIn && client) {
             const user = await TwitchApi.users.getUserById(userId);
@@ -233,14 +273,12 @@ class FirebotChatHelpers {
 
         this._profilePicUrlCache[userId] = url;
 
-        if (!updateAccountAvatars) {
-            return;
-        }
-
-        if (userId === accountAccess.getAccounts().streamer.userId) {
-            this._updateAccountAvatar("streamer", accountAccess.getAccounts().streamer, url);
-        } else if (userId === accountAccess.getAccounts().bot.userId) {
-            this._updateAccountAvatar("bot", accountAccess.getAccounts().bot, url);
+        if (updateAccountAvatars) {
+            if (userId === AccountAccess.getAccounts().streamer.userId) {
+                this._updateAccountAvatar("streamer", AccountAccess.getAccounts().streamer, url);
+            } else if (userId === AccountAccess.getAccounts().bot.userId) {
+                this._updateAccountAvatar("bot", AccountAccess.getAccounts().bot, url);
+            }
         }
     }
 
@@ -248,7 +286,7 @@ class FirebotChatHelpers {
         if (firebotChatMessage == null || parts == null) {
             return [];
         }
-        const { streamer, bot } = accountAccess.getAccounts();
+        const { streamer, bot } = AccountAccess.getAccounts();
         return parts.flatMap((p) => {
             if (p.type === "text" && p.text != null) {
 
@@ -438,7 +476,7 @@ class FirebotChatHelpers {
 
     async buildFirebotChatMessage(msg: ChatMessage, msgText: string, whisper = false, action = false) {
         const sharedChatRoomId = msg.tags.get("source-room-id");
-        const isSharedChatMessage = sharedChatRoomId != null && sharedChatRoomId !== accountAccess.getAccounts().streamer.userId;
+        const isSharedChatMessage = sharedChatRoomId != null && sharedChatRoomId !== AccountAccess.getAccounts().streamer.userId;
         const firebotChatMessage: FirebotChatMessage = {
             id: msg.tags.get("id"),
             username: msg.userInfo.userName,
@@ -484,7 +522,7 @@ class FirebotChatHelpers {
 
         await this.enrichMessageWithRanksAndRoles(firebotChatMessage);
 
-        const { streamer, bot } = accountAccess.getAccounts();
+        const { streamer, bot } = AccountAccess.getAccounts();
 
         /**
          * this is a hack to override the message param for actions.
@@ -616,7 +654,7 @@ class FirebotChatHelpers {
 
         await this.enrichMessageWithRanksAndRoles(viewerFirebotChatMessage);
 
-        const { streamer, bot } = accountAccess.getAccounts();
+        const { streamer, bot } = AccountAccess.getAccounts();
         if ((streamer.loggedIn && (msg.messageText.includes(streamer.username) || msg.messageText.includes(streamer.displayName)))
             || (bot.loggedIn && (msg.messageText.includes(bot.username) || msg.messageText.includes(streamer.username)))
         ) {

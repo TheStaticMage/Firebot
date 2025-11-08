@@ -1,6 +1,5 @@
-import { EffectType } from "../../../types/effects";
-import { EffectCategory } from "../../../shared/effect-constants";
-import effectQueueManager, { EffectQueueConfig } from "../queues/effect-queue-config-manager";
+import type { EffectType, EffectQueueConfig } from "../../../types/effects";
+import { EffectQueueConfigManager } from "../queues/effect-queue-config-manager";
 import queueRunner from "../queues/effect-queue-runner";
 import logger from "../../logwrapper";
 
@@ -12,7 +11,7 @@ const effect: EffectType<{
         name: "Trigger Manual Effect Queue",
         description: "Runs the next effect list in a manual effect queue.",
         icon: "fad fa-step-forward",
-        categories: [EffectCategory.SCRIPTING]
+        categories: ["scripting"]
     },
     optionsTemplate: `
         <eos-container header="Manual Effect Queue">
@@ -51,8 +50,8 @@ const effect: EffectType<{
         const queue = effectQueuesService.getEffectQueue(effect.effectQueueId);
         return queue?.name ?? "Unknown Queue";
     },
-    onTriggerEvent: async ({ effect }) => {
-        const queue = effectQueueManager.getItem(effect.effectQueueId);
+    onTriggerEvent: ({ effect }) => {
+        const queue = EffectQueueConfigManager.getItem(effect.effectQueueId);
 
         if (queue == null) {
             logger.debug(`Effect queue ${effect.effectQueueId} not found`);

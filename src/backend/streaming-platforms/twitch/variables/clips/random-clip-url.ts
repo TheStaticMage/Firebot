@@ -1,6 +1,5 @@
-import { ReplaceVariable } from "../../../../../types/variables";
-import { OutputDataType, VariableCategory } from "../../../../../shared/variable-constants";
-import accountAccess from "../../../../common/account-access";
+import type { ReplaceVariable } from "../../../../../types/variables";
+import { AccountAccess } from "../../../../common/account-access";
 import { TwitchApi } from "../../api";
 
 const model: ReplaceVariable = {
@@ -17,12 +16,12 @@ const model: ReplaceVariable = {
                 description: "Gets the URL for a random Twitch clip from the specified user's channel."
             }
         ],
-        categories: [VariableCategory.TEXT],
-        possibleDataOutput: [OutputDataType.TEXT]
+        categories: ["text"],
+        possibleDataOutput: ["text"]
     },
     evaluator: async (trigger, username: string) => {
         if (!username) {
-            username = accountAccess.getAccounts().streamer.username;
+            username = AccountAccess.getAccounts().streamer.username;
         }
 
         const clip = await TwitchApi.clips.getRandomClipForUserByName(username);

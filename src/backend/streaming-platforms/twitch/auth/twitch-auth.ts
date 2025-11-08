@@ -1,10 +1,15 @@
+import type { HelixPaginatedResponse } from "@twurple/api";
 import { getExpiryDateOfAccessToken } from "@twurple/auth";
-import logger from "../../../logwrapper";
+import type { HelixUserData } from "../api/twurple-private-types";
+
+import type { AuthProviderDefinition } from "../../../../types/auth";
+import type { FirebotAccount } from "../../../../types/accounts";
+
 import { SecretsManager } from "../../../secrets-manager";
+import { AccountAccess } from "../../../common/account-access";
 import authManager from "../../../auth/auth-manager";
-import accountAccess, { FirebotAccount } from "../../../common/account-access";
-import { AuthProviderDefinition } from "../../../auth/auth";
 import channelRewardManager from "../../../channel-rewards/channel-reward-manager";
+import logger from "../../../logwrapper";
 
 class TwitchAuthProviders {
     private readonly _host = "https://id.twitch.tv";
@@ -113,6 +118,12 @@ class TwitchAuthProviders {
             "chat:edit",
             "chat:read",
             "moderator:manage:announcements",
+            "moderator:manage:banned_users",
+            "moderator:manage:chat_messages",
+            "moderator:manage:chat_settings",
+            "moderator:manage:shield_mode",
+            "moderator:manage:shoutouts",
+            "moderator:manage:warnings",
             "user:manage:whispers",
             "user:read:chat",
             "user:read:emotes",
@@ -142,7 +153,7 @@ async function getUserCurrent(accessToken: string) {
         });
 
         if (response.ok) {
-            const userData = await response.json();
+            const userData = await response.json() as HelixPaginatedResponse<HelixUserData>;
             if (userData.data && userData.data.length > 0) {
                 return userData.data[0];
             }
@@ -158,14 +169,17 @@ authManager.on("auth-success", async (authData) => {
 
     if (providerId === twitchAuthProviders.streamerAccountProviderId
         || providerId === twitchAuthProviders.botAccountProviderId) {
-        const userData = await getUserCurrent(tokenData.access_token as string);
+        const userData = await getUserCurrent(tokenData.access_token);
         if (userData == null) {
             return;
         }
 
         const obtainmentTimestamp = Date.now();
 
-        const accountType = providerId === twitchAuthProviders.streamerAccountProviderId ? "streamer" : "bot";
+        const accountType = providerId === twitchAuthProviders.streamerAccountProviderId
+            ? "streamer"
+            : "bot";
+
         const accountObject: FirebotAccount = {
             username: userData.login,
             displayName: userData.display_name,
@@ -178,13 +192,13 @@ authManager.on("auth-success", async (authData) => {
                 ...tokenData,
                 obtainment_timestamp: obtainmentTimestamp, // eslint-disable-line camelcase
                 expires_at: getExpiryDateOfAccessToken({ // eslint-disable-line camelcase
-                    expiresIn: tokenData.expires_in,
+                    expiresIn: Number(tokenData.expires_in),
                     obtainmentTimestamp: obtainmentTimestamp
                 })
             }
         };
 
-        accountAccess.updateAccount(accountType, accountObject);
+        AccountAccess.updateAccount(accountType, accountObject);
 
         if (accountType === "streamer") {
             void channelRewardManager.loadChannelRewards();
@@ -192,4 +206,4 @@ authManager.on("auth-success", async (authData) => {
     }
 });
 
-export = twitchAuthProviders;
+export { twitchAuthProviders as TwitchAuthProviders };

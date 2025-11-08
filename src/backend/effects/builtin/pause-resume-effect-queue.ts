@@ -1,6 +1,5 @@
-import { EffectType } from "../../../types/effects";
-import { EffectCategory } from "../../../shared/effect-constants";
-import effectQueueManager, { EffectQueueConfig } from "../queues/effect-queue-config-manager";
+import type { EffectType, EffectQueueConfig } from "../../../types/effects";
+import { EffectQueueConfigManager } from "../queues/effect-queue-config-manager";
 import logger from "../../logwrapper";
 
 const effect: EffectType<{
@@ -13,7 +12,7 @@ const effect: EffectType<{
         name: "Pause/Resume Effect Queue",
         description: "Pauses or resumes an effect queue. Effects sent to a paused queue will run once the queue is resumed.",
         icon: "fad fa-pause-circle",
-        categories: [EffectCategory.SCRIPTING]
+        categories: ["scripting"]
     },
     optionsTemplate: `
         <eos-container header="Effect Queue">
@@ -59,7 +58,7 @@ const effect: EffectType<{
             />
         </eos-container>
     `,
-    optionsController: ($scope, effectQueuesService: any) => {
+    optionsController: ($scope, effectQueuesService) => {
         $scope.effectQueues = effectQueuesService.getEffectQueues();
         $scope.effectQueueName = null;
 
@@ -92,19 +91,19 @@ const effect: EffectType<{
         const queue = effectQueuesService.getEffectQueue(effect.effectQueue);
         return `${effect.action} ${queue?.name ?? "Unknown Queue"}`;
     },
-    onTriggerEvent: async ({ effect }) => {
-        const queue = effectQueueManager.getItem(effect.effectQueue);
+    onTriggerEvent: ({ effect }) => {
+        const queue = EffectQueueConfigManager.getItem(effect.effectQueue);
 
         if (queue == null) {
             logger.debug(`Effect queue ${effect.effectQueue} not found`);
             return false;
         }
         if (effect.action === "Pause") {
-            effectQueueManager.pauseQueue(effect.effectQueue, effect.runEffectsImmediatelyWhenPaused);
+            EffectQueueConfigManager.pauseQueue(effect.effectQueue, effect.runEffectsImmediatelyWhenPaused);
         } else if (effect.action === "Resume") {
-            effectQueueManager.resumeQueue(effect.effectQueue);
+            EffectQueueConfigManager.resumeQueue(effect.effectQueue);
         } else {
-            effectQueueManager.toggleQueue(effect.effectQueue, effect.runEffectsImmediatelyWhenPaused);
+            EffectQueueConfigManager.toggleQueue(effect.effectQueue, effect.runEffectsImmediatelyWhenPaused);
         }
 
         return true;

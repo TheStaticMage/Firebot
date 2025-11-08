@@ -1,8 +1,7 @@
-import { ReplaceVariable } from "../../../../../types/variables";
-import { OutputDataType, VariableCategory } from "../../../../../shared/variable-constants";
+import type { ReplaceVariable } from "../../../../../types/variables";
+import { AccountAccess } from "../../../../common/account-access";
 import { TwitchApi } from "../../api";
 import channelRewardManager from "../../../../channel-rewards/channel-reward-manager";
-import accountAccess from "../../../../common/account-access";
 
 const model : ReplaceVariable = {
     definition: {
@@ -14,8 +13,8 @@ const model : ReplaceVariable = {
                 description: "The description of the given reward. Name must be exact!"
             }
         ],
-        categories: [VariableCategory.COMMON],
-        possibleDataOutput: [OutputDataType.TEXT]
+        categories: ["common"],
+        possibleDataOutput: ["text"]
     },
     evaluator: async (trigger, rewardName: string) => {
         let rewardData;
@@ -31,7 +30,7 @@ const model : ReplaceVariable = {
             }
 
             const reward = await TwitchApi.streamerClient.channelPoints.getCustomRewardById(
-                accountAccess.getAccounts().streamer.userId,
+                AccountAccess.getAccounts().streamer.userId,
                 channelRewardId
             );
             if (reward) {

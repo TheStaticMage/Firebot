@@ -1,12 +1,11 @@
-import { ReplaceVariable } from "../../../../../types/variables";
-import { OutputDataType, VariableCategory } from "../../../../../shared/variable-constants";
+import type { ReplaceVariable } from "../../../../../types/variables";
 
 const model: ReplaceVariable = {
     definition: {
         handle: "isAnonymous",
         description: "Whether or not the gift sub(s) were given anonymously.",
-        categories: [VariableCategory.TRIGGER, VariableCategory.USER],
-        possibleDataOutput: [OutputDataType.BOOLEAN],
+        categories: ["trigger based", "user based"],
+        possibleDataOutput: ["bool"],
         triggers: {
             event: [
                 "twitch:community-subs-gifted",
@@ -15,7 +14,7 @@ const model: ReplaceVariable = {
             manual: true
         }
     },
-    evaluator: async (trigger) => {
+    evaluator: (trigger) => {
         return trigger.metadata?.eventData?.isAnonymous === true;
     }
 };

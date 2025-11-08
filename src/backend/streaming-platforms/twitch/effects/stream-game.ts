@@ -1,8 +1,7 @@
-import { EffectType } from "../../../../types/effects";
-import { EffectCategory } from "../../../../shared/effect-constants";
-import logger from "../../../logwrapper";
+import type { EffectType } from "../../../../types/effects";
+import { EventManager } from "../../../events/event-manager";
 import { TwitchApi } from "../api";
-import eventsManager from "../../../events/EventManager";
+import logger from "../../../logwrapper";
 
 const model: EffectType<{
     mode: "specific" | "custom" | "clear";
@@ -15,7 +14,7 @@ const model: EffectType<{
         name: "Set Stream Category",
         description: "Set the stream category/game.",
         icon: "fad fa-gamepad",
-        categories: [EffectCategory.COMMON, EffectCategory.MODERATION, EffectCategory.TWITCH],
+        categories: ["common", "Moderation", "twitch"],
         dependencies: {
             twitch: true
         }
@@ -90,7 +89,7 @@ const model: EffectType<{
         };
     },
     optionsValidator: (effect) => {
-        const errors = [];
+        const errors: string[] = [];
         if (effect.mode === "specific" && (effect.gameId == null || effect.gameId === "")) {
             errors.push("Please search for and select a category/game.");
         } else if (effect.mode === "custom" && effect.gameName == null) {
@@ -137,11 +136,11 @@ const model: EffectType<{
         }
 
         const category = (await TwitchApi.channels.getChannelInformation()).gameName;
-        eventsManager.triggerEvent("firebot", "category-changed", {
+        void EventManager.triggerEvent("firebot", "category-changed", {
             category: category
         });
         return true;
     }
 };
 
-module.exports = model;
+export = model;

@@ -1,9 +1,8 @@
-import { validate } from "uuid";
-import { EffectCategory } from '../../../shared/effect-constants';
 import { SavedChannelReward } from "../../../types/channel-rewards";
 import { EffectType } from "../../../types/effects";
 import channelRewardsManager from "../../channel-rewards/channel-reward-manager";
 import logger from "../../logwrapper";
+import { isValidUUID } from "../../utils";
 
 type StringUpdatable = { update: boolean, newValue: string };
 type StatusUpdatable = { update: boolean, newValue: 'toggle' | boolean };
@@ -44,7 +43,7 @@ const effect: EffectType<EffectMeta> = {
         name: "Update Channel Reward",
         description: "Update settings for a channel reward",
         icon: "fad fa-gifts",
-        categories: [EffectCategory.ADVANCED, EffectCategory.TWITCH],
+        categories: ["advanced", "twitch"],
         dependencies: []
     },
     optionsTemplate: `
@@ -384,16 +383,16 @@ const effect: EffectType<EffectMeta> = {
                 return;
             }
 
-            let rewardId;
+            let rewardId: string;
             switch (effect.rewardSelectMode) {
                 case "dropdown":
                     rewardId = effect.channelRewardId;
                     break;
                 case "associated":
-                    rewardId = trigger.metadata.eventData?.rewardId ?? trigger.metadata.rewardId;
+                    rewardId = (trigger.metadata.eventData?.rewardId ?? trigger.metadata.rewardId) as string;
                     break;
                 case "custom":
-                    rewardId = validate(effect.customId)
+                    rewardId = isValidUUID(effect.customId)
                         ? effect.customId
                         : channelRewardsManager.getChannelRewardIdByName(effect.customId);
                     break;

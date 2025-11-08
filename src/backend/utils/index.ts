@@ -1,7 +1,9 @@
 export {
     chunkArray,
+    containsAll,
     findIndexIgnoreCase,
     flattenArray,
+    getRandomItem,
     shuffleArray
 } from "./arrays";
 
@@ -39,6 +41,10 @@ export {
 } from "./get-random-int";
 
 export {
+    isValidUUID
+} from "./is-valid-uuid";
+
+export {
     maskPII,
     MaskPIIOptions
 } from "./mask-pii";
@@ -47,7 +53,8 @@ export {
     deepClone,
     deepFreeze,
     extractPropertyWithPath,
-    isPlainObject
+    isPlainObject,
+    simpleClone
 } from "./objects";
 
 export {

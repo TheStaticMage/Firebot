@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import { EffectInstance } from "../../../../types/effects";
-import { EffectTrigger } from "../../../../shared/effect-constants";
-import effectsManager from "../../../../backend/effects/effectManager";
+import { PresetEffectListManager } from "../../../../backend/effects/preset-lists/preset-effect-list-manager";
+import { EffectManager } from "../../../../backend/effects/effect-manager";
 import effectRunner from "../../../../backend/common/effect-runner";
-import presetEffectListManager from "../../../../backend/effects/preset-lists/preset-effect-list-manager";
+import { Trigger } from "../../../../types/triggers";
 
 export function getEffects(req: Request, res: Response): void {
-    let effectDefs = effectsManager.getEffectDefinitions();
+    let effectDefs = EffectManager.getEffectDefinitions();
 
     if (req.query.trigger) {
         effectDefs = effectDefs.filter(effect => effect.triggers == null || effect.triggers[req.query.trigger as string]);
@@ -17,7 +17,7 @@ export function getEffects(req: Request, res: Response): void {
 
 export function getEffect(req: Request, res: Response): void {
     const effectId = req.params.effectId;
-    const effect = effectsManager.getEffectById(effectId);
+    const effect = EffectManager.getEffectById(effectId);
     if (effect == null) {
         res.status(404).send({
             status: "error",
@@ -47,9 +47,9 @@ export async function runEffects(
 
         const processEffectsRequest = {
             trigger: {
-                type: EffectTrigger.API,
+                type: "api",
                 metadata: triggerData
-            },
+            } as Trigger,
             effects: req.body.effects
         };
 
@@ -66,7 +66,7 @@ export async function runEffects(
 };
 
 export function getPresetLists(req: Request, res: Response): void {
-    const presetLists = presetEffectListManager.getAllItems();
+    const presetLists = PresetEffectListManager.getAllItems();
 
     if (presetLists == null) {
         res.status(500).send({
@@ -100,7 +100,7 @@ async function runPresetEffectList(
         });
     }
 
-    const presetList = presetEffectListManager.getItem(presetListId);
+    const presetList = PresetEffectListManager.getItem(presetListId);
     if (presetList == null) {
         res.status(404).send({
             status: "error",
@@ -129,12 +129,12 @@ async function runPresetEffectList(
 
     const processEffectsRequest = {
         trigger: {
-            type: EffectTrigger.PRESET_LIST,
+            type: "preset",
             metadata: {
                 username,
                 presetListArgs: args
             }
-        },
+        } as Trigger,
         effects: presetList.effects
     };
 

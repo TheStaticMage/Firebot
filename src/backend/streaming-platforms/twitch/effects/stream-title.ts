@@ -1,6 +1,5 @@
-import { EffectType } from "../../../../types/effects";
-import { EffectCategory } from "../../../../shared/effect-constants";
-import accountAccess from "../../../common/account-access";
+import type { EffectType } from "../../../../types/effects";
+import { AccountAccess } from "../../../common/account-access";
 import { TwitchApi } from "../api";
 
 const model: EffectType<{
@@ -11,7 +10,7 @@ const model: EffectType<{
         name: "Set Stream Title",
         description: "Set the title of the stream.",
         icon: "fad fa-comment-dots",
-        categories: [EffectCategory.COMMON, EffectCategory.MODERATION, EffectCategory.TWITCH],
+        categories: ["common", "Moderation", "twitch"],
         dependencies: {
             twitch: true
         }
@@ -24,7 +23,7 @@ const model: EffectType<{
     `,
     optionsController: () => {},
     optionsValidator: (effect) => {
-        const errors = [];
+        const errors: string[] = [];
         if (effect.title == null) {
             errors.push("Please input the title you'd like to use for the stream.");
         }
@@ -33,11 +32,11 @@ const model: EffectType<{
     onTriggerEvent: async (event) => {
         const client = TwitchApi.streamerClient;
 
-        await client.channels.updateChannelInfo(accountAccess.getAccounts().streamer.userId, {
+        await client.channels.updateChannelInfo(AccountAccess.getAccounts().streamer.userId, {
             title: event.effect.title
         });
         return true;
     }
 };
 
-module.exports = model;
+export = model;
