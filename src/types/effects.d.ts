@@ -26,6 +26,9 @@ export type EffectTriggerResponse = {
         stop: boolean;
         bubbleStop: boolean;
     };
+    outputs?: {
+        [x as string]: unknown;
+    };
 };
 
 export type EffectOutput = {
@@ -51,6 +54,43 @@ export type OverlayExtension<OverlayData = unknown> = {
     };
 };
 
+export type OverlayDimensions = {
+    width: number;
+    height: number;
+};
+
+export type OverlayPosition = {
+    position: string;
+    customCoords?: {
+        top: number;
+        bottom: number;
+        left: number;
+        right: number;
+    };
+};
+
+export type OverlayRotation = {
+    rotation: number;
+    rotType: "deg" | "rad" | "turn";
+};
+
+export type OverlayEnterExitAnimations = {
+    enterAnimation: string;
+    enterDuration: number;
+
+    inbetweenAnimation: string;
+    inbetweenDuration: number;
+    inbetweenDelay: number;
+    inbetweenRepeat: number;
+
+    exitAnimation: string;
+    exitDuration: number;
+};
+
+export type OverlayInstance = {
+    overlayInstance: string;
+};
+
 export type EffectDefinition<EffectModel = unknown> = {
     id: string;
     name: string;
@@ -73,6 +113,20 @@ export type EffectDefinition<EffectModel = unknown> = {
     keysExemptFromAutoVariableReplacement?: Array<keyof EffectModel>;
 };
 
+export type EffectInstance<EffectModel = unknown> = {
+    id: string;
+    type: string;
+    effectLabel?: string;
+    active?: boolean;
+    abortTimeout?: number;
+    percentWeight?: number;
+    outputNames?: Record<string, unknown>;
+} & {
+    [K in keyof EffectModel]: EffectModel[K];
+} & {
+    [x: string]: unknown;
+};
+
 export type EffectType<EffectModel = unknown, OverlayData = unknown> = {
     definition: EffectDefinition<EffectModel>;
     optionsTemplate: string;
@@ -81,7 +135,7 @@ export type EffectType<EffectModel = unknown, OverlayData = unknown> = {
     optionsValidator?: (effect: EffectModel, $scope: EffectScope<EffectModel>) => string[];
     getDefaultLabel?: (effect: EffectModel, ...args: any[]) => Awaitable<string | undefined>;
     onTriggerEvent: (event: {
-        effect: EffectModel;
+        effect: EffectInstance<EffectModel>;
         trigger: Trigger;
         sendDataToOverlay: (data: OverlayData, overlayInstance?: string) => void;
         outputs: Record<string, unknown>;
@@ -89,12 +143,6 @@ export type EffectType<EffectModel = unknown, OverlayData = unknown> = {
     }) => Awaitable<void | boolean | EffectTriggerResponse>;
     overlayExtension?: OverlayExtension<OverlayData>;
 };
-
-export interface EffectInstance {
-    id: string;
-    type: string;
-    [x: string]: unknown;
-}
 
 export interface EffectList {
     id: string;

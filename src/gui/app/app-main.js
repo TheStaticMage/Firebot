@@ -1,3 +1,4 @@
+/* eslint-disable angular/di-unused */
 /* eslint-disable angular/no-run-logic */
 
 
@@ -111,6 +112,10 @@
     ]);
 
     app.run(function initializeApplication(
+        logger,
+        quickActionsService,
+        chatMessagesService,
+        activityFeedService,
         viewerRolesService,
         viewerRanksService,
         connectionService,
@@ -134,6 +139,8 @@
         channelRewardsService,
         sortTagsService,
         iconsService,
+        videoService,
+        replaceVariableService,
         variableMacroService,
         uiExtensionsService,
         webhooksService,
@@ -765,18 +772,7 @@
     app.filter('reverseChat', function() {
         return (items, reverse) => {
             return reverse === true
-                ? items.toSorted((a, b) => {
-                    // Keep chat message and associated redemption in their current order
-                    if (a.type === "message"
-                        && b.type === "redemption"
-                        && a.rewardMatched
-                        && a.data.customRewardId === b.data.reward.id
-                    ) {
-                        return 1;
-                    }
-
-                    return -1;
-                })
+                ? items.toReversed()
                 : items;
         };
     });

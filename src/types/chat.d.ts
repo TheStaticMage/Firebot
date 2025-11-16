@@ -123,6 +123,13 @@ export type FirebotChatMessage = {
     customHighlightColor?: string;
     customBannerIcon?: string;
     customBannerText?: string;
+    reward?: {
+        id: string;
+        name: string;
+        cost: number;
+        imageUrl: string;
+    };
+    isGigantified?: boolean;
 };
 
 export type FirebotEmote = {
