@@ -34,7 +34,7 @@ function formatMetadata(meta: object) {
             return `\n${first.stack}`;
         }
         // Pad so we have a space after the message
-        return ` ${splat.map(s => JSON.stringify(s, Object.getOwnPropertyNames(s))).join("; ")}`;
+        return ` ${splat.map(s => JSON.stringify(s, Object.getOwnPropertyNames(s ?? {}))).join("; ")}`;
     }
 
     return '';
