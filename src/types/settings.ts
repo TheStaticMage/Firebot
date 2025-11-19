@@ -88,6 +88,7 @@ export type FirebotSettingsTypes = {
     };
     OverlayInstances: string[];
     PersistCustomVariables: boolean;
+    PresetRecursionLimit: boolean;
     QuickActions: Record<string, {
         enabled: boolean;
         position: number;
@@ -219,6 +220,7 @@ export const FirebotSettingsDefaults: FirebotSettingsTypes = {
         height: 720
     },
     PersistCustomVariables: false,
+    PresetRecursionLimit: true,
     QuickActions: {},
     RunCustomScripts: false,
     SeenAdvancedCommandModePopup: false,
