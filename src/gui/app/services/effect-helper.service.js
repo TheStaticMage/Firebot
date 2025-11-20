@@ -8,14 +8,18 @@
             const service = {};
 
             const mapEffectDef = function(effectDef) {
-                return {
-                    definition: effectDef.definition,
-                    optionsTemplate: effectDef.optionsTemplate,
-                    optionsTemplateUrl: effectDef.optionsTemplateUrl,
-                    optionsController: eval(effectDef.optionsControllerRaw), // eslint-disable-line no-eval
-                    optionsValidator: eval(effectDef.optionsValidatorRaw), // eslint-disable-line no-eval
-                    getDefaultLabel: effectDef.getDefaultLabelRaw ? eval(effectDef.getDefaultLabelRaw) : undefined // eslint-disable-line no-eval
-                };
+                try {
+                    return {
+                        definition: effectDef.definition,
+                        optionsTemplate: effectDef.optionsTemplate,
+                        optionsTemplateUrl: effectDef.optionsTemplateUrl,
+                        optionsController: eval(effectDef.optionsControllerRaw), // eslint-disable-line no-eval
+                        optionsValidator: eval(effectDef.optionsValidatorRaw), // eslint-disable-line no-eval
+                        getDefaultLabel: effectDef.getDefaultLabelRaw ? eval(effectDef.getDefaultLabelRaw) : undefined // eslint-disable-line no-eval
+                    };
+                } catch (err) {
+                    throw new Error(`Error mapping effect definition for "${effectDef.definition.id}": ${err.message}`);
+                }
             };
 
             service.getEffectDefinition = function(id) {
