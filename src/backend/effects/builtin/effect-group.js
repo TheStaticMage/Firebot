@@ -173,7 +173,7 @@ const effectGroup = {
                 newTrigger.type = EffectTrigger.PRESET_LIST;
                 newTrigger.metadata.presetListArgs = effect.presetListArgs;
 
-                // Prevent loops if a preset list directly or indirectly calls
+                // Prevent hangs if a preset list directly or indirectly calls
                 // itself. Some recursion is allowed, but we cap it at 100 calls.
                 if (newTrigger.metadata.stackDepth == null) {
                     newTrigger.metadata.stackDepth = {};
