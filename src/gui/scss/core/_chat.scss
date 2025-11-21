@@ -287,6 +287,16 @@
     border-radius: 10px;
 }
 
+.shared-chat-banner {
+    font-size: 0.75em;
+    padding: 7px 10px 0;
+    & img {
+        height: 28px;
+        margin-right: 5px;
+        border-radius: 14px;
+    }
+}
+
 .isCompact {
     & .chat-user-avatar-wrapper {
         width: 28px;
@@ -297,6 +307,11 @@
 
     & .chat-user-avatar {
         width: 28px;
+    }
+
+    & .shared-chat-user-avatar {
+        width: 28px;
+        border-radius: 14px;
     }
 }
 
@@ -454,8 +469,8 @@
     border-top: 2px solid #535459;
     border-left: 2px solid #535459;
     border-right: 2px solid #535459;
-    border-top-right-radius: 8px;
-    border-top-left-radius: 8px;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
     margin-left: 10px;
     margin-right: 10px;
     display: flex;
@@ -479,14 +494,14 @@
         padding: 0 10px;
         margin-top: 5px;
         border-top: 2px solid #535459;
-        border-top-right-radius: 8px;
-        border-top-left-radius: 8px;
+        border-top-right-radius: 10px;
+        border-top-left-radius: 10px;
     }
 }
 
 .text-input {
     height: 45px;
-    border-radius: 8px;
+    border-radius: 10px;
     width: 100%;
     display: flex;
     background: $chat-input-bg-color;
@@ -516,7 +531,7 @@
     position: absolute;
     bottom: 100%;
     z-index: 3000;
-    border-radius: 8px;
+    border-radius: 10px;
     transform: translateY(-8px);
     box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.33);
     & .tip {

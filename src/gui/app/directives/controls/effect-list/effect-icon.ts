@@ -42,14 +42,18 @@ type Controller = {
                 let color: string | undefined = undefined;
                 if ($ctrl.effectId === "firebot:comment") {
                     color = "#f4d03f";
-                } else if (categories.includes("Moderation")) {
+                } else if (categories.includes("moderation")) {
                     color = "#ef4444";
+                } else if (categories.includes("dashboard")) {
+                    color = "#ff9900ff";
                 } else if (categories.includes("chat based")) {
                     color = "#60A5FA";
                 } else if (categories.includes("twitch")) {
                     color = "#ab73ff";
                 } else if (categories.includes("overlay")) {
                     color = "#F472B6";
+                } else if (categories.includes("firebot control")) {
+                    color = "#09ff00ff";
                 } else if (categories.includes("scripting")) {
                     color = "#FACC15";
                 } else if (categories.includes("fun")) {
