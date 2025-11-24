@@ -356,6 +356,7 @@
                 activityFeedService,
                 quickActionsService
             ) {
+                const $ctrl = this;
                 $scope.settings = settingsService;
                 $scope.sounds = soundService;
                 $scope.activityFeed = activityFeedService;
@@ -365,16 +366,22 @@
                 $scope.notificationVolume = settingsService.getSetting("ChatTaggedNotificationVolume");
                 $scope.notificationSoundOptions = soundService.notificationSoundOptions;
 
-                $scope.volumeUpdated = () => {
-                    settingsService.saveSetting("ChatTaggedNotificationVolume", $scope.notificationVolume);
-                };
-
                 $scope.volumeSliderOptions = {
                     floor: 1,
                     ceil: 10,
                     hideLimitLabels: true,
-                    onChange: $scope.volumeUpdated
+                    onChange: (_, value) => {
+                        settingsService.saveSetting("ChatTaggedNotificationVolume", value);
+                    }
                 };
+
+                function refreshSlider() {
+                    $timeout(function() {
+                        $scope.$broadcast("rzSliderForceRender");
+                    }, 50);
+                }
+
+                $ctrl.$onInit = refreshSlider;
 
                 $scope.selectNotification = function(n) {
                     $scope.selectedNotificationSound = n;
@@ -389,9 +396,7 @@
                 $scope.saveSelectedNotification = function() {
                     const sound = $scope.selectedNotificationSound;
 
-                    $timeout(() => {
-                        $rootScope.$broadcast("rzSliderForceRender");
-                    }, 50);
+                    refreshSlider();
 
                     settingsService.saveSetting("ChatTaggedNotificationSound", {
                         name: sound.name,
