@@ -204,10 +204,17 @@
             });
 
             // Watches for an event from main process
-            backendCommunicator.on("playsound", (data) => {
+            backendCommunicator.on("playsound", async (data) => {
                 const volume = data.volume / 100 * 10;
 
                 let selectedOutputDevice = data.audioOutputDevice;
+
+                // If only audioOutputDeviceId is provided, look up the device
+                if (selectedOutputDevice == null && data.audioOutputDeviceId) {
+                    const devices = await service.getOutputDevices();
+                    selectedOutputDevice = devices.find(d => d.deviceId === data.audioOutputDeviceId);
+                }
+
                 if (
                     selectedOutputDevice == null ||
                     selectedOutputDevice.label === "App Default"
