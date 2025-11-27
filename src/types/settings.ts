@@ -98,6 +98,7 @@ export type FirebotSettingsTypes = {
     SeenAdvancedCommandModePopup: boolean;
     ShowAdBreakIndicator: boolean;
     ShowActivityFeed: boolean;
+    ShowActivityFeedEventsInChat: boolean;
     ShowChatViewerList: boolean;
     ShowHypeTrainIndicator: boolean;
     ShowUptimeStat: boolean;
@@ -227,6 +228,7 @@ export const FirebotSettingsDefaults: FirebotSettingsTypes = {
     RunCustomScripts: false,
     SeenAdvancedCommandModePopup: false,
     ShowActivityFeed: true,
+    ShowActivityFeedEventsInChat: false,
     ShowAdBreakIndicator: true,
     ShowChatViewerList: true,
     ShowHypeTrainIndicator: true,
