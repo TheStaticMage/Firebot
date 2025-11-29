@@ -108,9 +108,14 @@ class ActionButtonManager {
         };
 
         const effectRunner = require("../common/effect-runner");
+        const effectsToRun = {
+            ...config.effectList,
+            runMode: "all",
+            list: Array.isArray(config.effectList?.list) ? [...config.effectList.list] : []
+        };
         await effectRunner.processEffects({
             trigger: enhancedTrigger,
-            effects: config.effectList
+            effects: effectsToRun
         });
     }
 

@@ -13,10 +13,13 @@
                 actionButtons: "<"
             },
             template: `
-                <div class="chat-alert">
-                    <span style="font-size:25px;margin-right: 10px;"><i ng-class="$ctrl.iconClass"></i></span>
-                    <span style="margin: auto 0;" ng-bind-html="$ctrl.message"></span>
-                    <action-buttons-display message-id="$ctrl.alertId" action-buttons="$ctrl.actionButtons"></action-buttons-display>
+                <div class="chat-alert-wrapper">
+                    <action-buttons-display position="top" message-id="$ctrl.alertId" action-buttons="$ctrl.actionButtons"></action-buttons-display>
+                    <div class="chat-alert">
+                        <span style="font-size:25px;margin-right: 10px;"><i ng-class="$ctrl.iconClass"></i></span>
+                        <span style="margin: auto 0;" ng-bind-html="$ctrl.message"></span>
+                    </div>
+                    <action-buttons-display position="bottom" message-id="$ctrl.alertId" action-buttons="$ctrl.actionButtons"></action-buttons-display>
                 </div>
             `,
             controller: function() {
