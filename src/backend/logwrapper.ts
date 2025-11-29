@@ -27,12 +27,7 @@ if (!fs.existsSync(LOG_FOLDER)) {
 function formatMetadata(meta: object) {
     const splat = meta[Symbol.for('splat')] as unknown[];
 
-    // If the first splat is an Error, include its stack trace
     if (splat?.length) {
-        const first = splat[0];
-        if (first instanceof Error && first.stack) {
-            return `\n${first.stack}`;
-        }
         // Pad so we have a space after the message
         return ` ${splat.map(s => JSON.stringify(s, Object.getOwnPropertyNames(s ?? {}))).join("; ")}`;
     }
