@@ -612,6 +612,18 @@
         };
     });
 
+    app.filter("hideDelayedMessages", function() {
+        return function(elements) {
+            return elements.filter((e) => {
+                if (e.type !== 'message') {
+                    return true;
+                }
+                return e.data.isDelayed !== true;
+            }
+            );
+        };
+    });
+
     app.filter("hideHiddenMessages", function() {
         return function(elements) {
             return elements.filter((e) => {
