@@ -1,0 +1,80 @@
+.action-buttons-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.action-buttons-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 6px;
+    width: 100%;
+    margin-bottom: 6px;
+    padding-top: 3px;
+
+    &.bottom {
+        margin-top: 6px;
+        margin-bottom: 0;
+        padding-top: 0;
+
+        .action-button-group {
+            margin-bottom: 3px;
+        }
+    }
+}
+
+.action-button-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+
+    &.action-button-group-top_left,
+    &.action-button-group-bottom_left {
+        justify-content: flex-start;
+        grid-column: 1;
+    }
+
+    &.action-button-group-top_center,
+    &.action-button-group-bottom_center {
+        justify-content: center;
+        grid-column: 2;
+        justify-self: center;
+    }
+
+    &.action-button-group-top_right,
+    &.action-button-group-bottom_right {
+        justify-content: flex-end;
+        text-align: right;
+        grid-column: 3;
+    }
+}
+
+.action-button {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: opacity 0.2s, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+
+    &:hover {
+        opacity: 0.85;
+        transform: translateY(-1px);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+
+    i {
+        font-size: 14px;
+    }
+}
