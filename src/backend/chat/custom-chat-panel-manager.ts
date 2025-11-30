@@ -18,6 +18,14 @@ interface UpdatePanelData {
     };
 }
 
+interface PanelData {
+    id: string;
+    type: string;
+    hidden?: boolean;
+    componentName: string;
+    componentData?: unknown;
+}
+
 class CustomChatPanelManager {
     injectPanel(data: InjectPanelData): void {
         if (!data.componentName) {
@@ -74,23 +82,14 @@ class CustomChatPanelManager {
         });
     }
 
-    setupListeners(): void {
-        logger.debug("Setting up custom chat panel IPC listeners");
+    async getPanel(panelId: string): Promise<PanelData | null> {
+        if (!panelId) {
+            logger.warn("Cannot get chat panel: panelId is required");
+            return null;
+        }
 
-        // eslint-disable-next-line @typescript-eslint/require-await
-        frontendCommunicator.onAsync("firebot:inject-chat-panel", async (data: InjectPanelData) => {
-            this.injectPanel(data);
-        });
-
-        // eslint-disable-next-line @typescript-eslint/require-await
-        frontendCommunicator.onAsync("firebot:remove-chat-panel", async (panelId: string) => {
-            this.removePanel(panelId);
-        });
-
-        // eslint-disable-next-line @typescript-eslint/require-await
-        frontendCommunicator.onAsync("firebot:update-chat-panel", async (data: UpdatePanelData) => {
-            this.updatePanel(data);
-        });
+        logger.debug("Getting custom chat panel", { panelId });
+        return await frontendCommunicator.fireEventAsync("firebot:get-chat-panel", panelId);
     }
 }
 

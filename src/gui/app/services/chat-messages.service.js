@@ -316,6 +316,27 @@
                 logger.debug("Updated custom chat panel", { panelId: payload.panelId, updates: payload.updates });
             };
 
+            // Get Custom Panel
+            service.getCustomPanel = function(panelId) {
+                const panel = service.chatQueue.find(item => item.id === panelId && item.type === "custom");
+                if (panel == null) {
+                    logger.debug(`Panel with id ${panelId} not found in queue`);
+                    return null;
+                }
+
+                return {
+                    id: panel.id,
+                    type: panel.type,
+                    hidden: panel.hidden,
+                    componentName: panel.data.componentName,
+                    componentData: panel.data.componentData
+                };
+            };
+
+            backendCommunicator.onAsync("firebot:get-chat-panel", async (panelId) => {
+                return service.getCustomPanel(panelId);
+            });
+
             // Prune Messages
             service.pruneChatQueue = function() {
                 const arr = service.chatQueue,
