@@ -1,5 +1,6 @@
 import { EffectType } from '../../../types/effects';
 import frontendCommunicator from '../../common/frontend-communicator';
+import { randomUUID } from 'crypto';
 
 const effect: EffectType<{
     message: string;
@@ -11,7 +12,14 @@ const effect: EffectType<{
         description: "Display an alert in Firebot's chat feed",
         icon: "fad fa-exclamation-circle",
         categories: ["common", "dashboard", "chat based"],
-        dependencies: []
+        dependencies: [],
+        outputs: [
+            {
+                label: "Message ID",
+                description: "The generated message ID for this chat feed alert",
+                defaultName: "messageId"
+            }
+        ]
     },
     optionsTemplate: `
     <eos-container>
@@ -57,13 +65,21 @@ const effect: EffectType<{
 
         const { effect } = event;
 
+        const messageId = randomUUID();
+
         frontendCommunicator.send("chatUpdate", {
             fbEvent: "ChatAlert",
             message: effect.message,
-            icon: effect.icon
+            icon: effect.icon,
+            messageId: messageId
         });
 
-        return true;
+        return {
+            success: true,
+            outputs: {
+                messageId: messageId
+            }
+        };
     }
 };
 

@@ -140,12 +140,13 @@
             };
 
             // Chat Alert Message
-            service.chatAlertMessage = function(message, icon = "fad fa-exclamation-circle") {
+            service.chatAlertMessage = function(message, icon = "fad fa-exclamation-circle", messageId) {
                 const alertItem = {
                     id: randomUUID(),
                     type: "alert",
                     message: message,
-                    icon: icon
+                    icon: icon,
+                    messageId: messageId || randomUUID()
                 };
 
                 service.chatQueue.push(alertItem);
@@ -218,8 +219,16 @@
                         break;
                     case "ChatAlert":
                         logger.debug("Chat alert from backend.");
-                        service.chatAlertMessage(data.message, data.icon);
+                        service.chatAlertMessage(data.message, data.icon, data.messageId);
                         break;
+                    case "DeleteChatAlert": {
+                        logger.debug("DeleteChatAlert event received", data);
+                        const alertIndex = service.chatQueue.findIndex(i => i.type === "alert" && i.messageId === data.messageId);
+                        if (alertIndex !== -1) {
+                            service.chatQueue.splice(alertIndex, 1);
+                        }
+                        break;
+                    }
                     case "InjectCustomPanel":
                         logger.info("InjectCustomPanel event received", data);
                         service.injectCustomPanel(data);
