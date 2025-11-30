@@ -7,16 +7,13 @@
         .module('firebotApp')
         .component("chatAlert", {
             bindings: {
-                alertId: "<",
                 alertMessage: "<",
-                alertIcon: "<",
-                actionButtons: "<"
+                alertIcon: "<"
             },
             template: `
                 <div class="chat-alert">
                     <span style="font-size:25px;margin-right: 10px;"><i ng-class="$ctrl.iconClass"></i></span>
                     <span style="margin: auto 0;" ng-bind-html="$ctrl.message"></span>
-                    <action-buttons-display message-id="$ctrl.alertId" action-buttons="$ctrl.actionButtons"></action-buttons-display>
                 </div>
             `,
             controller: function() {

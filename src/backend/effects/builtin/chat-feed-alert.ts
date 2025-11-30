@@ -1,14 +1,9 @@
 import { EffectType } from '../../../types/effects';
 import frontendCommunicator from '../../common/frontend-communicator';
-import { randomUUID } from 'crypto';
-import { actionButtonManager } from '../../chat/action-button-manager';
-import { ActionButtonDefinition } from '../../../types/action-buttons';
 
 const effect: EffectType<{
     message: string;
     icon: string;
-    addActionButtons?: boolean;
-    actionButtons?: ActionButtonDefinition[];
 }> = {
     definition: {
         id: "firebot:chat-feed-alert",
@@ -41,22 +36,6 @@ const effect: EffectType<{
 			icon-picker required
 		/>
     </eos-container>
-
-    <eos-container header="Action Buttons" pad-top="true">
-        <label class="control-fb control--checkbox"> Add Action Buttons to this Alert
-            <input type="checkbox" ng-model="effect.addActionButtons">
-            <div class="control__indicator"></div>
-        </label>
-
-        <div ng-if="effect.addActionButtons" style="margin-top: 15px;">
-            <action-button-list
-                model="effect.actionButtons"
-                trigger="{{trigger}}"
-                trigger-meta="triggerMeta"
-                modal-id="{{modalId}}">
-            </action-button-list>
-        </div>
-    </eos-container>
     `,
     optionsController: ($scope) => {
         // Backward compatibility from when the icon was hard-coded
@@ -74,27 +53,16 @@ const effect: EffectType<{
         }
         return errors;
     },
-    onTriggerEvent: async (event) => {
-        const { effect, trigger } = event;
+    onTriggerEvent: (event) => {
 
-        const messageId = randomUUID();
-        const chatUpdateData: any = {
+        const { effect } = event;
+
+        frontendCommunicator.send("chatUpdate", {
             fbEvent: "ChatAlert",
             message: effect.message,
-            icon: effect.icon,
-            messageId: messageId
-        };
+            icon: effect.icon
+        });
 
-        if (effect.addActionButtons) {
-            actionButtonManager.attachActionButtonsToMessage(
-                effect.actionButtons,
-                messageId,
-                trigger,
-                chatUpdateData
-            );
-        }
-
-        frontendCommunicator.send("chatUpdate", chatUpdateData);
         return true;
     }
 };

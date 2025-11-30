@@ -23,7 +23,6 @@
             },
             template: `
                 <div class="chat-message-wrapper">
-                    <action-buttons-display position="top" message-id="$ctrl.message.id" action-buttons="$ctrl.message.actionButtons"></action-buttons-display>
                     <div
                         ng-if="$ctrl.message.isAnnouncement"
                         class="announcement-bar"
@@ -267,8 +266,6 @@
                         </div>
                     </div>
                     <div ng-if="$ctrl.message.isAnnouncement || $ctrl.message.isFirstChat || $ctrl.message.isReturningChatter || $ctrl.message.isRaider || $ctrl.message.isSuspiciousUser || $ctrl.message.customBannerText || $ctrl.message.customBannerIcon" style="margin-bottom:5px">
-                    </div>
-                    <action-buttons-display position="bottom" message-id="$ctrl.message.id" action-buttons="$ctrl.message.actionButtons"></action-buttons-display>
                 </div>
             `,
             controller: function(

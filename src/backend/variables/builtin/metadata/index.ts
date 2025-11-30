@@ -1,4 +1,3 @@
-import actionButtonMetadata from './action-button-metadata';
 import arg from './arg';
 import argArray from './arg-array';
 import argArrayRaw from './arg-array-raw';
@@ -27,7 +26,6 @@ import webhookName from './webhook-name';
 import webhookPayload from './webhook-payload';
 
 export default [
-    actionButtonMetadata,
     arg,
     argArray,
     argArrayRaw,

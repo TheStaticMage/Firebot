@@ -7,7 +7,7 @@
     angular
         .module('firebotApp')
         .factory('chatMessagesService', function (logger, settingsService,
-            soundService, backendCommunicator, pronounsService, accountAccess, ngToast, actionButtonsService) {
+            soundService, backendCommunicator, pronounsService, accountAccess, ngToast) {
             const service = {};
 
             // Chat Message Queue
@@ -140,18 +140,15 @@
             };
 
             // Chat Alert Message
-            service.chatAlertMessage = function(message, icon = "fad fa-exclamation-circle", actionButtons = [], messageId = null) {
-                const id = messageId || randomUUID();
+            service.chatAlertMessage = function(message, icon = "fad fa-exclamation-circle") {
                 const alertItem = {
-                    id: id,
+                    id: randomUUID(),
                     type: "alert",
                     message: message,
-                    icon: icon,
-                    actionButtons: actionButtons
+                    icon: icon
                 };
 
                 service.chatQueue.push(alertItem);
-                actionButtonsService.applyPendingActionButtons(service.chatQueue, id);
             };
 
             backendCommunicator.on("chat-feed-system-message", (message, icon) => {
@@ -173,21 +170,6 @@
             backendCommunicator.on("chat-feed-custom-highlight", (data) => {
                 service.customHighlightAndBanner(data.messageId, data.customHighlightColor, data.customBannerIcon, data.customBannerText);
             });
-
-            // Add Action Buttons to Message
-            service.addActionButtonsToMessage = function(messageId, actionButtons) {
-                actionButtonsService.addActionButtonsToMessage(service.chatQueue, messageId, actionButtons);
-            };
-
-            // Hide Action Buttons
-            service.hideActionButtons = function(messageId) {
-                actionButtonsService.hideActionButtons(service.chatQueue, messageId);
-            };
-
-            // Handle Action Button Click
-            service.handleActionButtonClick = function(messageId, buttonUuid) {
-                actionButtonsService.handleActionButtonClick(service.chatQueue, messageId, buttonUuid);
-            };
 
             // Chat Update Handler
             // This handles all of the chat stuff that isn't a message.
@@ -236,11 +218,7 @@
                         break;
                     case "ChatAlert":
                         logger.debug("Chat alert from backend.");
-                        service.chatAlertMessage(data.message, data.icon, data.actionButtons, data.messageId);
-                        break;
-                    case "AddActionButtons":
-                        logger.debug("Adding action buttons to existing message");
-                        service.addActionButtonsToMessage(data.messageId, data.actionButtons);
+                        service.chatAlertMessage(data.message, data.icon);
                         break;
                     default:
                     // Nothing
@@ -504,7 +482,6 @@
                 }
 
                 service.chatQueue.push(messageItem);
-                actionButtonsService.applyPendingActionButtons(service.chatQueue, chatMessage.id);
 
                 service.pruneChatQueue();
             });
