@@ -217,7 +217,8 @@ function buildModules(scriptManifest) {
                     .forEach(n => notificationManager.deleteNotification(n.id));
             }
         },
-        uiExtensionManager: require("../../../ui-extensions/ui-extension-manager")
+        uiExtensionManager: require("../../../ui-extensions/ui-extension-manager"),
+        customChatPanelManager: require("../../../chat/custom-chat-panel-manager").default
     };
 }
 
