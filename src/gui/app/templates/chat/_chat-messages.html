@@ -88,6 +88,11 @@
             alert-message="chatItem.message"
             alert-icon="chatItem.icon"
           />
+          <custom-chat-panel
+            ng-if="chatItem.type === 'custom'"
+            component-name="::chatItem.data.componentName"
+            component-data="::chatItem.data.componentData"
+          />
         </div>
       </div>
       <div class="chat-autodisconnected" ng-show="cms.autodisconnected">

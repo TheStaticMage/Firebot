@@ -220,9 +220,66 @@
                         logger.debug("Chat alert from backend.");
                         service.chatAlertMessage(data.message, data.icon);
                         break;
+                    case "InjectCustomPanel":
+                        logger.info("InjectCustomPanel event received", data);
+                        service.injectCustomPanel(data);
+                        break;
+                    case "RemoveCustomPanel":
+                        logger.info("RemoveCustomPanel event received", data);
+                        service.removeCustomPanel(data.panelId);
+                        break;
                     default:
                     // Nothing
                         logger.warn("Unknown chat event sent", data);
+                }
+            };
+
+            // Inject Custom Panel
+            service.injectCustomPanel = function(payload) {
+                const customPanel = {
+                    id: payload.panelId,
+                    type: "custom",
+                    data: {
+                        componentName: payload.componentName,
+                        componentData: payload.componentData
+                    }
+                };
+
+                logger.debug("Injecting custom chat panel", { componentName: payload.componentName, panelId: payload.panelId });
+
+                const position = payload.position || "append";
+
+                if (position === "append") {
+                    service.chatQueue.push(customPanel);
+                } else if (position === "prepend") {
+                    service.chatQueue.unshift(customPanel);
+                } else if (position.afterMessageId) {
+                    const index = service.chatQueue.findIndex(item => item.id === position.afterMessageId);
+                    if (index !== -1) {
+                        service.chatQueue.splice(index + 1, 0, customPanel);
+                    } else {
+                        logger.warn(`Message with id ${position.afterMessageId} not found, appending panel instead`);
+                        service.chatQueue.push(customPanel);
+                    }
+                } else if (position.beforeMessageId) {
+                    const index = service.chatQueue.findIndex(item => item.id === position.beforeMessageId);
+                    if (index !== -1) {
+                        service.chatQueue.splice(index, 0, customPanel);
+                    } else {
+                        logger.warn(`Message with id ${position.beforeMessageId} not found, prepending panel instead`);
+                        service.chatQueue.unshift(customPanel);
+                    }
+                }
+            };
+
+            // Remove Custom Panel
+            service.removeCustomPanel = function(panelId) {
+                const index = service.chatQueue.findIndex(item => item.id === panelId);
+                if (index !== -1) {
+                    service.chatQueue.splice(index, 1);
+                    logger.debug("Removed custom chat panel", { panelId });
+                } else {
+                    logger.warn(`Panel with id ${panelId} not found in queue`);
                 }
             };
 

@@ -280,6 +280,10 @@ export async function whenReady() {
     // get ui extension manager in memory
     await import("../../../ui-extensions/ui-extension-manager");
 
+    // setup custom chat panel manager
+    const customChatPanelManager = (await import("../../../chat/custom-chat-panel-manager")).default;
+    customChatPanelManager.setupListeners();
+
     // start crowbar relay websocket
     await import("../../../crowbar-relay/crowbar-relay-websocket");
 
