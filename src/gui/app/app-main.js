@@ -665,6 +665,17 @@
         };
     });
 
+    app.filter("hideCustomPanels", function() {
+        return function(elements) {
+            return elements.filter((e) => {
+                if (e.type !== 'custom') {
+                    return true;
+                }
+                return e.hidden !== true;
+            });
+        };
+    });
+
     app.filter("chatUserRole", function() {
         return function(users, role) {
             if (users == null || role == null) {

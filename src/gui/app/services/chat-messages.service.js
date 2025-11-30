@@ -237,6 +237,10 @@
                         logger.info("RemoveCustomPanel event received", data);
                         service.removeCustomPanel(data.panelId);
                         break;
+                    case "UpdateCustomPanel":
+                        logger.info("UpdateCustomPanel event received", data);
+                        service.updateCustomPanel(data);
+                        break;
                     default:
                     // Nothing
                         logger.warn("Unknown chat event sent", data);
@@ -248,6 +252,7 @@
                 const customPanel = {
                     id: payload.panelId,
                     type: "custom",
+                    hidden: payload.hidden,
                     data: {
                         componentName: payload.componentName,
                         componentData: payload.componentData
@@ -290,6 +295,25 @@
                 } else {
                     logger.warn(`Panel with id ${panelId} not found in queue`);
                 }
+            };
+
+            // Update Custom Panel
+            service.updateCustomPanel = function(payload) {
+                const panel = service.chatQueue.find(item => item.id === payload.panelId && item.type === "custom");
+                if (panel == null) {
+                    logger.warn(`Panel with id ${payload.panelId} not found in queue`);
+                    return;
+                }
+
+                if (payload.updates.hidden !== undefined) {
+                    panel.hidden = payload.updates.hidden;
+                }
+
+                if (payload.updates.componentData !== undefined) {
+                    panel.data.componentData = payload.updates.componentData;
+                }
+
+                logger.debug("Updated custom chat panel", { panelId: payload.panelId, updates: payload.updates });
             };
 
             // Prune Messages

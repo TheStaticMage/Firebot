@@ -7,6 +7,15 @@ interface InjectPanelData {
     componentData?: unknown;
     position?: string | { afterMessageId: string } | { beforeMessageId: string };
     panelId?: string;
+    hidden?: boolean;
+}
+
+interface UpdatePanelData {
+    panelId: string;
+    updates: {
+        hidden?: boolean;
+        componentData?: unknown;
+    };
 }
 
 class CustomChatPanelManager {
@@ -23,10 +32,32 @@ class CustomChatPanelManager {
             componentName: data.componentName,
             componentData: data.componentData,
             position: data.position || "append",
-            panelId: panelId
+            panelId: panelId,
+            hidden: data.hidden
         };
 
         logger.debug("Injecting custom chat panel", { componentName: data.componentName, panelId });
+        frontendCommunicator.send("chatUpdate", payload);
+    }
+
+    updatePanel(data: UpdatePanelData): void {
+        if (!data.panelId) {
+            logger.warn("Cannot update chat panel: panelId is required");
+            return;
+        }
+
+        if (!data.updates || (data.updates.hidden === undefined && data.updates.componentData === undefined)) {
+            logger.warn("Cannot update chat panel: no updates provided");
+            return;
+        }
+
+        const payload = {
+            fbEvent: "UpdateCustomPanel",
+            panelId: data.panelId,
+            updates: data.updates
+        };
+
+        logger.debug("Updating custom chat panel", { panelId: data.panelId, updates: data.updates });
         frontendCommunicator.send("chatUpdate", payload);
     }
 
@@ -54,6 +85,11 @@ class CustomChatPanelManager {
         // eslint-disable-next-line @typescript-eslint/require-await
         frontendCommunicator.onAsync("firebot:remove-chat-panel", async (panelId: string) => {
             this.removePanel(panelId);
+        });
+
+        // eslint-disable-next-line @typescript-eslint/require-await
+        frontendCommunicator.onAsync("firebot:update-chat-panel", async (data: UpdatePanelData) => {
+            this.updatePanel(data);
         });
     }
 }
