@@ -1,3 +1,6 @@
+// Modified by The Static Mage, 2025
+// Licensed under GPL-3.0-or-later
+
 import { EffectType } from '../../../types/effects';
 import frontendCommunicator from '../../common/frontend-communicator';
 import { randomUUID } from 'crypto';
