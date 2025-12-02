@@ -225,6 +225,12 @@ function buildRunRequest(scriptManifest, params, trigger) {
     const scriptNameNormalized = scriptManifest.name.replace(/[#%&{}\\<>*?/$!'":@`|=\s-]+/g, "-").toLowerCase();
     const scriptDataDir = path.resolve(ProfileManager.getPathInProfile("/script-data/"), `./${scriptNameNormalized}/`);
 
+    const getUtcTimestamp = () => {
+        const now = new Date();
+        const pad = num => String(num).padStart(2, "0");
+        return `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}`;
+    };
+
     return {
         modules: buildModules(scriptManifest),
         command: trigger?.metadata?.userCommand,
@@ -235,7 +241,7 @@ function buildRunRequest(scriptManifest, params, trigger) {
             accounts: AccountAccess.getAccounts(),
             settings: SettingsManager,
             version: app.getVersion(),
-            mageForkVersion: 0
+            mageForkVersion: getUtcTimestamp()
         },
         parameters: params,
         trigger: trigger,
