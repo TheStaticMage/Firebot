@@ -234,7 +234,8 @@ function buildRunRequest(scriptManifest, params, trigger) {
         firebot: {
             accounts: AccountAccess.getAccounts(),
             settings: SettingsManager,
-            version: app.getVersion()
+            version: app.getVersion(),
+            mageForkVersion: 0
         },
         parameters: params,
         trigger: trigger,
