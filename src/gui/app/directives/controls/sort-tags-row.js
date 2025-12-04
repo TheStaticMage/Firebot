@@ -17,7 +17,7 @@
                     popover-append-to-body="true"
                     popover-trigger="'outsideClick'"
                 >
-                    <div class="sort-tags p-px" ng-class="{ 'hidden-tags': $ctrl.overflowStatus }">
+                    <div class="sort-tags p-px" ng-class="{ 'hidden-tags': hasOverflow() }">
                         <span ng-repeat="tag in getSortTags() track by tag.id" class="sort-tag mr-2">
                             <span class="mb-px">{{tag.name}}</span>
                         </span>
@@ -29,7 +29,7 @@
                             <i class="far fa-plus"></i>
                         </button>
                     </div>
-                    <div style="position: absolute;" ng-show="$ctrl.overflowStatus" uib-tooltip-html="getSortTagNames()">
+                    <div style="position: absolute;" ng-show="hasOverflow()" uib-tooltip-html="getSortTagNames()">
                         <button
                             role="button"
                             class="sort-tag-add mb-px"
@@ -59,12 +59,17 @@
                     </script>
                 </div>
             `,
-            controller: function($scope, $element, $timeout, $window, sortTagsService) {
+            controller: function($scope, $element, $timeout, sortTagsService) {
                 const $ctrl = this;
 
                 $ctrl.isPopupVisible = false;
                 $ctrl.cachedSortTags = [];
-                $ctrl.overflowStatus = false;
+                $ctrl.cachedOverflow = false;
+
+                // Cache sort tags to avoid repeated service calls
+                function updateCachedTags() {
+                    $ctrl.cachedSortTags = sortTagsService.getSortTagsForItem($ctrl.context, $ctrl.item.sortTags);
+                }
 
                 $scope.editSortTags = () => {
                     $ctrl.isPopupVisible = false;
@@ -77,44 +82,31 @@
 
                 // Debounce overflow check
                 let overflowTimeout;
-                const checkOverflow = () => {
-                    const tagContainer = $element[0].querySelector(".sort-tags");
-                    if (!tagContainer) {
-                        $ctrl.overflowStatus = false;
-                        return;
-                    }
-
-                    const allTags = Array.from(tagContainer.children);
-                    const hasOverflow = allTags.some(child => {
-                        const parent = child.parentNode;
-                        return (child.offsetLeft - parent.offsetLeft > parent.offsetWidth) ||
-                            (child.offsetTop - parent.offsetTop > parent.offsetHeight);
-                    });
-
-                    $ctrl.overflowStatus = hasOverflow;
-                };
-
-                const debounceOverflowCheck = () => {
+                $scope.getOverflowTagCount = () => {
                     if (overflowTimeout) {
-                        $timeout.cancel(overflowTimeout);
+                        return $ctrl.cachedOverflow ? 1 : 0;
                     }
                     overflowTimeout = $timeout(() => {
-                        checkOverflow();
+                        const allTags = $element.find(".sort-tags").children().toArray();
+                        const count = Math.max(allTags.reduce((acc, child) => {
+                            const parent = child.parentNode;
+                            if ((child.offsetLeft - parent.offsetLeft > parent.offsetWidth) ||
+                                (child.offsetTop - parent.offsetTop > parent.offsetHeight)) {
+                                acc++;
+                            }
+                            return acc;
+                        }, 0), 0);
+                        $ctrl.cachedOverflow = count > 0;
                         overflowTimeout = null;
                     }, 100);
+                    return $ctrl.cachedOverflow ? 1 : 0;
                 };
 
-                // Cache sort tags to avoid repeated service calls and recalc overflow when tags change
-                function updateCachedTags() {
-                    $ctrl.cachedSortTags = sortTagsService.getSortTagsForItem($ctrl.context, $ctrl.item.sortTags);
-                    debounceOverflowCheck();
-                }
+                $scope.hasOverflow = () => {
+                    return $scope.getOverflowTagCount() > 0;
+                };
 
                 $scope.sts = sortTagsService;
-
-                const windowEl = angular.element($window);
-                const handleResize = () => debounceOverflowCheck();
-                windowEl.on("resize", handleResize);
 
                 $ctrl.removeSortTag = (tagId) => {
                     $ctrl.item.sortTags = $ctrl.item.sortTags.filter(id => id !== tagId);
@@ -150,13 +142,6 @@
                 $scope.$watch(() => $ctrl.item.sortTags, () => {
                     updateCachedTags();
                 }, true);
-
-                $scope.$on("$destroy", () => {
-                    if (overflowTimeout) {
-                        $timeout.cancel(overflowTimeout);
-                    }
-                    windowEl.off("resize", handleResize);
-                });
             }
         });
 }());
