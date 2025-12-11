@@ -553,7 +553,7 @@
 
         <!-- overlay info modal -->
         <script type="text/ng-template" id="overlayInfoModal.html">
-            
+
         </script>
 
         <!-- show events modal -->
@@ -613,7 +613,8 @@
             <div class="modal-footer">
                 <button ng-if="downloadHasError" class="btn btn-primary" ng-click="dismiss()">Close</button>
                 <button ng-if="!downloadHasError && downloadComplete && !installing" class="btn btn-primary" ng-click="installUpdate()">Install Now</button>
-                <button ng-if="!downloadHasError && downloadComplete && !installing" class="btn btn-default" ng-click="dismiss()">Install On Exit</button>
+                <button ng-if="!downloadHasError && downloadComplete && !installing" class="btn btn-default" ng-click="installOnExit()">Install On Exit</button>
+                <button ng-if="!downloadHasError && downloadComplete && !installing" class="btn btn-default" ng-click="dismiss()">Install Later</button>
             </div>
         </script>
 
@@ -626,14 +627,14 @@
                         <div class="flex item-center justify-between">
                             <div
                                 class="test-effects-btn clickable"
-                                uib-tooltip="Test Effect" 
-                                ng-hide="effect == null || effect.type === 'Nothing'" 
-                                ng-click="runEffect()" 
-                                aria-label="Test Effect" 
+                                uib-tooltip="Test Effect"
+                                ng-hide="effect == null || effect.type === 'Nothing'"
+                                ng-click="runEffect()"
+                                aria-label="Test Effect"
                                 role="button"
                             >
                                 <i class="far fa-play-circle"></i>
-                            </div> 
+                            </div>
                             <div>
                                 <a href role="button"
                                     aria-label="Open effect menu"
@@ -666,7 +667,7 @@
                         <button type="button" ng-click="openNewEffectModal()" class="btn btn-sm btn-default ml-4" style="font-size: 10px;">Change</button>
                         </div>
                     </div>
-                
+
                     <div class="effect-settings-panel">
                         <div ng-show="effect.type == 'Nothing'" class="effect-specific-title"><h4>Please select an effect.</h4></div>
                         <effect-options effect="effect" type="effect.type" trigger="{{triggerType}}" ng-show="effect.type != null" trigger-meta="triggerMeta"><effect-options>

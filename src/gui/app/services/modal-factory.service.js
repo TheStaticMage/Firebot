@@ -342,6 +342,11 @@
                             updatesService.installUpdate();
                         };
 
+                        $scope.installOnExit = function() {
+                            backendCommunicator.send("installOnExit");
+                            $uibModalInstance.dismiss("cancel");
+                        };
+
                         $scope.dismiss = function() {
                             $uibModalInstance.dismiss("cancel");
                         };

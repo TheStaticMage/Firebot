@@ -110,6 +110,10 @@ exports.setupCommonListeners = () => {
 
     const updateFeedUrl = `https://update.electronjs.org/crowbartools/Firebot/win32/${app.getVersion()}`;
 
+    // Default to NOT auto-installing on quit for safety
+    // Only enable if user explicitly clicks "Install On Exit"
+    autoUpdater.autoInstallOnAppQuit = false;
+
     frontendCommunicator.on("downloadUpdate", async () => {
         //back up first
         if (SettingsManager.getSetting("BackupBeforeUpdates")) {
@@ -128,6 +132,11 @@ exports.setupCommonListeners = () => {
             // Prepare for update install on next run
             SettingsManager.saveSetting("JustUpdated", true);
         });
+    });
+
+    frontendCommunicator.on("installOnExit", () => {
+        logger.info("User chose to install update on exit");
+        autoUpdater.autoInstallOnAppQuit = true;
     });
 
     frontendCommunicator.on("installUpdate", () => {
