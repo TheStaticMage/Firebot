@@ -41,6 +41,11 @@
 
             function shouldAutoUpdate(autoUpdateLevel, updateType) {
                 // if auto updating is completely disabled
+                if (settingsService.getSetting('DisableAutoUpdate')) {
+                    return false;
+                }
+
+                // if auto updating is completely disabled
                 if (autoUpdateLevel === 0) {
                     return false;
                 }

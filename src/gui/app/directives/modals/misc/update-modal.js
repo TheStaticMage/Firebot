@@ -40,7 +40,7 @@
                     </div>
                 </div>
                 <div class="modal-footer update-buttons sticky-footer" ng-if="$ctrl.getUpdateData() != null">
-                    <a class="github-link" href><button class="btn btn-primary" ng-if="$ctrl.getUpdateData().updateIsAvailable" ng-click="$ctrl.downloadAndInstallUpdate()">Update</button></a>
+                    <a class="github-link" href><button class="btn btn-primary" ng-if="$ctrl.getUpdateData().updateIsAvailable && !$ctrl.isAutoUpdateDisabled()" ng-click="$ctrl.downloadAndInstallUpdate()">Update</button></a>
                     <a href ng-click="$ctrl.openLink('https://github.com/crowbartools/Firebot/issues/new?assignees=&template=bug_report.yml')"><button class="btn btn-danger">Report Bugs</button></a>
                     <a href ng-click="$ctrl.openLink('https://github.com/crowbartools/Firebot/issues/new?assignees=&template=feature_request.md')"><button class="btn btn-info">Suggest Features</button></a>
                 </div>
@@ -50,7 +50,7 @@
                 close: "&",
                 dismiss: "&"
             },
-            controller: function($rootScope, updatesService) {
+            controller: function($rootScope, updatesService, settingsService) {
                 const $ctrl = this;
 
                 $ctrl.updatesService = updatesService;
@@ -59,6 +59,10 @@
 
                 $ctrl.getUpdateData = () => {
                     return updatesService.updateData;
+                };
+
+                $ctrl.isAutoUpdateDisabled = () => {
+                    return settingsService.getSetting('DisableAutoUpdate');
                 };
 
                 // Get update information if we havent already

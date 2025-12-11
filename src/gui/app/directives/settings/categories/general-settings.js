@@ -80,6 +80,19 @@
                     </firebot-setting>
 
                     <firebot-setting
+                        name="Disable Auto-Update"
+                        description="Disable all update checks. Firebot will not check for or install updates."
+                    >
+                        <toggle-button
+                            toggle-model="settings.getSetting('DisableAutoUpdate')"
+                            on-toggle="settings.saveSetting('DisableAutoUpdate', !settings.getSetting('DisableAutoUpdate'))"
+                            font-size="40"
+                            aria-label="Disable Auto-Update: Disable all update checks. Firebot will not check for or install updates."
+                            accessibility-label="(settings.getSetting('DisableAutoUpdate') ? 'Enabled' : 'Disabled') + ' Disable all update checks. Firebot will not check for or install updates.'"
+                        />
+                    </firebot-setting>
+
+                    <firebot-setting
                         name="Beta Notifications"
                         description="Firebot automatically updates to new stable versions. It does not automatically update to betas or major new
                         releases however. Enable if you want to be notified of new beta releases."

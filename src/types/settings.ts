@@ -69,6 +69,7 @@ export type FirebotSettingsTypes = {
     DefaultToAdvancedCommandMode: boolean;
     DefaultTtsVoiceId: string;
     DeleteProfile: string;
+    DisableAutoUpdate: boolean;
     EventSetSettings: Record<string, {
         position: number;
     }>;
@@ -206,6 +207,7 @@ export const FirebotSettingsDefaults: FirebotSettingsTypes = {
     DefaultToAdvancedCommandMode: false,
     DefaultTtsVoiceId: undefined,
     DeleteProfile: undefined,
+    DisableAutoUpdate: false,
     EventSetSettings: {},
     EventSettings: {},
     FirstTimeUse: true,
