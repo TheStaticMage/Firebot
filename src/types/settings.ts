@@ -31,6 +31,7 @@ export type FirebotSettingsTypes = {
     BackupIgnoreResources: boolean;
     BackupKeepAll: boolean;
     BackupLocation: string;
+    BackupLocationReset: boolean;
     BackupOnceADay: boolean;
     BackupOnExit: boolean;
     ChatAlternateBackgrounds: boolean;
@@ -131,6 +132,7 @@ export const FirebotGlobalSettings: Partial<Record<keyof FirebotSettingsTypes, b
     BackupIgnoreResources: true,
     BackupKeepAll: true,
     BackupLocation: true,
+    BackupLocationReset: true,
     BackupOnceADay: true,
     BackupOnExit: true,
     DebugMode: true,
@@ -168,6 +170,7 @@ export const FirebotSettingsDefaults: FirebotSettingsTypes = {
     BackupIgnoreResources: true,
     BackupKeepAll: false,
     BackupLocation: undefined,
+    BackupLocationReset: false,
     BackupOnceADay: true,
     BackupOnExit: true,
     ChatAlternateBackgrounds: true,
