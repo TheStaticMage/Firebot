@@ -946,6 +946,36 @@ export async function getGroupItem(groupName: string, groupItemId: number): Prom
     }
 }
 
+export async function getSceneItemVisibilityByName(
+    sceneName: string,
+    itemName: string
+): Promise<boolean | null> {
+    if (!connected) {
+        return null;
+    }
+
+    try {
+        const sceneItems = await getAllSceneItemsInScene(sceneName);
+
+        if (!sceneItems || sceneItems.length === 0) {
+            return null;
+        }
+
+        const item = sceneItems.find(si => si.name === itemName);
+
+        if (!item) {
+            return null;
+        }
+
+        const containerName = item.groupName || sceneName;
+        return await getSourceVisibility(containerName, item.itemId);
+
+    } catch (error) {
+        logger.error(`Failed to get visibility for scene item "${itemName}" in scene "${sceneName}"`, error);
+        return null;
+    }
+}
+
 export async function getSourcesWithFilters(): Promise<Array<OBSSource>> {
     const sources = await getAllSources();
     return sources?.filter(s => s.filters?.length > 0);

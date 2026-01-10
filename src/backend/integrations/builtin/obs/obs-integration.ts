@@ -75,6 +75,7 @@ import { InputAudioTracksVariable } from "./variables/input-audio-tracks";
 import { InputAudioMonitorTypeVariable } from "./variables/input-audio-monitor-type";
 import { GroupItemIdVariable } from "./variables/group-item-id";
 import { GroupNameVariable } from "./variables/group-name";
+import { SceneItemVisibleVariable } from "./variables/scene-item-visible";
 
 type ObsSettings = {
     websocketSettings: {
@@ -198,6 +199,7 @@ class ObsIntegration
         ReplaceVariableManager.registerReplaceVariable(InputAudioSyncOffsetVariable);
         ReplaceVariableManager.registerReplaceVariable(InputAudioTracksVariable);
         ReplaceVariableManager.registerReplaceVariable(InputAudioMonitorTypeVariable);
+        ReplaceVariableManager.registerReplaceVariable(SceneItemVisibleVariable);
 
         this.setupConnection(integrationData.userSettings);
     }
