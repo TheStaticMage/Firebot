@@ -197,6 +197,19 @@ export const FirebotEventSource: EventSource = {
                     foo: "bar"
                 }
             }
+        },
+        {
+            id: "viewer-database-compacted",
+            name: "Viewer Database Compacted",
+            description:
+				"When the viewer database file is compacted and a backup copy is available.",
+            cached: false,
+            manualMetadata: {
+                dbPath: "/path/to/db/users.db",
+                backupPath: "/path/to/db/users.db.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+                backupUuid: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+                compactedAt: 0
+            }
         }
     ]
 };

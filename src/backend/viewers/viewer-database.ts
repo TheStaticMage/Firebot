@@ -21,6 +21,9 @@ import frontendCommunicator from "../common/frontend-communicator";
 import logger from "../logwrapper";
 import { commafy, wait } from "../utils";
 
+import { randomUUID } from "crypto";
+import fsp from "fs/promises";
+
 interface ViewerDbChangePacket {
     userId: string;
     field: string;
@@ -61,6 +64,12 @@ interface UserDetails {
 class ViewerDatabase extends TypedEmitter<{
     "viewer-database-loaded": () => void;
     "updated-viewer-avatar": (event: { userId: string, url: string }) => void;
+    "viewer-database-compacted": (data: {
+        dbPath: string;
+        backupPath: string;
+        backupUuid: string;
+        compactedAt: number;
+    }) => void;
 }> {
     private _db: Datastore<FirebotViewer>;
     private _dbCompactionInterval = 30000;
@@ -110,10 +119,10 @@ class ViewerDatabase extends TypedEmitter<{
 
         frontendCommunicator.onAsync("create-firebot-viewer-data", async (viewer: BasicViewer) => {
             return this.createNewViewer({
-                id: viewer.id, 
-                username: viewer.username, 
-                displayName: viewer.displayName, 
-                profilePicUrl: viewer.profilePicUrl, 
+                id: viewer.id,
+                username: viewer.username,
+                displayName: viewer.displayName,
+                profilePicUrl: viewer.profilePicUrl,
                 twitchRoles: viewer.twitchRoles
             });
         });
@@ -178,14 +187,53 @@ class ViewerDatabase extends TypedEmitter<{
             logger.info("ViewerDB: Failed Database Path: ", path);
         }
 
-        // Setup our automatic compaction interval to shrink filesize.
-        this._db.setAutocompactionInterval(this._dbCompactionInterval);
+        // Setup our automatic compaction interval to shrink filesize and create backups.
         setInterval(() => {
-            logger.debug(`ViewerDB: Compaction should be happening now. Compaction Interval: ${this._dbCompactionInterval}`);
+            void (async () => {
+                try {
+                    await this._db.compactDatafileAsync();
+                    await this._backupDbFileAfterCompaction();
+                } catch (error) {
+                    logger.error(
+                        "ViewerDB: Error during compaction/backup cycle:",
+                        (error as Error).message
+                    );
+                }
+            })();
         }, this._dbCompactionInterval);
 
         logger.info("ViewerDB: Viewer Database Loaded: ", path);
         this.emit("viewer-database-loaded");
+    }
+
+    private async _backupDbFileAfterCompaction(): Promise<void> {
+        const sentinelFile = ProfileManager.getPathInProfile("db/users.db.make-backup");
+        try {
+            await fsp.stat(sentinelFile);
+        } catch {
+            logger.info("ViewerDB: Sentinel file not found, skipping backup after compaction.");
+            return;
+        }
+
+        const dbPath = ProfileManager.getPathInProfile("db/users.db");
+        const backupUuid = randomUUID();
+        const backupPath = `${dbPath}.${backupUuid}`;
+
+        await fsp.copyFile(dbPath, backupPath);
+
+        const eventData = {
+            dbPath,
+            backupPath,
+            backupUuid,
+            compactedAt: Date.now()
+        };
+
+        this.emit("viewer-database-compacted", eventData);
+        void EventManager.triggerEvent(
+            "firebot",
+            "viewer-database-compacted",
+            eventData
+        );
     }
 
     disconnectViewerDatabase(): void {
@@ -747,6 +795,8 @@ class ViewerDatabase extends TypedEmitter<{
         frontendCommunicator.send("rank-recalculation:progress", processedViewers);
 
         await this._db.compactDatafileAsync();
+
+        void this._backupDbFileAfterCompaction();
 
         await wait(1000);
 

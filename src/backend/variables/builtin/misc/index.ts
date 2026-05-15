@@ -1,4 +1,5 @@
 import activeChatUserCount from './active-chat-user-count';
+import backupPath from './backup-path';
 import chatUserCount from "./chat-user-count";
 import color from './color';
 import date from './date';
@@ -19,6 +20,7 @@ import uptime from './uptime';
 
 export default [
     activeChatUserCount,
+    backupPath,
     chatUserCount,
     color,
     date,
