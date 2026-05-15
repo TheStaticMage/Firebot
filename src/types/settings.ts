@@ -1,3 +1,5 @@
+// Modified by The Static Mage, 2026
+// Licensed under GPL-3.0
 export enum FirebotAutoUpdateLevel {
     Off = 0,
     Bugfix = 1,

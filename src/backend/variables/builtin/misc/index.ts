@@ -1,3 +1,5 @@
+// Modified by The Static Mage, 2026
+// Licensed under GPL-3.0
 import activeChatUserCount from './active-chat-user-count';
 import backupPath from './backup-path';
 import chatUserCount from "./chat-user-count";

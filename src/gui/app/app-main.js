@@ -1,3 +1,5 @@
+// Modified by The Static Mage, 2026
+// Licensed under GPL-3.0
 /* eslint-disable angular/di-unused */
 /* eslint-disable angular/no-run-logic */
 

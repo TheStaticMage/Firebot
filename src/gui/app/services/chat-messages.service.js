@@ -1,3 +1,5 @@
+// Modified by The Static Mage, 2026
+// Licensed under GPL-3.0
 "use strict";
 (function() {
     const moment = require('moment');
