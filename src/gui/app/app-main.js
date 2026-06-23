@@ -448,8 +448,8 @@
          */
 
         // Get app version and change titlebar.
-        const appVersion = firebotAppDetails.version;
-        $scope.appTitle = `Firebot v${appVersion}`;
+        const appVersion = require("../../shared/patch-version.js");
+        $scope.appTitle = `Firebot v${appVersion} [TheStaticMage fork]`;
 
         const url = require("url");
         $scope.customFontCssPath = url.pathToFileURL(fontManager.getFontCssPath());

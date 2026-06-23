@@ -442,20 +442,6 @@ async function createAppMenu() {
                     icon: await createIconImage("../../../gui/images/icons/mdi/source-branch.png")
                 },
                 {
-                    label: 'Report a Bug',
-                    click: () => {
-                        shell.openExternal("https://github.com/crowbartools/Firebot/issues/new?assignees=&template=bug_report.yml");
-                    },
-                    icon: await createIconImage("../../../gui/images/icons/mdi/bug-outline.png")
-                },
-                {
-                    label: 'Request a Feature',
-                    click: () => {
-                        shell.openExternal("https://github.com/crowbartools/Firebot/issues/new?assignees=&template=feature_request.md");
-                    },
-                    icon: await createIconImage("../../../gui/images/icons/mdi/star-circle-outline.png")
-                },
-                {
                     type: 'separator'
                 },
                 {

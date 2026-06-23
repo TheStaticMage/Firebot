@@ -224,6 +224,7 @@ function buildRunRequest(scriptManifest, params, trigger) {
     const scriptNameNormalized = scriptManifest.name.replace(/[#%&{}\\<>*?/$!'":@`|=\s-]+/g, "-").toLowerCase();
     const scriptDataDir = path.resolve(ProfileManager.getPathInProfile("/script-data/"), `./${scriptNameNormalized}/`);
 
+    // Used for dev only. Replaced by a hard-coded value in the build process.
     const getUtcTimestamp = () => {
         const now = new Date();
         const pad = num => String(num).padStart(2, "0");

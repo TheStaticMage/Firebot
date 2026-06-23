@@ -69,17 +69,8 @@
             </div>
             <div id="aboutModalBody" class="modal-body" style="text-align: center; margin-top: -50px;">
                 <section>
-                    <a href ng-click="$root.openLinkExternally('https://firebot.app')"><img style="width: 165px;" src="../images/logo_transparent_2.png"></a>
-                    <h1>Firebot</h1>
-                </section>
-
-                <section>
-                    <h5><b>Connect With Us</b></h5>
-                    <div id="aboutModalSocialButtons">
-                        <a href ng-click="$root.openLinkExternally('https://discord.gg/crowbartools-372817064034959370')" title="Discord"><i class="fab fa-discord"></i></a>
-                        <a href class="bluesky" ng-click="$root.openLinkExternally('https://bsky.app/profile/firebot.app')" title="Bluesky"></a>
-                        <a href ng-click="$root.openLinkExternally('https://github.com/crowbartools/Firebot')" title="GitHub"><i class="fab fa-github"></i></a>
-                    </div>
+                    <p>This is an unsupported and unmaintained fork of Firebot built by <a href ng-click="$root.openLinkExternally('https://github.com/TheStaticMage/firebot-fork-builder')">TheStaticMage</a>.</p>
+                    <p>Get the actual version of Firebot from <a href ng-click="$root.openLinkExternally('https://firebot.app')">firebot.app</a></p>
                 </section>
 
                 <section>
@@ -106,9 +97,13 @@
 
                 <section>
                     <h5><b>Support</b></h5>
+                    <p>This fork is unsupported and unmaintained. Only the <a href ng-click="$root.openLinkExternally('https://firebot.app')">original Firebot</a> is actively maintained and supported. Please do not ask for help with this fork in the Firebot discord or GitHub.</p>
+                </section>
+
+                <section>
+                    <h5><b>Support Firebot</b></h5>
+                    <p>Support firebot development by visiting the links below:</p>
                     <p>
-                        <a href ng-click="$root.openLinkExternally('https://github.com/crowbartools/Firebot/issues/new?assignees=&template=bug_report.yml')">Report a Bug</a> |
-                        <a href ng-click="$root.openLinkExternally('https://github.com/crowbartools/Firebot/issues/new?assignees=&template=feature_request.md')">Request a Feature</a> |
                         <a href ng-click="$root.openLinkExternally('https://opencollective.com/crowbartools')">Donate</a> |
                         <a href ng-click="$root.openLinkExternally('https://crowbar-tools.myspreadshop.com')">Merch Store</a> |
                         <a href ng-click="$root.openLinkExternally('https://firebot.app/testimonial-submission')">Submit a Testimonial</a>
@@ -126,9 +121,17 @@
         },
         controller: function(backendCommunicator) {
             const $ctrl = this;
+            // Load baked-in patch version
+            let patchVersion = "";
+            try {
+                patchVersion = require("../../shared/patch-version.js");
+            } catch (e) {
+                console.error("Failed to load patch version:", e);
+                patchVersion = "unknown";
+            }
 
             $ctrl.$onInit = function() {
-                $ctrl.version = firebotAppDetails.version;
+                $ctrl.version = patchVersion;
                 $ctrl.osType = firebotAppDetails.os.type;
                 $ctrl.osVersion = firebotAppDetails.os.release;
             };
