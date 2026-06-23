@@ -29,6 +29,10 @@ const model : ReplaceVariable = {
         pronounNumber: number | string = 0,
         fallback : string = "they/them"
     ) => {
+        if (!username?.length) {
+            username = trigger.metadata.username;
+        }
+
         if (typeof pronounNumber === 'string' || <unknown>pronounNumber instanceof String) {
             pronounNumber = Number(`${pronounNumber}`);
         }
@@ -39,17 +43,18 @@ const model : ReplaceVariable = {
         }
 
         const fallbackParts = (fallback ?? "").split("/");
+        let fallbackPart = fallback;
         let type: "subject" | "object" | "both";
 
         switch (pronounNumber) {
             case 1:
                 type = "subject";
-                fallback = fallbackParts[0];
+                fallbackPart = fallbackParts[0];
                 break;
 
             case 2:
                 type = "object";
-                fallback = fallbackParts[1] ?? fallbackParts[0];
+                fallbackPart = fallbackParts[1] ?? fallbackParts[0];
                 break;
 
             default:
@@ -57,11 +62,11 @@ const model : ReplaceVariable = {
                 break;
         }
 
-        const pronoun = await FirebotPronounManager.getUserFriendlyPronounString(username, type);
+        const pronoun = await FirebotPronounManager.getUserFriendlyPronounString(username, fallback, type);
 
         return !!pronoun?.length
             ? pronoun
-            : fallback;
+            : fallbackPart;
     }
 };
 export default model;
